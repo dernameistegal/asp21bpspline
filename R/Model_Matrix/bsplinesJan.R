@@ -10,11 +10,9 @@ setup   - boolean
     Other
 knotp   - vector of length knots + 2 * order
 "
-
 # setitup is called in basis function to provide an accurate extended knotp vector
-setitup = function(len)
+setitup = function(knots, order, range, len)
 {
-
   knotp = rep(NA, times = knots + 2 * order)
   low = 1 + order
   up = knots + order
@@ -30,20 +28,20 @@ setitup = function(len)
 }
 
 
-
-basis = function(knots, knotno, order, range, value)
+basis = function(knots, knotno, order, range, value, knotp = NA)
 {
 
   len = (max(range) - min(range)) / (knots - 1)
-  if (!exists("knotp"))
+  if (any(is.na(knotp)) == T)
   {
-    knotp = setitup(len)
+    knotp = setitup(knots, order, range, len)
+    knotno = knotno + order
   }
 
   # defining base case
   if (order < 1)
   {
-    if (knotp[knotno] <= value && value <= knotp[knotno + 1])
+    if (knotp[knotno] < value & value < knotp[knotno + 1])
     {
       return(1)
     }
@@ -54,23 +52,24 @@ basis = function(knots, knotno, order, range, value)
   }
 
   # defining recursive case
-  iterand1 = basis(knots, knotno, order - 1, range, value)
-  iterand2 = basis(knots, knotno + 1, order - 1, range, value)
-  faktor1 = (value - knotp[knotno]) / (len * order)
-  faktor2 = (knotp[knotno + order + 1] - value) / (len * (order + 1))
+  iterand1 = basis(knots, knotno, order - 1, range, value, knotp = knotp)
+  iterand2 = basis(knots, knotno + 1, order - 1, range, value, knotp = knotp)
+  faktor1 = (value - knotp[knotno]) / (knotp[knotno + order] - knotp[knotno])
+  faktor2 = (knotp[knotno + order + 1] - value) / (knotp[knotno + order + 1] - knotp[knotno + 1])
   return(faktor1 * iterand1 + faktor2 * iterand2)
 }
 
 
-seq = seq(1, 10, length.out = 1000)
-y = rep(NA, times = 1000)
-for (i in 1:1000)
+
+basis(knots = 10, knotno = 5, order = 2, range =
+        c(1,10), value = 5)
+
+
+y = rep(NA, times = 100)
+s = seq(1,10, length.out = 100)
+for (i in 1:100)
 {
-  y[i] = basis(knots = 10, knotno = 3, order = 2, range =c(1,10), value = seq[i])
+  y[i] = basis(knots = 10, knotno = 5, order = 2, range =
+                 c(1,10), value = seq[i])
 }
-
 plot(seq, y)
-
-
-
-
