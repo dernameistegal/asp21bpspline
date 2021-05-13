@@ -35,20 +35,6 @@ test <-function(){
 # Welche Informationen braucht eine Splinefunktion? Z_Wert, Gesamtzahl der Knoten, Order
 # was will ich jetzt schaffen?  Intervall 0 - 10 sollen Splines eines beliebigen grades gebildet werden
 
-# wie wird es dann grafisch dargestellt: Eigentlich erst später durchführbar, aber hier schonmal Gerüst
-p <- ggplot(data = data.frame(x = c(0, 10)), aes(x))# + ylim(c(0,3))
-test <-function(){
-  p + stat_function(fun = Wrapper,n = 1000, geom = "area", fill = "blue", alpha = 0.5)
-}
-
-#Hier wird jetzt die Splinesfunktion definiert
-#kn     knot number
-#interv intervall auf dem das Ganze definiert wird
-
-kp <-  seq(0, 10, length.out = 10)
-kn<- kn + order * 2
-
-
 # Definition des Grundsplines, auf dem die anderen aufbauen
 B_0 <- function(z,kj1,kj2){
   if (kj1 < z & z < kj2 ){
@@ -56,9 +42,15 @@ B_0 <- function(z,kj1,kj2){
   }else{return(0)}
 }
 
-# range     In welchem Bereich soll definiert werden (Vektor mit 2 Elementen)
-# kn        Welche Knotenzahl ist gewünscht
-# order     Welche order soll der Spline haben
+# wie wird es dann grafisch dargestellt: Eigentlich erst später durchführbar, aber hier schonmal Gerüst
+p <- ggplot(data = data.frame(x = c(1, 10)), aes(x))# + ylim(c(0,3))
+test <-function(){
+  p + stat_function(fun = Wrapper,n = 1000, geom = "area", fill = "blue", alpha = 0.5)
+}
+
+#Hier wird jetzt die Splinesfunktion definiert
+
+
 
 knotposition <- function(range, kn, order){
   #distanz zwischen zwei Punkten
@@ -70,19 +62,15 @@ knotposition <- function(range, kn, order){
   seq(from = (range[1] - onedist * order), to = (range[2] + onedist * order),
       length.out = (kn  + 2 * order))
 }
-# minimalbeispiel
-knotposition(c(0,10), kn = 11, 4)
 
-#z      der Wert an der Stelle an der ausgewertet wird
-#range  zwischen welchen Bereichen sollen die Knoten liegen
-#kn     Gesamtzahl an Knoten
-#j      Nummer des entsprechenden splines (immer zwischen zwei benachbarten knots)
-#order  welcher order soll der Spline angehören
-
+kp <- knotposition(range = c(0,10), 11, 2)
 #kp     Platz auf der x Achse des Knots
-splines <- function( z, range, kn,j, order){
-  j <- j + order
-  kp <- knotposition(range = range, kn =  kn, order = order)
+#j      Nummer des entsprechenden Knots
+#order  welcher order soll der Spline angehören
+#z      der Wert an der Stelle an der ausgewertet wird
+
+
+Spline <- function(kp, j, z, order){
   if (order == 0){
     return(B_0(z, kp[j], kp[j + 1]))
   }
@@ -91,8 +79,17 @@ splines <- function( z, range, kn,j, order){
   return(k)
 }
 
+splines <- function(z, range, kn, order, j){
+  kp <- knotposition(range, kn, order)
+  #damit die richtige Knotenposition angegeben wird
+  j <- j + order
+  Spline(kp, j, z, order)
+}
+
+splines(0.001,range = c(0,10), kn = 2,order = 5,j = 1)
+
 Wrapper <- function(z){
-  sapply(z, splines, range = c(0,10), kn= 2, j = 1, order = 0)
+  sapply(z, splines, range = c(0,10), kn = 11,order = 1,j = 3)
 }
 test()
 
