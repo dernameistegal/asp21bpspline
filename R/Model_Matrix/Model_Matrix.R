@@ -1,8 +1,5 @@
 ####Einstieg konstruieren eines Splines der Ordnung 1#####
-set.seed(100)
-x <- runif(100,0,20)
-y <- sin(x) +rnorm(100)
-plot(x,y)
+
 
 Knoten <- seq(1,10, length.out = 10)
 
@@ -101,7 +98,7 @@ test <-function(){
 }
 
 Wrapper <- function(z){
-  sapply(z, splines, range = c(0,10), kn = 11,order = 2,j = 4)
+  sapply(z, splines, range = c(0,10), kn = 11,order = 6,j = 4)
 }
 test()
 
@@ -110,7 +107,7 @@ kn <- 11
 model <- matrix(0, nrow = length(z), ncol = kn - 1)
 for ( i in 1:length(z)){
   for( j in 1:(kn - 1)){
-    model[i,j] <- splines( z = z[i] ,range = c(0,10), kn = 11,order = 5, j = j )
+    model[i,j] <- splines( z = z[i] ,range = c(0,10), kn = 11,order = 7, j = j )
   }
 }
 
@@ -124,30 +121,28 @@ model_matrix <- function(z, kn, range, order){
   {
     for( j in 1:(kn - 1))
     {
-      model[i,j] <- splines( z = z[i] ,range = c(0,10), kn = 11,order = 2, j = j )
+      model[i,j] <- splines( z = z[i] ,range = range, kn = kn,order = order, j = j )
     }
   }
   return(model)
 }
-Z <- model_matrix(z = x, kn = 11,range = c(0,10), order = 3)
-koeffizienten <- crossprod(Z) %*% t(Z) %*% y
-koeffizienten
+####Spline Modell Schätzen####
 
-####Zusammensetzen der FUnktion funktioniert nohc nicht####
-# jetzt soll die Funktion zusammengefügt werden
-
-ts <- numeric(20)
-for (p in seq(0,10, length.out = 20)) {
-  summe <- 0
-  #bildet die Summe der einzelnen
-  for ( j in 1:10){
-    summe <- summe + koeffizienten[j]* splines( z = p,range = c(0,10), kn = 11,order = 2, j = j)
-  }
-  ts[p] <- summe
+set.seed(100)
+x <- runif(1000,0,10)
+y <- 3 * sin(x) +rnorm(1000)
+y_hat <- spl(z = x, kn = 20,range = c(0,10), order = 2)
+spl <- function(z, x, kn, range, order){
+  Z <- model_matrix(z = z, kn = kn,range = range, order = order)
+  beta_hat <- solve(crossprod(Z)) %*% t(Z) %*% y
+  y_hat <- Z %*% beta_hat
+  return(y_hat)
 }
 
 
-ts
+ggplot(mapping = aes(x = x)) + geom_point(aes(y = y)) + geom_point(aes(y =  y_hat), colour = "green")
+# jetzt soll die Funktion zusammengefügt werden
+
 #splines(z = 0.1,range = c(0,10), kn = 11,order = 1,j = 1)
 
 
