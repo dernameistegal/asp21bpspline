@@ -62,7 +62,7 @@ splines <- function(z, range, kn, order, j)
 # }
 #
 # Wrapper <- function(z){
-#   sapply(z, splines, range = c(0,10), kn = 11,order = 6,j = 4)
+#   sapply(z, splines, range = c(0,10), kn = 20,order = 6,j = 1)
 # }
 # test()
 
@@ -72,10 +72,12 @@ splines <- function(z, range, kn, order, j)
 #kn   Gewünschte Knotenzahl
 model_matrix <- function(z, kn, range, order)
 {
-  model <- matrix(0, nrow = length(z), ncol = kn - 1)
+  # Zahl der insgesamt benötigten Splines
+  nr_splines = kn + order - 1
+  model <- matrix(0, nrow = length(z), ncol = nr_splines)
   for ( i in 1:length(z))
   {
-    for( j in 1:(kn - 1))
+    for( j in 1:(nr_splines))
     {
       # model Matrix wird befüllt
       model[i,j] <- splines(z = z[i] ,range = range, kn = kn,order = order, j = j )
@@ -87,7 +89,7 @@ model_matrix <- function(z, kn, range, order)
 
 set.seed(100)
 x <- runif(1000,0,10)
-y <- cos(x) +rnorm(1000)
+y <- 0.5 * x + cos(x) +rnorm(1000)
 
 
 "
@@ -125,4 +127,4 @@ y_hat <- spl(z = x,y = y, kn = 50,range = c(0,10), order = 2)
 #profvis(spl(z = p,y = o, kn = 50,range = c(0,10), order =3 ))
 
 print(y_hat)
-
+splines(z = 9.9 ,range = c(0,10), kn = 50,order = 2, j = 51 )
