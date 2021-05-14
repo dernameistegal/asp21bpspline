@@ -1,32 +1,21 @@
 source("R\\Model_Matrix\\Model_Matrix.R")
 # Ideen f?r Penaltymatrixc
 
-#
-Dmat <- function(m,n){
-  D <- matrix(0, nrow = m, ncol = n)
-  for(i in 1:m){
-    for (j in 1:n){
-       if (i == j){
-          D[i,j] <- -1
-       }
-       if (i == j - 1){
-           D[i ,j] <- 1
-       }
-    }
-  }
-  return(D)
-}
-Dmat(3,4)
-#m ist die Anzahl der länge von beta_hat
+"
+m ist die Anzahl der länge von beta_hat
+"
 Dmat2 <- function(m){
   dia <- diag(m)
   D <- cbind(0,dia) + cbind(-dia,0)
   return(D)
 }
 
+"
+p_order_diff      welcher Ordnung soll die penalization Difference sein
+kn                Anzahl der Knoten innerhalb der Range
+p_order_diff      Welcher Ordnung gehören die Splines an
+"
 
-#
-# p_order_diff      welcher Ordnung soll die penalization Difference sein
 diff_mat <- function(kn, order ,p_order_diff)
 {
   koe_nr <- kn + order - 1
@@ -58,8 +47,17 @@ diff_mat <- function(kn, order ,p_order_diff)
 # difference penalty matrix
 
 
-# p_order Ordnung der Bestrafung
-# lambda  Wie stark wird für Koeffizienten bestraft
+"
+z       float           Wert der erklärenden Variable
+y       float           Wert der zu erklärenden Variable
+kn      integer         Zahl der Knoten die verwendet werden soll
+range   2 float vector  VOn wo bis wo soll simuliert werden
+order   interger        Grad der verwendeten B-Splines
+p_order integer         Welcher order gehört die Penalization an
+lambda  float           Wie stark sollen die Parameter geglättet werden
+"
+
+
 
 spl <- function(z, y, kn, range, order, p_order, lambda)
 {
@@ -74,10 +72,10 @@ spl <- function(z, y, kn, range, order, p_order, lambda)
   # return(y_hat)
 }
 
-x <- runif(1000,0,10)
-y <- 0.5 * x + 0.5 * x^2 - 0.07 *x^3 +rnorm(1000, sd = 8)
+x <- runif(1000,0,20)
+y <-  - 2 * x + 0.5 * x^2 - 0.02 *x^3 +rnorm(1000, sd = 8)
 
-y_hat <- spl(z = x,y = y, kn = 40,range = c(0,10), order = 2, p_order = 4, lambda = 200000)
+y_hat <- spl(z = x, y = y, kn = 3,range = c(0,20), order = 1, p_order = 4, lambda = 0)
 print(y_hat)
 #library(profvis)
 #profvis(spl(z = p,y = o, kn = 50,range = c(0,10), order =3 ))
