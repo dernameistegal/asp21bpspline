@@ -39,7 +39,7 @@ check = function()
 recursivespline = function(knots, i, d, range, x, pos)
 {
   # defining base case
-  if (d == 1)
+  if (d == 0)
   {
     out = 0
     if (pos[i] <= x & x < pos[i + 1])
@@ -50,8 +50,8 @@ recursivespline = function(knots, i, d, range, x, pos)
   }
 
   # defining recursive case
-  iterand1 = recursivespline(knots, i,     d - 1, range, x, pos = pos)
-  iterand2 = recursivespline(knots, i + 1, d - 1, range, x, pos = pos)
+  iterand1 = recursivespline(knots, i - 1, d - 1, range, x, pos = pos)
+  iterand2 = recursivespline(knots, i    , d - 1, range, x, pos = pos)
 
 
   product1 = 0
@@ -59,13 +59,13 @@ recursivespline = function(knots, i, d, range, x, pos)
 
   if (iterand1 != 0)
   {
-    faktor1 = (x - pos[i]) / (pos[i + d - 1] - pos[i])
+    faktor1 = (x - pos[i - d]) / (pos[i] - pos[i - d])
     product1 = iterand1 * faktor1
   }
 
   if (iterand2 != 0)
   {
-    faktor2 = (pos[i + d] - x) / (pos[i + d] - pos[i + 1])
+    faktor2 = (pos[i + 1] - x) / (pos[i + 1] - pos[i + 1 - d])
     product2 = iterand2 * faktor2
   }
   cat("Called:", "i:", i,"d:", d,"range:", range, "x:", x, "out:", product1 + product2, "\n")
@@ -111,17 +111,18 @@ Setitup works perfectly
 
 
 # basis(knots = 3, i = 3, d = 1, range = c(0,3), x = 1.5)
-basis(knots = 3, i = 2, d = 1, range = c(0,3), x = 1.5)
+basis(knots = 3, i = 2, d = 0, range = c(0,3), x = 1.5)
 
 
 y = rep(NA, times = 100)
-s = seq(1,10, length.out = 100)
+s = seq(1,4, length.out = 100)
 for (i in 1:100)
 {
-  y[i] = basis(knots = 10, i = 5, d = 2, range =
-                 c(1,10), x = s[i])
+  y[i] = basis(knots = 4, i = 5, d = 2, range =
+                 c(1, 4), x = s[i])
 }
-plot(seq, y)
+
+plot(s, y)
 
 
 
