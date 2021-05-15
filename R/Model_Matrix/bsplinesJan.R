@@ -1,75 +1,128 @@
 "   VARIABLES
-    Input
-knots   - positive integer
-knotno  - positive integer
-order   - positive integer
-range   - tulpel of two floats
-value   - input value for actual Bspline function
-setup   - boolean
+      Input
+knots   - positive integer      Number of knots
+i       - positive integer      index of knots
+d       - positive integer      degree of spline
+range   - tulpel of two floats  range of spline
+x       - input x for actual Bspline function
 
-    Other
-knotp   - vector of length knots + 2 * order
+      Other
+pos   - vector of length knots + 2 * d
 "
-# setitup is called in basis function to provide an accurate extended knotp vector
-setitup = function(knots, order, range, len)
+# setitup is called in basis function to provide an accurate extended pos vector
+setitup = function(knots, d, range, len)
 {
-  knotp = rep(NA, times = knots + 2 * order)
-  low = 1 + order
-  up = knots + order
-  knotp[(low):(up)] = seq(min(range), max(range), length.out = knots)
-  #extend by border cases
-  for (i in 1:order)
+  pos = rep(NA, times = knots + 2 * d + 1)
+  low = 1 + d
+  up = knots + d
+  pos[(low):(up)] = seq(min(range), max(range), length.out = knots)
+  #extend by bd cases
+  for (i in 1:d)
   {
-    knotp[low-i] = knotp[low - i + 1] - len
-    knotp[up + i] = knotp[up + i - 1] + len
+    pos[low-i] = pos[low - i + 1] - len
+    pos[up + i] = pos[up + i - 1] + len
   }
+  pos[up + d + 1] = pos[up + d] + len
 
-  return(knotp)
+  return(pos)
 }
 
 
-basis = function(knots, knotno, order, range, value, knotp = NA)
+# check is called in basis function and verifies that the input is valid
+check = function()
 {
+  return(T)
+}
 
-  len = (max(range) - min(range)) / (knots - 1)
-  if (any(is.na(knotp)) == T)
-  {
-    knotp = setitup(knots, order, range, len)
-    knotno = knotno + order
-  }
-
+# needs to be redefined.function from wikipedia is inconsistently parameterised
+# recursive definition of bspline
+recursivespline = function(knots, i, d, range, x, pos)
+{
   # defining base case
-  if (order < 1)
+  if (d == 1)
   {
-    if (knotp[knotno] < value & value < knotp[knotno + 1])
+    out = 0
+    if (pos[i] <= x & x < pos[i + 1])
     {
-      return(1)
+      out = 1
     }
-    else
-    {
-      return(0)
-    }
+    return(out)
   }
 
   # defining recursive case
-  iterand1 = basis(knots, knotno, order - 1, range, value, knotp = knotp)
-  iterand2 = basis(knots, knotno + 1, order - 1, range, value, knotp = knotp)
-  faktor1 = (value - knotp[knotno]) / (knotp[knotno + order] - knotp[knotno])
-  faktor2 = (knotp[knotno + order + 1] - value) / (knotp[knotno + order + 1] - knotp[knotno + 1])
-  return(faktor1 * iterand1 + faktor2 * iterand2)
+  iterand1 = recursivespline(knots, i,     d - 1, range, x, pos = pos)
+  iterand2 = recursivespline(knots, i + 1, d - 1, range, x, pos = pos)
+
+
+  product1 = 0
+  product2 = 0
+
+  if (iterand1 != 0)
+  {
+    faktor1 = (x - pos[i]) / (pos[i + d - 1] - pos[i])
+    product1 = iterand1 * faktor1
+  }
+
+  if (iterand2 != 0)
+  {
+    faktor2 = (pos[i + d] - x) / (pos[i + d] - pos[i + 1])
+    product2 = iterand2 * faktor2
+  }
+  cat("Called:", "i:", i,"d:", d,"range:", range, "x:", x, "out:", product1 + product2, "\n")
+  return(product1 + product2)
 }
 
 
 
-basis(knots = 10, knotno = 5, order = 2, range =
-        c(1,10), value = 5)
+# main function
+basis = function(knots, i, d, range, x, pos = NA, mode = "recursive")
+{
+  len = (max(range) - min(range)) / (knots - 1)
+  if (any(is.na(pos)) == T)
+  {
+    pos = setitup(knots, d, range, len)
+    i = i + d
+  }
+
+  stopifnot(check())
+
+  if (mode == "recursive")
+  {
+    out = recursivespline(knots, i, d, range, x, pos)
+
+    return(out)
+  }
+  else
+  {
+    stop("Called inexistent mode")
+  }
+}
+
+
+# Testing code ------------------------------
+
+
+setitup(4, 1, c(0,3), 1)
+"
+Setitup works perfectly
+
+
+"
+
+
+# basis(knots = 3, i = 3, d = 1, range = c(0,3), x = 1.5)
+basis(knots = 3, i = 2, d = 1, range = c(0,3), x = 1.5)
 
 
 y = rep(NA, times = 100)
 s = seq(1,10, length.out = 100)
 for (i in 1:100)
 {
-  y[i] = basis(knots = 10, knotno = 5, order = 2, range =
-                 c(1,10), value = seq[i])
+  y[i] = basis(knots = 10, i = 5, d = 2, range =
+                 c(1,10), x = s[i])
 }
 plot(seq, y)
+
+
+
+
