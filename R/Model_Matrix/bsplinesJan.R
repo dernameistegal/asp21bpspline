@@ -4,7 +4,7 @@ knots   - positive integer      Number of knots
 i       - positive integer      index of knots
 d       - positive integer      degree of spline
 range   - tulpel of two floats  range of spline
-x       - input x for actual Bspline function
+x       - vector of floats      input value for bspline function
 
       Other
 pos   - vector of length knots + 2 * d
@@ -12,17 +12,16 @@ pos   - vector of length knots + 2 * d
 # setitup is called in basis function to provide an accurate extended pos vector
 setitup = function(knots, d, range, len)
 {
-  pos = rep(NA, times = knots + 2 * d + 1)
+  pos = rep(NA, times = knots + 2 * d)
   low = 1 + d
   up = knots + d
   pos[(low):(up)] = seq(min(range), max(range), length.out = knots)
   #extend by bd cases
-  for (i in 1:d)
+  for (i in 1:(d))
   {
     pos[low-i] = pos[low - i + 1] - len
     pos[up + i] = pos[up + i - 1] + len
   }
-  pos[up + d + 1] = pos[up + d] + len
 
   return(pos)
 }
@@ -34,45 +33,45 @@ check = function()
   return(T)
 }
 
-# needs to be redefined.function from wikipedia is inconsistently parameterised
-# recursive definition of bspline
-recursivespline = function(knots, i, d, range, x, pos)
+# recursive definition of bspline based on kneib p 429
+recursivespline = function(i, d, range, x, pos)
 {
   # defining base case
   if (d == 0)
   {
-    out = 0
-    if (pos[i] <= x & x < pos[i + 1])
-    {
-      out = 1
-    }
+    index = pos[i] <= x & x < pos[i + 1]
+    out = x
+    out[index] = 1
+    out[!index] = 0
+
     return(out)
   }
 
   # defining recursive case
-  iterand1 = recursivespline(knots, i - 1, d - 1, range, x, pos = pos)
-  iterand2 = recursivespline(knots, i    , d - 1, range, x, pos = pos)
+  iterand1 = recursivespline(i - 1, d - 1, range, x, pos = pos)
+  iterand2 = recursivespline(i    , d - 1, range, x, pos = pos)
 
 
-  product1 = 0
-  product2 = 0
+  product1 = rep(0, times = length(x))
+  product2 = product1
 
-  if (iterand1 != 0)
-  {
-    faktor1 = (x - pos[i - d]) / (pos[i] - pos[i - d])
-    product1 = iterand1 * faktor1
-  }
 
-  if (iterand2 != 0)
-  {
-    faktor2 = (pos[i + 1] - x) / (pos[i + 1] - pos[i + 1 - d])
-    product2 = iterand2 * faktor2
-  }
-  cat("Called:", "i:", i,"d:", d,"range:", range, "x:", x, "out:", product1 + product2, "\n")
+  faktor1 = (x - pos[i - d]) / (pos[i] - pos[i - d])
+  product1 = iterand1 * faktor1
+
+  faktor2 = (pos[i + 1] - x) / (pos[i + 1] - pos[i + 1 - d])
+  product2 = iterand2 * faktor2
+
+
+  #cat("Called:", "i:", i,"d:", d,"range:", range, "x:", x, "out:", product1 + product2, "\n")
   return(product1 + product2)
 }
 
-
+#iterative definition of bspline based on wikipedia
+iterativespline = function(i, d, range, x, pos)
+{
+  stop("iterativespline is not defined")
+}
 
 # main function
 basis = function(knots, i, d, range, x, pos = NA, mode = "recursive")
@@ -88,8 +87,13 @@ basis = function(knots, i, d, range, x, pos = NA, mode = "recursive")
 
   if (mode == "recursive")
   {
-    out = recursivespline(knots, i, d, range, x, pos)
+    out = recursivespline(i, d, range, x, pos)
 
+    return(out)
+  }
+  else if (mode == "iterative")
+  {
+    out = iterativespline(i, d, range, x, pos)
     return(out)
   }
   else
@@ -111,19 +115,19 @@ Setitup works perfectly
 
 
 # basis(knots = 3, i = 3, d = 1, range = c(0,3), x = 1.5)
-basis(knots = 3, i = 2, d = 0, range = c(0,3), x = 1.5)
+basis(knots = 4, i = 1, d = 0, range = c(0,3), x = 1.5)
 
 
 y = rep(NA, times = 100)
 s = seq(1,4, length.out = 100)
 for (i in 1:100)
 {
-  y[i] = basis(knots = 4, i = 5, d = 2, range =
+  y[i] = basis(knots = 4, i = 6, d = 3, range =
                  c(1, 4), x = s[i])
 }
 
 plot(s, y)
+plot(s, basis(knots = 4, i = 3, d = 2, range = c(1, 4), x = s))
 
 
-
-
+basis(knots = 4, i = 5, d = 3, range =c(1, 4), x = 2.1)
