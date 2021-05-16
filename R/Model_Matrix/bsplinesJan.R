@@ -105,29 +105,27 @@ basis = function(knots, i, d, range, x, pos = NA, mode = "recursive")
 
 # Testing code ------------------------------
 
+#
+# setitup(4, 1, c(0,3), 1)
+# "
+# Setitup works perfectly
+#
+#
+# "
+#
+#
+# # basis(knots = 3, i = 3, d = 1, range = c(0,3), x = 1.5)
+# basis(knots = 4, i = 1, d = 0, range = c(0,3), x = 1.5)
+#
+#
+# y = rep(NA, times = 100)
+# s = seq(0,3, length.out = 100)
+#
+#
+# basis(knots = 4, i = 1, d = 2, range = c(0, 3), x = s)
+#
+# plot(s, basis(knots = 4, i = 5, d = 2, range = c(0, 3), x = s))
+#
+#
+# basis(knots = 4, i = 5, d = 3, range =c(1, 4), x = 2.1)
 
-setitup(4, 1, c(0,3), 1)
-"
-Setitup works perfectly
-
-
-"
-
-
-# basis(knots = 3, i = 3, d = 1, range = c(0,3), x = 1.5)
-basis(knots = 4, i = 1, d = 0, range = c(0,3), x = 1.5)
-
-
-y = rep(NA, times = 100)
-s = seq(1,4, length.out = 100)
-for (i in 1:100)
-{
-  y[i] = basis(knots = 4, i = 6, d = 3, range =
-                 c(1, 4), x = s[i])
-}
-
-plot(s, y)
-plot(s, basis(knots = 4, i = 3, d = 2, range = c(1, 4), x = s))
-
-
-basis(knots = 4, i = 5, d = 3, range =c(1, 4), x = 2.1)
