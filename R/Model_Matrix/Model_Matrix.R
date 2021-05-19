@@ -1,4 +1,6 @@
 
+
+library(ggplot2)
 ####B-Splin Erzeugung####
 
 #Hier wird jetzt die Grundfunktion für die Knotenpunkte definiert
@@ -19,6 +21,9 @@ splinmitte <- function(range, kn, order)
   return(seq(from = (range[1] - onedist * order), to = (range[2] + onedist * order),
       length.out = (kn  + 2 * order)))
 }
+
+splinmitte(c(0,10), 22, 3)
+setitup(22, 3, c(0,10), 10/21)
 
 # Definition des Grundsplines, auf dem die anderen aufbauen
 B_0 <- function(z,kj1,kj2){
@@ -56,15 +61,17 @@ splines <- function(z, range, kn, order, j)
 
 ####Grafische Darstellung der Splines####
 
-# p <- ggplot(data = data.frame(x = c(0, 10)), aes(x))# + ylim(c(0,3))
-# test <-function(){
-#   p + stat_function(fun = Wrapper,n = 1000, geom = "area", fill = "blue", alpha = 0.5)
-# }
-#
-# Wrapper <- function(z){
-#   sapply(z, splines, range = c(0,10), kn = 20,order = 6,j = 1)
-# }
-# test()
+p <- ggplot(data = data.frame(x = c(0, 10)), aes(x))# + ylim(c(0,3))
+test <-function()
+{
+  p + stat_function(fun = Wrapper,n = 1000, geom = "area", fill = "blue", alpha = 0.5)
+}
+
+Wrapper <- function(z)
+{
+  sapply(z, splines, range = c(0,10), kn = 11,order = 7,j = 1)
+}
+test()
 
 ####Model_Matrix####
 #jetzt wird die Modell Matrix (Z) definiert
@@ -73,7 +80,7 @@ splines <- function(z, range, kn, order, j)
 model_matrix <- function(z, kn, range, order)
 {
   # Zahl der insgesamt benötigten Splines
-  nr_splines = kn + order - 1
+  nr_splines <- kn + order - 1
   model <- matrix(0, nrow = length(z), ncol = nr_splines)
   for ( i in 1:length(z))
   {
@@ -86,7 +93,7 @@ model_matrix <- function(z, kn, range, order)
   return(model)
 }
 ####Spline Modell Schätzen####
-
+# ts tab
 set.seed(100)
 x <- runif(1000,0,10)
 y <- 0.5 * x + cos(x) +rnorm(1000)
@@ -116,15 +123,15 @@ print.spl <- function(spl_objekt)
 {
   ggplot(mapping = aes(x = spl_objekt[["z"]])) +
     geom_point(aes(y = spl_objekt[["y"]])) +
-    geom_line(aes(y =  spl_objekt[["y_hat"]]), colour = "green", size = 2)+
+    geom_line(aes(y = spl_objekt[["y_hat"]]), colour = "green", size = 2)+
     ylab("dependent variable")+
     xlab("explaining variable")
 }
 
 #### Model Beispiel ####
-y_hat <- spl(z = x,y = y, kn = 50,range = c(0,10), order = 2)
+y_hat <- spl(z = x,y = y, kn = 10,range = c(0,10), order = 2)
 #library(profvis)
 #profvis(spl(z = p,y = o, kn = 50,range = c(0,10), order =3 ))
 
 print(y_hat)
-splines(z = 9.9 ,range = c(0,10), kn = 50,order = 2, j = 51 )
+#splines(z = 9.9 ,range = c(0,10), kn = 10,order = 2, j = 51 )

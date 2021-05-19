@@ -45,8 +45,9 @@ bspline = function(m, knots, d)
 
 
 
-
-xa = runif(100)
+install.packages("lslm")
+require(lslm)
+xa = seq(0,1, length.out = 100)
 y = xa + rnorm(100)
 m = lslm(y ~ xa, light = F)
 

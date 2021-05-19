@@ -10,6 +10,8 @@ Dmat2 <- function(m){
   return(D)
 }
 
+
+Dmat2(10) %*% t(Dmat2(10) ) %*% Dmat2(10) %*% t(Dmat2(10) )
 "
 p_order_diff      welcher Ordnung soll die penalization Difference sein
 kn                Anzahl der Knoten innerhalb der Range
@@ -75,7 +77,7 @@ spl <- function(z, y, kn, range, order, p_order, lambda)
 x <- runif(1000,0,20)
 y <-  - 2 * x + 0.5 * x^2 - 0.02 *x^3 +rnorm(1000, sd = 8)
 
-y_hat <- spl(z = x, y = y, kn = 3,range = c(0,20), order = 1, p_order = 4, lambda = 0)
+y_hat <- spl(z = x, y = y, kn = 25,range = c(0,10), order = 3, p_order = 2, lambda = 100)
 print(y_hat)
 #library(profvis)
 #profvis(spl(z = p,y = o, kn = 50,range = c(0,10), order =3 ))
