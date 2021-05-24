@@ -110,4 +110,13 @@ ml(x,y,kn = 20, d = 4, diffd = 1, lambda = 0.1)
 
 
 
+# Mon May 24 19:30:25 2021 ------------------------------
+# optimizing penalty matrix
+
+penalty = function(knots, d, order)
+{
+
+  return(K)
+}
+# difference penalty matrix
 
