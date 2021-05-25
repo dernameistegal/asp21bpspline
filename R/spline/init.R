@@ -1,0 +1,143 @@
+initialisation = function(m, kn, p_order, order)
+{
+  m = basis_generation(m, kn, order)
+  m$spline$K = penalty(m$spline$ext_kn, p_order)
+  return(m)
+}
+
+
+basis_generation = function(m, kn, order, lslm = T)
+{
+  # removing superfluous intercept
+  if (all(m$x[,1] == 1))
+  {
+    m$x = m$x[,-1]
+  }
+
+
+  m$spline$ext_kn = kn - 1 + order
+  mat = data.frame(matrix(0, nrow = length(m$x), ncol = m$spline$ext_kn))
+  m$spline$range = range(m$x)
+
+  # applying basis function to every element
+  for (i in 1:m$spline$ext_kn)
+  {
+    mat[,i]= basis(kn, i, order, m$spline$range, m$x, pos = NA)
+  }
+
+  m$spline$x = model.matrix(~ . - 1, data = mat)
+  if (lslm == F)
+  {
+    return(m$spline$x)
+  }
+  return(m)
+}
+
+
+penalty = function(kn, p_order = 2)
+{
+  if (p_order == 1)
+  {
+    ones = cbind(0, diag(kn - 1))
+    nones = cbind(diag(kn - 1) * -1, 0)
+    K = ones + nones
+    K = t(K) %*% K
+    return(ones + nones)
+  }
+
+  # recursive definition of penalty matrix
+  # shrink starting kn such that end kn are correct
+  kn = kn - p_order + 1
+  K = penalty(kn, 1)
+  for (i in 1:(p_order - 1))
+  {
+    K = K %*% penalty(kn + i, 1)
+  }
+  K = t(K) %*% K
+  return(K)
+}
+
+" The functions in this file compute the basis for a b-spline model
+
+"
+
+# setitup is called in basis function to provide an accurate extended pos vector
+setitup = function(kn, d, range, len)
+{
+  pos = rep(NA, times = kn + 2 * d)
+  low = 1 + d
+  up = kn + d
+  pos[(low):(up)] = seq(min(range), max(range), length.out = kn)
+  #extend by d cases
+  for (i in 1:(d))
+  {
+    pos[low-i] = pos[low - i + 1] - len
+    pos[up + i] = pos[up + i - 1] + len
+  }
+
+  return(pos)
+}
+
+
+
+# recursive definition of bspline based on kneib p 429
+# order is renamed d here to provide more readable code
+recursivespline = function(i, d, range, x, pos)
+{
+  # defining base case
+  if (d == 0)
+  {
+    index = pos[i] <= x & x < pos[i + 1]
+    out = x
+    out[index] = 1
+    out[!index] = 0
+
+    return(out)
+  }
+
+  # defining recursive case
+  iterand1 = recursivespline(i - 1, d - 1, range, x, pos = pos)
+  iterand2 = recursivespline(i    , d - 1, range, x, pos = pos)
+
+  product1 = rep(0, times = length(x))
+  product2 = product1
+
+  faktor1 = (x - pos[i - d]) / (pos[i] - pos[i - d])
+  product1 = iterand1 * faktor1
+
+  faktor2 = (pos[i + 1] - x) / (pos[i + 1] - pos[i + 1 - d])
+  product2 = iterand2 * faktor2
+
+  # cat("Called:", "i:", i,"d:", d,"range:", range, "x:", x, "out:", product1 + product2, "\n")
+  return(product1 + product2)
+}
+
+
+
+# main function
+basis = function(kn, i, order, range, x, pos = NA)
+{
+  len = (max(range) - min(range)) / (kn - 1)
+  if (any(is.na(pos)) == T)
+  {
+    pos = setitup(kn, order, range, len)
+    i = i + order
+  }
+  out = recursivespline(i, order, range, x, pos)
+  return(out)
+}
+
+
+
+library(lslm)
+
+set.seed(100)
+x <- runif(1000,0,10)
+y <- 0.5 * x + cos(x) +rnorm(1000)
+
+m = lslm(y ~ x, light = FALSE)
+m = initialisation(m, 11, 2, 2)
+
+
+
+

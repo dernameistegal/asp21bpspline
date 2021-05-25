@@ -79,11 +79,11 @@ penalty = function(knots,diffd = 2)
 }
 
 
-penalty(9,2)
+penalty(9,1)
 
 
 
-
+require(lslm)
 # wrapper
 ml = function(xa,y, kn, d, diffd, lambda)
 {
@@ -104,19 +104,10 @@ ml = function(xa,y, kn, d, diffd, lambda)
 x = seq(0,10,length.out = 100)
 y = 0.1 * x + rnorm(100,0,0.3)
 plot(x,y)
-ml(x,y,kn = 20, d = 4, diffd = 1, lambda = 0.1)
+ml(x,y,kn = 20, d = 3, diffd = 2, lambda = 10)
 
 
 
 
 
-# Mon May 24 19:30:25 2021 ------------------------------
-# optimizing penalty matrix
-
-penalty = function(knots, d, order)
-{
-
-  return(K)
-}
-# difference penalty matrix
 
