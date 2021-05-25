@@ -1,8 +1,9 @@
-initialisation = function(m, kn, p_order, order)
+initialisation = function(m, kn, p_order, order, lambda)
 {
   m = basis_generation(m, kn, order)
   m$spline$K = penalty(m$spline$ext_kn, p_order)
   m$spline$y = m$y
+  m$spline$lambda = lambda
   return(m)
 }
 

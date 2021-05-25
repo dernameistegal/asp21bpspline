@@ -39,7 +39,7 @@ estimation = function(m, maxit = 100, reltol = sqrt(.Machine$double.eps))
 init_beta = function(m)
 {
   m$chol_info_gamma = chol(info_gamma(m))
-  fit = leastsquares(m, m$y)
+  fit = leastsquares(m, m$y, m$lambda)
   m$coefficients$location = coef(fit)
   m$fitted.values$location = fitted(fit)
   m$residuals$location = residuals(fit)
@@ -49,7 +49,7 @@ init_beta = function(m)
 
 init_gamma = function(m)
 {
-  fit = leastsquares(m, 0.6351814 + log(abs(m$residuals$location)))
+  fit = leastsquares(m, 0.6351814 + log(abs(m$residuals$location)), m$lambda)
   m$coefficients$scale = coef(fit)
   m$fitted.values$scale = exp(fitted(fit))
   return(m)
