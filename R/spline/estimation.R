@@ -55,18 +55,10 @@ init_gamma = function(m)
   return(m)
 }
 
-
 update_gamma = function(m)
 {
-  step = backsolve(
-    r = m$chol_info_gamma,
-    x = forwardsolve(
-      l = m$chol_info_gamma,
-      x = score_gamma(m),
-      upper.tri = TRUE,
-      transpose = TRUE
-    )
-  )
+  fwd = forwardsolve(l = m$chol_info_gamma,x = score_gamma(m),upper.tri = TRUE, transpose = TRUE)
+  step = backsolve(r = m$chol_info_gamma, x = fwd )
 
   m = set_gamma(m, coef(m)$scale + step)
   return(m)
@@ -77,7 +69,7 @@ update_beta = function(m)
 {
   m$coefficients$location = m$coefficients$location + solve(info_beta(m)) %*% score_beta(m)
   m$fitted.values$location = m$x %*% m$coefficients$location
-  m$residuals = m$y - m$fitted.values$location
+  m$residuals$location = m$y - m$fitted.values$location
   return(m)
 }
 
@@ -138,4 +130,4 @@ set_gamma = function(m, gamma)
 x = seq(0,10, length.out = 100)
 y = x + rnorm(100, 0, 0.1)
 m = lslm(y ~ x, light = F)
-spline_user_function(m, 10, 2, 2, 0)
+#spline_user_function(m, 10, 2, 2, 0)
