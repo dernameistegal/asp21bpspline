@@ -2,6 +2,7 @@ initialisation = function(m, kn, p_order, order)
 {
   m = basis_generation(m, kn, order)
   m$spline$K = penalty(m$spline$ext_kn, p_order)
+  m$spline$y = m$y
   return(m)
 }
 
@@ -11,18 +12,18 @@ basis_generation = function(m, kn, order, lslm = T)
   # removing superfluous intercept
   if (all(m$x[,1] == 1))
   {
-    m$x = m$x[,-1]
+    m$spline$x = m$x[,-1]
   }
 
 
   m$spline$ext_kn = kn - 1 + order
-  mat = data.frame(matrix(0, nrow = length(m$x), ncol = m$spline$ext_kn))
+  mat = data.frame(matrix(0, nrow = length(m$spline$x), ncol = m$spline$ext_kn))
   m$spline$range = range(m$x)
 
   # applying basis function to every element
   for (i in 1:m$spline$ext_kn)
   {
-    mat[,i]= basis(kn, i, order, m$spline$range, m$x, pos = NA)
+    mat[,i]= basis(kn, i, order, m$spline$range, m$spline$x, pos = NA)
   }
 
   m$spline$x = model.matrix(~ . - 1, data = mat)
@@ -129,14 +130,14 @@ basis = function(kn, i, order, range, x, pos = NA)
 
 
 
-library(lslm)
-
-set.seed(100)
-x <- runif(1000,0,10)
-y <- 0.5 * x + cos(x) +rnorm(1000)
-
-m = lslm(y ~ x, light = FALSE)
-m = initialisation(m, 11, 2, 2)
+# library(lslm)
+#
+# set.seed(100)
+# x <- runif(1000,0,10)
+# y <- 0.5 * x + cos(x) +rnorm(1000)
+#
+# m = lslm(y ~ x, light = FALSE)
+# m = initialisation(m, 11, 2, 2)
 
 
 
