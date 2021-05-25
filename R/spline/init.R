@@ -1,7 +1,11 @@
 initialisation = function(m, kn, p_order, order, lambda)
 {
   m = basis_generation(m, kn, order)
-  m$spline$K = penalty(m$spline$ext_kn, p_order)
+  order1 = F
+  if(p_order == 1){
+    order1 = T
+  }
+  m$spline$K = penalty(m$spline$ext_kn, p_order, order1)
   m$spline$y = m$y
   m$spline$lambda = lambda
   return(m)
@@ -36,13 +40,16 @@ basis_generation = function(m, kn, order, lslm = T)
 }
 
 
-penalty = function(kn, p_order = 2)
+penalty = function(kn, p_order = 2, order1 = F)
 {
   if (p_order == 1)
   {
     ones = cbind(0, diag(kn - 1))
     nones = cbind(diag(kn - 1) * -1, 0)
     K = ones + nones
+    if(order1 == T){
+      return(t(K) %*% K)
+    }
     K = t(K) %*% K
     return(ones + nones)
   }
