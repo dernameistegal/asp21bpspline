@@ -23,7 +23,7 @@ estimation = function(m, maxit = 100, reltol = sqrt(.Machine$double.eps))
 
     enough = abs(after - before) > reltol * (abs(before) + reltol)
 
-    if (it == maxit)
+    if (it >= maxit)
     {
       warning("Estimation did not converge, maximum number of iterations reached")
       break
