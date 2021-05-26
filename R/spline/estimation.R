@@ -67,9 +67,10 @@ update_gamma = function(m)
 
 update_beta = function(m)
 {
-  m$coefficients$location = m$coefficients$location + solve(info_beta(m)) %*% score_beta(m)
-  m$fitted.values$location = m$x %*% m$coefficients$location
-  m$residuals$location = m$y - m$fitted.values$location
+  fit = w_leastsquares(m)
+  m$coefficients$location <- coef(fit)
+  m$fitted.values$location <- fitted(fit)
+  m$residuals <- resid(fit)
   return(m)
 }
 
@@ -82,6 +83,23 @@ leastsquares = function(m, y, lambda = 0)
   beta_hat = solve(crossprod(Z) +  m$K * lambda) %*% t(Z) %*% y
   y_hat = Z %*% beta_hat
 
+  fit = list()
+  fit$fitted.values = y_hat
+  fit$residuals = y - y_hat
+  fit$coefficients = beta_hat
+
+  return(fit)
+}
+
+# vermutlich ist das auch so nicht ganz richtig, weil sich auch m$K * lambda ändern müsste
+w_leastsquares = function(m)
+{
+  lambda = m$lambda
+  y = m$y
+  Z = m$x
+  W = diag(as.vector(m$fitted.values$scale))
+  beta_hat = solve(t(Z) %*% W %*% Z +  m$K * lambda) %*% t(Z) %*% W %*% y
+  y_hat = Z %*% beta_hat
   fit = list()
   fit$fitted.values = y_hat
   fit$residuals = y - y_hat
@@ -103,7 +121,7 @@ score_beta = function(m)
 # changed from source lslm
 score_gamma = function(m)
 {
-  ups = (t(m$residuals$location / m$fitted.values$scale)^2 - 1) %*% m$z
+  ups = (t(m$residuals/ m$fitted.values$scale)^2 - 1) %*% m$z
   return(drop(ups))
 }
 
@@ -127,7 +145,7 @@ set_gamma = function(m, gamma)
   return(m)
 }
 
-x = seq(0,10, length.out = 100)
-y = x + rnorm(100, 0, 0.1)
-m = lslm(y ~ x, light = F)
+# x = seq(0,10, length.out = 100)
+# y = x + rnorm(100, 0, 0.1)
+# m = lslm(y ~ x, light = F)
 #spline_user_function(m, 10, 2, 2, 0)
