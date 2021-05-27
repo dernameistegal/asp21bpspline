@@ -1,5 +1,5 @@
 
-
+#Hier müssen noch x und y richtig definiert werden für den scatterplot
 print.spl <- function(m, sd = 1.96)
 {
   require(ggplot2)
