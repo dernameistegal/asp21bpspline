@@ -1,8 +1,10 @@
-initialisation = function(m, kn, p_order, order)
+initialisation = function(m, kn, p_order, order, lambda)
 {
   m = basis_generation(m, kn, order)
-  m$spline$K = penalty(m$spline$ext_kn, p_order)
+  D = penalty(m$spline$ext_kn, p_order)
+  m$spline$K = t(D) %*% D
   m$spline$y = m$y
+  m$spline$lambda = lambda
   return(m)
 }
 
@@ -27,10 +29,6 @@ basis_generation = function(m, kn, order, lslm = T)
   }
 
   m$spline$x = model.matrix(~ . - 1, data = mat)
-  if (lslm == F)
-  {
-    return(m$spline$x)
-  }
   return(m)
 }
 
@@ -41,24 +39,17 @@ penalty = function(kn, p_order = 2)
   {
     ones = cbind(0, diag(kn - 1))
     nones = cbind(diag(kn - 1) * -1, 0)
-    K = ones + nones
-    K = t(K) %*% K
+    D = ones + nones
     return(ones + nones)
   }
 
-  # recursive definition of penalty matrix
-  # shrink starting kn such that end kn are correct
-  kn = kn - p_order + 1
-  K = penalty(kn, 1)
-  for (i in 1:(p_order - 1))
-  {
-    K = K %*% penalty(kn + i, 1)
-  }
-  K = t(K) %*% K
-  return(K)
+  # recursive definition of prerequisite for penalty matrix
+  D = penalty(kn, 1)[1:(kn - p_order), 1:(kn - p_order + 1)]
+  D = D %*% penalty(kn, p_order - 1)
+  return(D)
 }
 
-" The functions in this file compute the basis for a b-spline model
+" The functions in this section compute the basis for a b-spline model
 
 "
 
