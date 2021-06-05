@@ -29,7 +29,6 @@ estimation = function(m, maxit = 100, reltol = sqrt(.Machine$double.eps))
       break
     }
   }
-
   m$iterations = it
   return(m)
 }
@@ -48,7 +47,8 @@ init_beta = function(m)
 
 init_gamma = function(m)
 {
-  m$chol_info_gamma = chol(info_gamma(m))
+  m$chol_info_gamma = chol(info_gamma(m) + m$lambda * m$K)
+  m$penalized_info = info_gamma(m) - m$lambda * m$K
   fit = leastsquares(m, 0.6351814 + log(abs(m$residuals$location)), m$lambda)
   m$coefficients$scale = coef(fit)
   m$fitted.values$scale = exp(fitted(fit))
@@ -57,7 +57,9 @@ init_gamma = function(m)
 
 update_gamma = function(m)
 {
-  fwd = forwardsolve(l = m$chol_info_gamma,x = score_gamma(m),upper.tri = TRUE, transpose = TRUE)
+  fwd = forwardsolve(l = m$chol_info_gamma,
+                     x = score_gamma(m) - m$lambda * drop(m$K %*% coef(m)$scale),
+                     upper.tri = TRUE, transpose = TRUE)
   step = backsolve(r = m$chol_info_gamma, x = fwd )
 
   m = set_gamma(m, coef(m)$scale + step)

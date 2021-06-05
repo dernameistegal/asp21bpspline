@@ -20,4 +20,4 @@ m = spline_user_function(m = m, kn =  11, order =  3, p_order =  3,lambda =  1)
 #so ist das Modell mit splines
 print.spl(m, sd = 1.96)
 
-remove(m)
+
