@@ -1,5 +1,3 @@
-#feed this to function: m = m$spline
-
 mcmc = function(m, its = 1000, a1 = 1, b1 = 0.0005, a2 = 1, b2 = 0.0005) {
   a = Sys.time()
   result = generation_samples(m, its, a1, b1, a2, b2)

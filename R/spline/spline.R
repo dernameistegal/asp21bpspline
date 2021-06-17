@@ -1,8 +1,3 @@
-source("R/spline/print_function.R")
-source("R/spline/estimation.R")
-source("R/spline/init.R")
-source("R/spline/mcmc_framework_jonathan.R")
-
 spline_user_function = function(m, kn, order, p_order, lambda)
 {
   m = initialisation(m, kn, p_order, order, lambda)

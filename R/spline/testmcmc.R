@@ -1,3 +1,11 @@
+#source necessary files and generate model object
+
+source("R/spline/print_function.R")
+source("R/spline/estimation.R")
+source("R/spline/init.R")
+source("R/spline/mcmc_framework_jonathan.R")
+m =
+
 # test
 library(profvis)
 source("R/spline/mcmc_framework_jonathan.R")
