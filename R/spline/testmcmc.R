@@ -3,15 +3,14 @@
 source("R/spline/print_function.R")
 source("R/spline/estimation.R")
 source("R/spline/init.R")
+source("R/spline/spline.R")
 source("R/spline/mcmc_framework_jonathan.R")
-m =
+m = m$spline
 
-# test
+
+
+# evaluate code performance with profvis and rprof (set its to 1 for this purpose)
 library(profvis)
-source("R/spline/mcmc_framework_jonathan.R")
-
-# evaluate code performance with profvis and rprof
-
 profvis({
   mcmc(m)
 })
@@ -22,8 +21,6 @@ Rprof(NULL)
 summaryRprof("mcmc_prof.log", lines = "show")
 
 #test without code performance evaluation
-
 lol = mcmc(m)
 
-lol$gamma
 
