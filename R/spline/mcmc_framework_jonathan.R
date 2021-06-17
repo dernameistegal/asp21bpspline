@@ -7,9 +7,7 @@ mcmc = function(m, its = 1, a1 = 1, b1 = 0.0005, a2 = 1, b2 = 0.0005) {
   b = Sys.time()
   print(b-a)
   return(result)  # TODO ####
-
 }
-
 
 
 
