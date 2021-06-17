@@ -1,6 +1,6 @@
 #feed this to function: m = m$spline
 
-mcmc = function(m, its = 1, a1 = 1, b1 = 0.0005, a2 = 1, b2 = 0.0005) {
+mcmc = function(m, its = 1000, a1 = 1, b1 = 0.0005, a2 = 1, b2 = 0.0005) {
   a = Sys.time()
   result = generation_samples(m, its, a1, b1, a2, b2)
   result_thinned_and_burned = burn_thin()  # TODO ####
@@ -50,7 +50,7 @@ generation_samples = function(m, its, a1, b1, a2, b2) {
     beta_sampled[i,] = mcmc_m$coefficients$location
   }
 
-  return(list(beta_sampled, gamma_sampled, tau2_sampled, eps2_sampled))
+  return(list(beta = beta_sampled, gamma = gamma_sampled, tau2 = tau2_sampled, eps2 = eps2_sampled))
 }
 
 
@@ -93,22 +93,25 @@ mcmc_update = function(curr_m, parameter, k = NA, rank_k = NA, x = NA, z = NA, y
     gamma = curr_m$coefficients$scale
     beta = curr_m$coefficients$location
     eps2 = curr_m$coefficients$eps2
-    gamma_proposed = rnorm(length(gamma), 2) + gamma
+    gamma_proposed = rnorm(length(gamma), .2) + gamma
 
     log_full_cond = function(gamma) {
       temp1 = -sum(z %*% gamma)
-      temp2_helper = diag(drop((y - x %*% beta))/exp(drop(z %*% gamma)))
-      temp2 = -.5 * sum(temp2_helper %*% temp2_helper)
+      temp2_helper = drop((y - x %*% beta))/exp(drop(z %*% gamma))
+      temp2 = -.5 * (t(temp2_helper) %*% temp2_helper)
       temp3 = -1/(2 * eps2) * t(gamma) %*% k %*% gamma
+      return(temp1 + temp2 + temp3)
     }
 
-    log_full_cond(gamma)/log_full_cond(gamma_proposed)
+    temp4 = drop(log_full_cond(gamma_proposed) - log_full_cond(gamma)) +
+      sum(dnorm(gamma, mean = gamma_proposed, sd = .2, log = TRUE)) -
+      sum(dnorm(gamma_proposed, mean = gamma, sd = .2, log = TRUE))
+    log_accept_prob = min(temp4, 0)
 
-
-
-
+    if (log(runif(1)) < log_accept_prob) {
+      curr_m$coefficients$scale = gamma_proposed
+    }
     return(curr_m)
-
   }
 }
 
