@@ -1,4 +1,4 @@
-library(lslm)
+library(lmls)
 
 # Fisher Scoring Algorithm
 
@@ -111,23 +111,23 @@ w_leastsquares = function(m)
 }
 
 
-#### helpers from lslm
+#### helpers from lmls
 
-# changed from source lslm
+# changed from source lmls
 score_beta = function(m)
 {
   ups = t(m$residuals$location / m$fitted.values$scale^2) %*% m$x
   return(drop(ups))
 }
 
-# changed from source lslm
+# changed from source lmls
 score_gamma = function(m)
 {
   ups = (t(m$residuals/ m$fitted.values$scale)^2 - 1) %*% m$z
   return(drop(ups))
 }
 
-# changed from source lslm
+# changed from source lmls
 info_beta = function(m)
 {
   crossprod(m$x, diag(as.vector(1/(m$fitted.values$scale^2))) %*% m$x)
@@ -149,5 +149,5 @@ set_gamma = function(m, gamma)
 
 # x = seq(0,10, length.out = 100)
 # y = x + rnorm(100, 0, 0.1)
-# m = lslm(y ~ x, light = F)
+# m = lmls(y ~ x, light = F)
 #spline_user_function(m, 10, 2, 2, 0)

@@ -9,7 +9,7 @@ initialisation = function(m, kn, p_order, order, lambda)
 }
 
 
-basis_generation = function(m, kn, order, lslm = T)
+basis_generation = function(m, kn, order, lmls = T)
 {
   # removing superfluous intercept
   if (all(m$x[,1] == 1))
@@ -121,13 +121,13 @@ basis = function(kn, i, order, range, x, pos = NA)
 
 
 
-# library(lslm)
+# library(lmls)
 #
 # set.seed(100)
 # x <- runif(1000,0,10)
 # y <- 0.5 * x + cos(x) +rnorm(1000)
 #
-# m = lslm(y ~ x, light = FALSE)
+# m = lmls(y ~ x, light = FALSE)
 # m = initialisation(m, 11, 2, 2)
 
 

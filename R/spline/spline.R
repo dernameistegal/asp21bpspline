@@ -9,11 +9,11 @@ spline_user_function = function(m, kn, order, p_order, lambda)
 
 
 
-require(lslm)
+require(lmls)
 set.seed(1000)
 x = seq(0,10, length.out = 500)
 y =  x + rnorm(500, 0, 1) * (0.5 + x*0.3)
-m = lslm(y ~ x, light = F)
+m = lmls(y ~ x, light = F)
 #penalization problem etwas verbessert, nun haben große lambda eine große Wirkung, aber wir müssen noch überlgen, ob update gamma auch betroffen ist
 #bis jetzt ist nur update beta etwas verändert
 m = spline_user_function(m = m, kn =  11, order =  3, p_order =  1,lambda =  1)

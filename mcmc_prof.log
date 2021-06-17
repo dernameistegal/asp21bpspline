@@ -1,0 +1,13 @@
+line profiling: sample.interval=20000
+#File 1: <expr>
+"%*%" 1#103 "log_full_cond" 1#107 "mcmc_update" 1#45 "generation_samples" 1#5 "mcmc" 1#135 "eval" "eval" "withVisible" "source" 
+"%*%" 1#103 "log_full_cond" 1#107 "mcmc_update" 1#45 "generation_samples" 1#5 "mcmc" 1#135 "eval" "eval" "withVisible" "source" 
+"%*%" 1#103 "log_full_cond" 1#107 "mcmc_update" 1#45 "generation_samples" 1#5 "mcmc" 1#135 "eval" "eval" "withVisible" "source" 
+"%*%" 1#103 "log_full_cond" 1#107 "mcmc_update" 1#45 "generation_samples" 1#5 "mcmc" 1#135 "eval" "eval" "withVisible" "source" 
+"%*%" 1#103 "log_full_cond" 1#107 "mcmc_update" 1#45 "generation_samples" 1#5 "mcmc" 1#135 "eval" "eval" "withVisible" "source" 
+"%*%" 1#103 "log_full_cond" 1#107 "mcmc_update" 1#45 "generation_samples" 1#5 "mcmc" 1#135 "eval" "eval" "withVisible" "source" 
+"%*%" 1#86 "diag" 1#86 "mcmc_update" 1#47 "generation_samples" 1#5 "mcmc" 1#135 "eval" "eval" "withVisible" "source" 
+"findCenvVar" "getInlineInfo" "isBaseVar" "FUN" "lapply" "unlist" "Filter" "findLocalsList" "funEnv" "make.functionContext" "cmpfun" "doTryCatch" "tryCatchOne" "tryCatchList" "tryCatch" "compiler:::tryCmpfun" 1#6 "burn_thin" 1#6 "mcmc" 1#135 "eval" "eval" "withVisible" "source" 
+"findCenvVar" "getInlineInfo" "isBaseVar" "FUN" "lapply" "unlist" "Filter" "findLocalsList" "funEnv" "make.functionContext" "cmpfun" "doTryCatch" "tryCatchOne" "tryCatchList" "tryCatch" "compiler:::tryCmpfun" 1#6 "burn_thin" 1#6 "mcmc" 1#135 "eval" "eval" "withVisible" "source" 
+"findCenvVar" "getInlineInfo" "isBaseVar" "FUN" "lapply" "unlist" "Filter" "findLocalsList" "funEnv" "make.functionContext" "cmpfun" "doTryCatch" "tryCatchOne" "tryCatchList" "tryCatch" "compiler:::tryCmpfun" 1#6 "burn_thin" 1#6 "mcmc" 1#135 "eval" "eval" "withVisible" "source" 
+"findCenvVar" "getInlineInfo" "isBaseVar" "FUN" "lapply" "unlist" "Filter" "findLocalsList" "funEnv" "make.functionContext" "cmpfun" "doTryCatch" "tryCatchOne" "tryCatchList" "tryCatch" "compiler:::tryCmpfun" 1#6 "burn_thin" 1#6 "mcmc" 1#135 "eval" "eval" "withVisible" "source" 

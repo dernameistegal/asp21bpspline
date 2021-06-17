@@ -1,9 +1,13 @@
 #feed this to function: m = m$spline
 
-mcmc = function(m, its = 1000, a1 = 1, b1 = 0.0005, a2 = 1, b2 = 0.0005) {
+mcmc = function(m, its = 1, a1 = 1, b1 = 0.0005, a2 = 1, b2 = 0.0005) {
+  a = Sys.time()
   result = generation_samples(m, its, a1, b1, a2, b2)
   result_thinned_and_burned = burn_thin()  # TODO ####
+  b = Sys.time()
+  print(b-a)
   return(result)  # TODO ####
+
 }
 
 
@@ -18,8 +22,6 @@ generation_samples = function(m, its, a1, b1, a2, b2) {
   mcmc_m$hyperpar$b1 = b1
   mcmc_m$hyperpar$a2 = a2
   mcmc_m$hyperpar$b2 = b2
-  mcmc_m$hyperpar$mean_beta = NA
-  mcmc_m$hyperpar$var_beta = NA
 
   # initializing values that stay fixed throughout mcmc-algorithm
   x = mcmc_m$x
@@ -35,6 +37,7 @@ generation_samples = function(m, its, a1, b1, a2, b2) {
   gamma_sampled = matrix(nrow = its, ncol = ncol(m$z))
   tau2_sampled = numeric(length = its)
   eps2_sampled = numeric(length = its)
+
 
   # generate mcmc-samples
   for (i in 1:its) {
@@ -64,8 +67,6 @@ mcmc_update = function(curr_m, parameter, k = NA, rank_k = NA, x = NA, z = NA, y
     eps2_proposed = 1/rgamma(1, new_a1, new_b1)
 
     curr_m$coefficients$eps2 = eps2_proposed
-    curr_m$hyperpar$a1 = new_a1
-    curr_m$hyperpar$b1 = new_b1
     return(curr_m)
 
   } else if (parameter == "tau2") {
@@ -76,8 +77,6 @@ mcmc_update = function(curr_m, parameter, k = NA, rank_k = NA, x = NA, z = NA, y
     tau2_proposed = 1/rgamma(1, new_a2, new_b2)
 
     curr_m$coefficients$tau2 = tau2_proposed
-    curr_m$hyperpar$a2 = new_a2
-    curr_m$hyperpar$b2 = new_b2
     return(curr_m)
 
   } else if (parameter == "location") {
@@ -93,8 +92,25 @@ mcmc_update = function(curr_m, parameter, k = NA, rank_k = NA, x = NA, z = NA, y
     return(curr_m)
 
   } else if (parameter == "scale") {
+    gamma = curr_m$coefficients$scale
+    beta = curr_m$coefficients$location
+    eps2 = curr_m$coefficients$eps2
+    gamma_proposed = rnorm(length(gamma), 2) + gamma
+
+    log_full_cond = function(gamma) {
+      temp1 = -sum(z %*% gamma)
+      temp2_helper = diag(drop((y - x %*% beta))/exp(drop(z %*% gamma)))
+      temp2 = -.5 * sum(temp2_helper %*% temp2_helper)
+      temp3 = -1/(2 * eps2) * t(gamma) %*% k %*% gamma
+    }
+
+    log_full_cond(gamma)/log_full_cond(gamma_proposed)
+
+
+
+
     return(curr_m)
-    # TODO (this will be more complicated) ####
+
   }
 }
 
@@ -105,8 +121,7 @@ burn_thin = function() { #TODO ####
 }
 
 
-# test
-test_return = mcmc(m)
+
 
 
 
