@@ -1,7 +1,17 @@
+" variable definitions
+m - spline object
+...
+
+
+result empirical sample from beta, gamma, tau, epsilon
+"
+
+
 mcmc = function(m, its = 1000, a1 = 1, b1 = 0.0005, a2 = 1, b2 = 0.0005) {
   a = Sys.time()
   result = generation_samples(m, its, a1, b1, a2, b2)
-  result_thinned_and_burned = burn_thin()  # TODO ####
+  result = burn(result)
+  result = thin(result)
   b = Sys.time()
   print(b-a)
   return(result)  # TODO ####
@@ -12,8 +22,8 @@ mcmc = function(m, its = 1000, a1 = 1, b1 = 0.0005, a2 = 1, b2 = 0.0005) {
 generation_samples = function(m, its, a1, b1, a2, b2) {
   # initializing hyperparameters and starting values for parameters
   mcmc_m = m
-  mcmc_m$coefficients$eps2 = 1/rgamma(1, a1, b1)
-  mcmc_m$coefficients$tau2 = 1/rgamma(1, a2, b2)
+  mcmc_m$coefficients$eps2 = 1/rgamma(1, shape = a1, scale = b1)
+  mcmc_m$coefficients$tau2 = 1/rgamma(1, shape = a2, scale = b2)
   mcmc_m$hyperpar$a1 = a1
   mcmc_m$hyperpar$b1 = b1
   mcmc_m$hyperpar$a2 = a2
@@ -37,6 +47,11 @@ generation_samples = function(m, its, a1, b1, a2, b2) {
 
   # generate mcmc-samples
   for (i in 1:its) {
+    print(i)
+    if (i == 125)
+    {
+      print("halla")
+    }
     mcmc_m = mcmc_update(mcmc_m, parameter = "eps2", k = k1, rank_k = rank_k1, x = NA, z = NA, y = NA)
     mcmc_m = mcmc_update(mcmc_m, parameter =  "scale", k = k1, rank_k = NA, x = x, z = z, y = y)
     mcmc_m = mcmc_update(mcmc_m, parameter =  "tau2", k = k2, rank_k = rank_k2, x = NA, z = NA, y = NA)
@@ -60,20 +75,22 @@ mcmc_update = function(curr_m, parameter, k = NA, rank_k = NA, x = NA, z = NA, y
     gamma = curr_m$coefficients$scale
     new_a1 = curr_m$hyperpar$a1 + .5 * rank_k
     new_b1 = curr_m$hyperpar$b1 + .5 * t(gamma) %*% k %*% gamma
-    eps2_proposed = 1/rgamma(1, new_a1, new_b1)
+    eps2_proposed = 1/rgamma(1, shape = new_a1, scale = new_b1)
 
-    curr_m$coefficients$eps2 = eps2_proposed
+    curr_m$coefficients$eps2 = 1 # change for bugfix formerly eps2_proposed
     return(curr_m)
+
 
   } else if (parameter == "tau2") {
 
     beta = curr_m$coefficients$location
     new_a2 = curr_m$hyperpar$a2 + .5 * rank_k
     new_b2 = curr_m$hyperpar$b2 + .5 * t(beta) %*% k %*% beta
-    tau2_proposed = 1/rgamma(1, new_a2, new_b2)
+    tau2_proposed = 1/rgamma(1, shape = new_a2, scale = new_b2)
 
-    curr_m$coefficients$tau2 = tau2_proposed
+    curr_m$coefficients$tau2 = 1 #  change for bugfix formerly tau2_proposed
     return(curr_m)
+
 
   } else if (parameter == "location") {
     gamma = curr_m$coefficients$scale
@@ -86,6 +103,7 @@ mcmc_update = function(curr_m, parameter, k = NA, rank_k = NA, x = NA, z = NA, y
     beta_proposed = mean + backsolve(r = temp1, x = rnorm(ncol(x)))
     curr_m$coefficients$location = beta_proposed
     return(curr_m)
+
 
   } else if (parameter == "scale") {
     gamma = curr_m$coefficients$scale
@@ -111,12 +129,31 @@ mcmc_update = function(curr_m, parameter, k = NA, rank_k = NA, x = NA, z = NA, y
     }
     return(curr_m)
   }
+
 }
 
 
 
-burn_thin = function() { #TODO ####
-  return(NA)
+burn = function(result, burnfactor = 400)
+{
+  len = length(result$eps2)
+  result$eps2 = result$eps2[burnfactor:len]
+  result$tau2 = result$tau2[burnfactor:len]
+  result$beta = result$beta[burnfactor:len,]
+  result$gamma = result$gamma[burnfactor:len,]
+  return(result)
+}
+
+
+thin = function(result, thinfactor = 4)
+{
+  len = length(result$eps2)
+  s = seq(1, len, by = thinfactor)
+  result$eps2 = result$eps2[s]
+  result$tau2 = result$tau2[s]
+  result$beta = result$beta[s,]
+  result$gamma = result$gamma[s,]
+  return(result)
 }
 
 
