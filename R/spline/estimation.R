@@ -151,8 +151,3 @@ set_gamma = function(m, gamma)
 # y = x + rnorm(100, 0, 0.1)
 # m = lmls(y ~ x, light = F)
 #spline_user_function(m, 10, 2, 2, 0)
-
-
-m = lmls(y~x, scale = ~x, light = F)
-m = spline_user_function(m, c(40,40), order = c(2,2), p_order = c(2,2),
-                         smooth = c(1,1))

@@ -16,6 +16,8 @@ initialisation = function(m, kn, p_order, order, smooth)
 
   m$spline$p_order = p_order
   m$spline$y = m$y
+  m$spline$formerx = m$x[, -1]
+  m$spline$formerz = m$z[, -1]
   m$spline$smooth = smooth
 
   m = m$spline

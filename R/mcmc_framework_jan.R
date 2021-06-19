@@ -52,8 +52,8 @@ mcmc = function(m, it, burning, thinning, cov)
     list[[4]][i, ] = sample.gamma(list, X, Z, y, K2, i, ngamma, cov)
   }
 
-  #list = burn(list, burning)
-  #list = thin(list, thinning)
+  list = burn(list, burning)
+  list = thin(list, thinning)
 
   return(list)
 }
@@ -141,23 +141,23 @@ else
 
 
 
-burn = function(result, burnfactor = 400)
+burn = function(result, burning = 1)
 {
-  len = length(result$eps2)
-  result$epsilon = result$eps2[burnfactor:len]
-  result$tau = result$tau2[burnfactor:len]
-  result$beta = result$beta[burnfactor:len,]
-  result$gamma = result$gamma[burnfactor:len,]
+  len = length(result$epsilon)
+  result$epsilon = result$epsilon[burning:len]
+  result$tau = result$tau[burning:len]
+  result$beta = result$beta[burning:len,]
+  result$gamma = result$gamma[burning:len,]
   return(result)
 }
 
 
-thin = function(result, thinfactor = 4)
+thin = function(result, thinning = 1)
 {
-  len = length(result$eps2)
-  s = seq(1, len, by = thinfactor)
-  result$epsilon = result$eps2[s]
-  result$tau = result$tau2[s]
+  len = length(result$epsilon)
+  s = seq(1, len, by = thinning)
+  result$epsilon = result$epsilon[s]
+  result$tau = result$tau[s]
   result$beta = result$beta[s,]
   result$gamma = result$gamma[s,]
   return(result)
@@ -170,18 +170,19 @@ source("R/spline/estimation.R")
 source("R/spline/init.R")
 source("R/spline/spline.R")
 set.seed(1)
-x = seq(0,10, length.out = 500)
-y = x + rnorm(500, 0,sd =1 + sin(x))
+x = seq(0,20, length.out = 500)
+y = 5*sin(x) + rnorm(500, 0,sd =1 + abs(sin(x)))
 m = lmls(y~x, scale = ~x, light = F)
-m = spline_user_function(m, c(40,40), order = c(2,2), p_order = c(2,2),
-                         smooth = c(1,1))
+m = spline_user_function(m, c(8,15), order = c(2,2), p_order = c(6,2),
+                         smooth = c(1000,1))
 
 print.spl(m, sd = 1.96)
 
-m
-n = 2000
-lol = mcmc(m, it = n, burning = 500, thinning = 5, cov = 0.02)
 
+n = 2000
+lol = mcmc(m, it = n, burning = 50, thinning = 1, cov = 0.02)
+
+n = length(lol$tau)
 seq1 = seq(1, n, length.out = n)
 plot(seq1, lol$tau, type = "l")
 plot(seq1, lol$epsilon, type = "l")
@@ -209,8 +210,6 @@ points(x, y)
 lines(x, pred$location + 1.96 * pred$scale)
 lines(x, pred$location - 1.96 * pred$scale)
 
-mean(lol$tau)
-mean(lol$epsilon)
 
 
 
