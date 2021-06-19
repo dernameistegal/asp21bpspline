@@ -4,10 +4,9 @@ library(lmls)
 
 estimation = function(m, maxit = 100, reltol = sqrt(.Machine$double.eps))
 {
-  m$spline$z = m$spline$x
-  m$spline  = init_beta(m$spline)
-  m$spline = init_gamma(m$spline)
-  m$spline = update_beta(m$spline)
+  m  = init_beta(m)
+  m = init_gamma(m)
+  m = update_beta(m)
 
   it = 0
   enough = TRUE
@@ -16,10 +15,10 @@ estimation = function(m, maxit = 100, reltol = sqrt(.Machine$double.eps))
   {
     it = it + 1
 
-    before = sum(m$spline$coefficients$location)
-    m$spline = update_gamma(m$spline)
-    m$spline = update_beta(m$spline)
-    after =  sum(m$spline$coefficients$location)
+    before = sum(m$coefficients$location)
+    m = update_gamma(m)
+    m = update_beta(m)
+    after =  sum(m$coefficients$location)
 
     enough = abs(after - before) > reltol * (abs(before) + reltol)
 
@@ -37,7 +36,7 @@ estimation = function(m, maxit = 100, reltol = sqrt(.Machine$double.eps))
 #### estimation####
 init_beta = function(m)
 {
-  fit = leastsquares(m, m$y, m$lambda)
+  fit = leastsquares(m$loc$X, m$loc$K , m$y, m$smooth[1])
   m$coefficients$location = coef(fit)
   m$fitted.values$location = fitted(fit)
   m$residuals$location = residuals(fit)
@@ -47,9 +46,10 @@ init_beta = function(m)
 
 init_gamma = function(m)
 {
-  m$chol_info_gamma = chol(info_gamma(m) + m$lambda * m$K)
-  m$penalized_info = info_gamma(m) - m$lambda * m$K
-  fit = leastsquares(m, 0.6351814 + log(abs(m$residuals$location)), m$lambda)
+  m$chol_info_gamma = chol(info_gamma(m) + m$smooth[2] * m$scale$K)
+  m$penalized_info = info_gamma(m) - m$smooth[2] * m$scale$K
+  fit = leastsquares(m$scale$Z, m$scale$K, 0.6351814 + log(abs(m$residuals$location)),
+                     m$smooth[2])
   m$coefficients$scale = coef(fit)
   m$fitted.values$scale = exp(fitted(fit))
   return(m)
@@ -58,7 +58,7 @@ init_gamma = function(m)
 update_gamma = function(m)
 {
   fwd = forwardsolve(l = m$chol_info_gamma,
-                     x = score_gamma(m) - m$lambda * drop(m$K %*% coef(m)$scale),
+                     x = score_gamma(m) - m$smooth[2] * drop(m$scale$K %*% coef(m)$scale),
                      upper.tri = TRUE, transpose = TRUE)
   step = backsolve(r = m$chol_info_gamma, x = fwd )
 
@@ -79,11 +79,11 @@ update_beta = function(m)
 
 # own helper
 
-leastsquares = function(m, y, lambda = 0)
+leastsquares = function(X, K, y, lambda)
 {
-  Z = m$x
-  beta_hat = solve(crossprod(Z) +  m$K * lambda) %*% t(Z) %*% y
-  y_hat = Z %*% beta_hat
+
+  beta_hat = solve(crossprod(X) + K * lambda) %*% t(X) %*% y
+  y_hat = X %*% beta_hat
 
   fit = list()
   fit$fitted.values = y_hat
@@ -96,11 +96,11 @@ leastsquares = function(m, y, lambda = 0)
 # vermutlich ist das auch so nicht ganz richtig, weil sich auch m$K * lambda ändern müsste
 w_leastsquares = function(m)
 {
-  lambda = m$lambda
+  lambda = m$smooth[1]
   y = m$y
-  Z = m$x
+  Z = m$loc$X
   W = diag(as.vector(m$fitted.values$scale))
-  beta_hat = solve(t(Z) %*% W %*% Z +  m$K * lambda) %*% t(Z) %*% W %*% y
+  beta_hat = solve(t(Z) %*% W %*% Z +  m$loc$K * lambda) %*% t(Z) %*% W %*% y
   y_hat = Z %*% beta_hat
   fit = list()
   fit$fitted.values = y_hat
@@ -116,34 +116,34 @@ w_leastsquares = function(m)
 # changed from source lmls
 score_beta = function(m)
 {
-  ups = t(m$residuals$location / m$fitted.values$scale^2) %*% m$x
+  ups = t(m$residuals$location / m$fitted.values$scale^2) %*% m$loc$X
   return(drop(ups))
 }
 
 # changed from source lmls
 score_gamma = function(m)
 {
-  ups = (t(m$residuals/ m$fitted.values$scale)^2 - 1) %*% m$z
+  ups = (t(m$residuals/ m$fitted.values$scale)^2 - 1) %*% m$scale$Z
   return(drop(ups))
 }
 
 # changed from source lmls
 info_beta = function(m)
 {
-  crossprod(m$x, diag(as.vector(1/(m$fitted.values$scale^2))) %*% m$x)
+  crossprod(m$x, diag(as.vector(1/(m$fitted.values$scale^2))) %*% m$loc$X)
 }
 
 # not changed from source
 info_gamma = function(m)
 {
-  2 * crossprod(m$z)
+  2 * crossprod(m$scale$Z)
 }
 
 # not changed from source
 set_gamma = function(m, gamma)
 {
   m$coefficients$scale = gamma
-  m$fitted.values$scale = exp(drop(m$z %*% gamma))
+  m$fitted.values$scale = exp(m$scale$Z %*% gamma)
   return(m)
 }
 
@@ -151,3 +151,8 @@ set_gamma = function(m, gamma)
 # y = x + rnorm(100, 0, 0.1)
 # m = lmls(y ~ x, light = F)
 #spline_user_function(m, 10, 2, 2, 0)
+
+
+m = lmls(y~x, scale = ~x, light = F)
+m = spline_user_function(m, c(40,40), order = c(2,2), p_order = c(2,2),
+                         smooth = c(1,1))

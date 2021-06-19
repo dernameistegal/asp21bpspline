@@ -1,37 +1,50 @@
-initialisation = function(m, kn, p_order, order, lambda)
+initialisation = function(m, kn, p_order, order, smooth)
 {
-  m = basis_generation(m, kn, order)
-  D = penalty(m$spline$ext_kn, p_order)
-  m$spline$K = t(D) %*% D
-  m$spline$p_order1 = p_order
-  m$spline$p_order2 = p_order
+  #building Matrices for location
+  templist = basis_generation(m$x, kn[1], order[1])
+  m$spline$loc$X = templist$X
+  m$spline$loc$ext_kn = templist$ext_kn
+  D = penalty(m$spline$loc$ext_kn, p_order[1])
+  m$spline$loc$K = t(D) %*% D
+
+  #building Matrices for scale
+  templist = basis_generation(m$z, kn[2], order[2])
+  m$spline$scale$Z = templist$X
+  m$spline$scale$ext_kn = templist$ext_kn
+  D = penalty(m$spline$scale$ext_kn, p_order[2])
+  m$spline$scale$K = t(D) %*% D
+
+  m$spline$p_order = p_order
   m$spline$y = m$y
-  m$spline$lambda = lambda
+  m$spline$smooth = smooth
+
+  m = m$spline
   return(m)
 }
 
 
-basis_generation = function(m, kn, order, lmls = T)
+basis_generation = function(X, kn, order, lmls = T)
 {
   # removing superfluous intercept
-  if (all(m$x[,1] == 1))
+  if (all(X[,1] == 1))
   {
-    m$spline$x = m$x[,-1]
+    X = X[,-1]
   }
 
 
-  m$spline$ext_kn = kn - 1 + order
-  mat = data.frame(matrix(0, nrow = length(m$spline$x), ncol = m$spline$ext_kn))
-  m$spline$range = range(m$x)
+  ext_kn = kn - 1 + order
+  mat = data.frame(matrix(0, nrow = length(x), ncol = ext_kn))
+  range = range(X)
 
   # applying basis function to every element
-  for (i in 1:m$spline$ext_kn)
+  for (i in 1:ext_kn)
   {
-    mat[,i]= basis(kn, i, order, m$spline$range, m$spline$x, pos = NA)
+    mat[,i]= basis(kn, i, order, range, X, pos = NA)
   }
 
-  m$spline$x = model.matrix(~ . - 1, data = mat)
-  return(m)
+  X = model.matrix(~ . - 1, data = mat)
+
+  return(list(X = X, ext_kn = ext_kn))
 }
 
 
@@ -131,6 +144,7 @@ basis = function(kn, i, order, range, x, pos = NA)
 #
 # m = lmls(y ~ x, light = FALSE)
 # m = initialisation(m, 11, 2, 2)
+
 
 
 

@@ -30,13 +30,13 @@ mcmc = function(m, it, burning, thinning, cov)
               gamma = sample_gamma)
 
   # extract elements
-  X = m$x
+  X = m$loc$X
   y = m$y
-  Z = m$z
-  K1 = m$K
-  K2 = m$K #to do####
-  rk_K1 = m$ext_kn - m$p_order2
-  rk_K2 = m$ext_kn - m$p_order2
+  Z = m$scale$Z
+  K1 = m$loc$K
+  K2 = m$scale$K
+  rk_K1 = m$loc$ext_kn - m$p_order[1]
+  rk_K2 = m$scale$ext_kn - m$p_order[2]
 
   list$beta[1, ] = m$coefficients$location
   list$gamma[1, ] = m$coefficients$scale
@@ -78,7 +78,7 @@ sample.beta = function(list, X, Z, y, K, i)
   gamma = matrix(list$gamma[i-1, ], ncol = 1)
   tau = list$tau[i]
 
-  sigmainv = diag(drop(1 / exp((Z %*% gamma)^2)))
+  sigmainv = diag(drop(1 / (exp(Z %*% gamma))^2))
 
   cov = solve(t(X) %*% sigmainv %*% X + K / tau)
   mean = cov %*% (t(X) %*% sigmainv %*% y)
@@ -170,21 +170,49 @@ source("R/spline/estimation.R")
 source("R/spline/init.R")
 source("R/spline/spline.R")
 set.seed(1)
-x = seq(0,10, length.out = 100)
-y = x + rnorm(100)
-m = lmls(y~x, light = F)
-m = spline_user_function(m, 10, order = 2, p_order = 2, lambda = 1)
-m = m$spline
-n = 10000
-lol = mcmc(m, it = n, burning = 10, thinning = 10, cov = 0.1)
+x = seq(0,10, length.out = 500)
+y = x + rnorm(500, 0,sd =1 + sin(x))
+m = lmls(y~x, scale = ~x, light = F)
+m = spline_user_function(m, c(40,40), order = c(2,2), p_order = c(2,2),
+                         smooth = c(1,1))
 
+print.spl(m, sd = 1.96)
 
+m
+n = 2000
+lol = mcmc(m, it = n, burning = 500, thinning = 5, cov = 0.02)
 
 seq1 = seq(1, n, length.out = n)
 plot(seq1, lol$tau, type = "l")
 plot(seq1, lol$epsilon, type = "l")
 plot(seq1, lol$beta[, 1], type = "l")
 plot(seq1, lol$gamma[, 1], type = "l")
+
+bmean = colMeans(lol$beta)
+gmean = colMeans(lol$gamma)
+length(gmean)
+
+fit.spline = function(beta, gamma, X)
+{
+
+
+  location = X %*% beta
+  scale = exp(X %*% gamma)
+  return(list(location = location, scale =  scale))
+}
+
+
+pred = fit.spline(bmean, gmean, m$loc$X)
+
+plot(x, pred$location)
+points(x, y)
+lines(x, pred$location + 1.96 * pred$scale)
+lines(x, pred$location - 1.96 * pred$scale)
+
+mean(lol$tau)
+mean(lol$epsilon)
+
+
 
 
 
