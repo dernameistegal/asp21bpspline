@@ -3,8 +3,8 @@ initialisation = function(m, kn, p_order, order, lambda)
   m = basis_generation(m, kn, order)
   D = penalty(m$spline$ext_kn, p_order)
   m$spline$K = t(D) %*% D
-  m$spline$p_order1 = m$spline$ext_kn - p_order
-  m$spline$p_order2 = m$spline$ext_kn - p_order
+  m$spline$p_order1 = p_order
+  m$spline$p_order2 = p_order
   m$spline$y = m$y
   m$spline$lambda = lambda
   return(m)

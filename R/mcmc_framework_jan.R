@@ -30,9 +30,6 @@ mcmc = function(m, it, burning, thinning, cov)
               gamma = sample_gamma)
 
   # extract elements
-  list$beta[1, ] = m$coefficients$location
-  list$gamma[1, ] = m$coefficients$scale
-
   X = m$x
   y = m$y
   Z = m$z
@@ -41,9 +38,13 @@ mcmc = function(m, it, burning, thinning, cov)
   rk_K1 = m$ext_kn - m$p_order2
   rk_K2 = m$ext_kn - m$p_order2
 
+  list$beta[1, ] = m$coefficients$location
+  list$gamma[1, ] = m$coefficients$scale
+  list$epsilon[1] = sample.epsilon(list, K2, rk_K2, 2)
+  list$tau[1] =   sample.tau(list, K1, rk_K1, 2)
 
 
-  for (i in 1:(it + 1))
+  for (i in 2:(it))
   {
     list[[1]][i] =   sample.tau(list, K1, rk_K1, i)
     list[[2]][i, ] = sample.beta(list, X, Z, y, K1, i)
@@ -51,8 +52,8 @@ mcmc = function(m, it, burning, thinning, cov)
     list[[4]][i, ] = sample.gamma(list, X, Z, y, K2, i, ngamma, cov)
   }
 
-  list = burn(list, burning)
-  list = thin(list, thinning)
+  #list = burn(list, burning)
+  #list = thin(list, thinning)
 
   return(list)
 }
@@ -61,7 +62,7 @@ mcmc = function(m, it, burning, thinning, cov)
 sample.tau = function(list, K, rk_K, i)
 {
   # check for validity
-  beta = matrix(list$beta[i,], ncol = 1)
+  beta = matrix(list$beta[i-1,], ncol = 1)
 
   a = 1 + 1/2 * rk_K
   b = 0.0005 + 1/2 * t(beta) %*% K %*% beta
@@ -74,7 +75,7 @@ sample.tau = function(list, K, rk_K, i)
 sample.beta = function(list, X, Z, y, K, i)
 {
   # check for validity
-  gamma = matrix(list$gamma[i, ], ncol = 1)
+  gamma = matrix(list$gamma[i-1, ], ncol = 1)
   tau = list$tau[i]
 
   sigmainv = diag(drop(1 / exp((Z %*% gamma)^2)))
@@ -90,37 +91,32 @@ sample.beta = function(list, X, Z, y, K, i)
 sample.epsilon = function(list, K, rk_K, i)
 {
   # check for validity
-  gamma = matrix(list$gamma[i,], ncol = 1)
+  gamma = matrix(list$gamma[i-1,], ncol = 1)
 
   a = 1 + 1/2 * rk_K
   b = 0.0005 + 1/2 * t(gamma) %*% K %*% gamma
 
-  epsilon = 1 / rgamma(1,shape = a, scale = b)
+  epsilon = 1 / rgamma(1, shape = a, scale = b)
   return(epsilon)
 }
 
 
-slikelihood = sum(likelihood)
-summand = t(gamma) %*% K %*% gamma / (2 * epsilon)
-logp = slikelihood - summand
-
-
 sample.gamma = function(list, X, Z, y, K, i, ngamma, cov)
 {
-  gamma = matrix(list$gamma[i,], ncol = 1)
+  gamma = matrix(list$gamma[i-1,], ncol = 1)
   beta = matrix(list$beta[i,], ncol = 1)
   epsilon = list$epsilon[i]
 
-  proposal = gamma + rmvnorm(ngamma, mean = 0, cov = diag(cov, ngamma))
+  proposal = gamma + rnorm(ngamma, mean = 0, sd = cov)
 
 
 
   log_full_cond = function(gamma)
   {
     faktor1 = -sum(Z %*% gamma)
-    faktor2_helper = (y - x %*% beta) / exp(Z %*% gamma)
+    faktor2_helper = (y - X %*% beta) / exp(Z %*% gamma)
     faktor2 = -.5 * (t(faktor2_helper) %*% faktor2_helper)
-    faktor3 = -1/(2 * eps2) * t(gamma) %*% K %*% gamma * nrow(X)
+    faktor3 = -1/(2 * epsilon) * t(gamma) %*% K %*% gamma * nrow(X)
     return(faktor1 + faktor2 + faktor3)
   }
 
@@ -128,7 +124,7 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov)
   dgamma_new = sum(dnorm(proposal, mean = gamma, sd = cov, log = TRUE))
 
   logprop_ratio = dgamma_old - dgamma_new
-  logp = log_full_cond(proposal) - log_full_cond(gamma)) + logprop_ratio
+  logp = log_full_cond(proposal) - log_full_cond(gamma) + logprop_ratio
 
 
 # accept whole vector
@@ -173,14 +169,22 @@ require(lmls)
 source("R/spline/estimation.R")
 source("R/spline/init.R")
 source("R/spline/spline.R")
+set.seed(1)
 x = seq(0,10, length.out = 100)
 y = x + rnorm(100)
 m = lmls(y~x, light = F)
 m = spline_user_function(m, 10, order = 2, p_order = 2, lambda = 1)
 m = m$spline
-mcmc(m, 10, 10, 10)
+n = 10000
+lol = mcmc(m, it = n, burning = 10, thinning = 10, cov = 0.1)
 
 
+
+seq1 = seq(1, n, length.out = n)
+plot(seq1, lol$tau, type = "l")
+plot(seq1, lol$epsilon, type = "l")
+plot(seq1, lol$beta[, 1], type = "l")
+plot(seq1, lol$gamma[, 1], type = "l")
 
 
 

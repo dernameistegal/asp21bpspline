@@ -158,7 +158,7 @@ thin = function(result, thinfactor = 4)
 
 
 
-
+dnorm(c(1, 2, 3, 4), mean = c(1, 2, 3, 4), sd = 1)
 
 
 
