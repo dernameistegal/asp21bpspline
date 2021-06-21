@@ -65,7 +65,7 @@ sample.tau = function(list, K, rk_K, i)
   beta = matrix(list$beta[i-1,], ncol = 1)
 
   a = 1 + 1/2 * rk_K
-  b = 0.0005 + 1/2 * t(beta) %*% K %*% beta
+  b = 0.0005 + 1/2 * t(beta) %f*f% K %f*f% beta
 
   tau = 1 / rgamma(1, shape = a, scale = b)
   return(tau)
@@ -80,8 +80,8 @@ sample.beta = function(list, X, Z, y, K, i)
 
   sigmainv = diag(drop(1 / (exp(Z %*% gamma))^2))
 
-  cov = solve(t(X) %*% sigmainv %*% X + K / tau)
-  mean = cov %*% (t(X) %*% sigmainv %*% y)
+  cov = solve(t(X) %f*f% sigmainv %f*f% X + K / tau)
+  mean = cov %f*f% (t(X) %f*f% sigmainv %*% y)
 
   beta = rmvnorm(1, mean, cov)
   return(beta)
@@ -94,7 +94,7 @@ sample.epsilon = function(list, K, rk_K, i)
   gamma = matrix(list$gamma[i-1,], ncol = 1)
 
   a = 1 + 1/2 * rk_K
-  b = 0.0005 + 1/2 * t(gamma) %*% K %*% gamma
+  b = 0.0005 + 1/2 * t(gamma) %f*f% K %f*f% gamma
 
   epsilon = 1 / rgamma(1, shape = a, scale = b)
   return(epsilon)
@@ -113,10 +113,10 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov)
 
   log_full_cond = function(gamma)
   {
-    faktor1 = -sum(Z %*% gamma)
-    faktor2_helper = (y - X %*% beta) / exp(Z %*% gamma)
-    faktor2 = -.5 * (t(faktor2_helper) %*% faktor2_helper)
-    faktor3 = -1/(2 * epsilon) * t(gamma) %*% K %*% gamma * nrow(X)
+    faktor1 = -sum(Z %f*f% gamma)
+    faktor2_helper = (y - X %f*f% beta) / exp(Z %f*f% gamma)
+    faktor2 = -.5 * (t(faktor2_helper) %f*f% faktor2_helper)
+    faktor3 = -1/(2 * epsilon) * t(gamma) %f*f% K %f*f% gamma * nrow(X)
     return(faktor1 + faktor2 + faktor3)
   }
 
@@ -169,18 +169,22 @@ require(lmls)
 source("R/spline/estimation.R")
 source("R/spline/init.R")
 source("R/spline/spline.R")
+source("src/RcppExport.R")
+
+
 set.seed(1)
-x = seq(0,20, length.out = 500)
-y = 5*sin(x) + rnorm(500, 0,sd =1 + abs(sin(x)))
+x = seq(0,20, length.out = 300)
+y = 5 * x + rnorm(300,0, 1)
 m = lmls(y~x, scale = ~x, light = F)
-m = spline_user_function(m, c(8,15), order = c(2,2), p_order = c(6,2),
-                         smooth = c(1000,1))
+m = spline_user_function(m, c(15,15), order = c(2,2), p_order = c(3,2), smooth = c(1,1))
 
 print.spl(m, sd = 1.96)
 
 
-n = 2000
-lol = mcmc(m, it = n, burning = 50, thinning = 1, cov = 0.02)
+n = 200
+
+require(microbenchmark)
+microbenchmark(mcmc(m, it = n, burning = 50, thinning = 1, cov = 0.02) )
 
 n = length(lol$tau)
 seq1 = seq(1, n, length.out = n)
