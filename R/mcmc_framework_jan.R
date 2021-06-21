@@ -13,7 +13,7 @@ require(mvtnorm)
 
 
 
-mcmc = function(m, it, burning, thinning, cov)
+mcmc.spline = function(m, it, burning, thinning, cov)
 {
 
 
@@ -163,28 +163,31 @@ thin = function(result, thinning = 1)
   return(result)
 }
 
-
+source("src/RcppExport.R")
 source("R/spline/print_function.R")
 require(lmls)
 source("R/spline/estimation.R")
 source("R/spline/init.R")
 source("R/spline/spline.R")
-source("src/RcppExport.R")
+
 
 
 set.seed(1)
-x = seq(0,20, length.out = 300)
-y = 5 * x + rnorm(300,0, 1)
+x = seq(0,20, length.out = 600)
+y = sin(x) + rnorm(600,0, 1)
 m = lmls(y~x, scale = ~x, light = F)
-m = spline_user_function(m, c(15,15), order = c(2,2), p_order = c(3,2), smooth = c(1,1))
+m = spline_user_function(m, c(30,30), order = c(2,2), p_order = c(3,2), smooth = c(1,1))
 
 print.spl(m, sd = 1.96)
 
 
-n = 200
+n = 10000
 
 require(microbenchmark)
-microbenchmark(mcmc(m, it = n, burning = 50, thinning = 1, cov = 0.02) )
+microbenchmark(mcmc.spline(m, it = n, burning = 50, thinning = 1, cov = 0.02) )
+
+lol = mcmc.spline(m, it = n, burning = 50, thinning = 1, cov = 0.04)
+
 
 n = length(lol$tau)
 seq1 = seq(1, n, length.out = n)
@@ -209,7 +212,7 @@ fit.spline = function(beta, gamma, X)
 
 pred = fit.spline(bmean, gmean, m$loc$X)
 
-plot(x, pred$location)
+plot(x, pred$location, ylim = c(-3,3))
 points(x, y)
 lines(x, pred$location + 1.96 * pred$scale)
 lines(x, pred$location - 1.96 * pred$scale)
