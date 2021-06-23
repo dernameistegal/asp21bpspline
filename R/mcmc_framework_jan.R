@@ -10,7 +10,7 @@ cov - variance for random walk proposals for gamma
 
 "
 require(mvtnorm)
-
+require(Matrix)
 
 
 mcmc.spline = function(m, it, burning, thinning, cov)
@@ -37,6 +37,7 @@ mcmc.spline = function(m, it, burning, thinning, cov)
   K2 = m$scale$K
   rk_K1 = m$loc$ext_kn - m$p_order[1]
   rk_K2 = m$scale$ext_kn - m$p_order[2]
+  unpenalized_info = m$unpenalized_info
 
   list$beta[1, ] = m$coefficients$location
   list$gamma[1, ] = m$coefficients$scale
@@ -49,7 +50,7 @@ mcmc.spline = function(m, it, burning, thinning, cov)
     list[[1]][i] =   sample.tau(list, K1, rk_K1, i)
     list[[2]][i, ] = sample.beta(list, X, Z, y, K1, i)
     list[[3]][i] =   sample.epsilon(list, K2, rk_K2, i)
-    list[[4]][i, ] = sample.gamma(list, X, Z, y, K2, i, ngamma, cov)
+    list[[4]][i, ] = sample.gamma(list, X, Z, y, K2, i, ngamma, cov, unpenalized_info)
   }
 
   list = burn(list, burning)
@@ -101,14 +102,42 @@ sample.epsilon = function(list, K, rk_K, i)
 }
 
 
-sample.gamma = function(list, X, Z, y, K, i, ngamma, cov)
+sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
 {
   gamma = matrix(list$gamma[i-1,], ncol = 1)
   beta = matrix(list$beta[i,], ncol = 1)
   epsilon = list$epsilon[i]
+  info_gamma = unpenalized_info + 1/epsilon * K
+  chol_info_gamma = chol(info_gamma)
 
-  proposal = gamma + rnorm(ngamma, mean = 0, sd = cov)
+  ####new proposal####
+  fitted_values_scale = drop(exp(Z %*% gamma))
+  residuals = drop(y - X %*% beta)
+  score_gamma = ((residuals/fitted_values_scale)^2 - 1) %*% Z
 
+  fwd = forwardsolve(l = chol_info_gamma,
+                       x = t(score_gamma) - 1/epsilon * (K %*% gamma),
+                       upper.tri = TRUE, transpose = TRUE)
+  step = backsolve(r = chol_info_gamma, x = fwd)
+
+  mean_sampler <- gamma + step
+  proposal <- drop(rmvnorm(1, mean_sampler, solve(info_gamma)))
+
+  forward <- dmvnorm(proposal, mean_sampler, solve(info_gamma), log = TRUE)
+
+  ##backward probability
+  fitted_values_scale = drop(exp(Z %*% proposal))
+  residuals = drop(y - X %*% beta)
+  score_proposal = ((residuals/fitted_values_scale)^2 - 1) %*% Z
+
+  fwd = forwardsolve(l = chol_info_gamma,
+                     x = t(score_proposal) - 1/epsilon * (K %*% proposal),
+                     upper.tri = TRUE, transpose = TRUE)
+  step = backsolve(r = chol_info_gamma, x = fwd)
+
+  mean_sampler_proposal <- proposal + step
+  backward <- dmvnorm(drop(gamma), mean_sampler_proposal, solve(info_gamma), log = TRUE)
+  ########
 
 
   log_full_cond = function(gamma)
@@ -120,11 +149,8 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov)
     return(faktor1 + faktor2 + faktor3)
   }
 
-  dgamma_old = sum(dnorm(gamma, mean = proposal, sd = cov, log = TRUE))
-  dgamma_new = sum(dnorm(proposal, mean = gamma, sd = cov, log = TRUE))
 
-  logprop_ratio = dgamma_old - dgamma_new
-  logp = log_full_cond(proposal) - log_full_cond(gamma) + logprop_ratio
+  logp = log_full_cond(proposal) - log_full_cond(gamma) + backward - forward
 
 
 # accept whole vector
@@ -181,12 +207,15 @@ m = spline_user_function(m, c(30,30), order = c(2,2), p_order = c(3,2), smooth =
 print.spl(m, sd = 1.96)
 
 
-n = 10000
+n = 100
 
-require(microbenchmark)
-microbenchmark(mcmc.spline(m, it = n, burning = 50, thinning = 1, cov = 0.02) )
+#require(microbenchmark)
+#microbenchmark(mcmc.spline(m, it = n, burning = 50, thinning = 1, cov = 0.02) )
 
+a = Sys.time()
 lol = mcmc.spline(m, it = n, burning = 50, thinning = 1, cov = 0.04)
+b = Sys.time()
+b-a
 
 
 n = length(lol$tau)
@@ -216,7 +245,6 @@ plot(x, pred$location, ylim = c(-3,3))
 points(x, y)
 lines(x, pred$location + 1.96 * pred$scale)
 lines(x, pred$location - 1.96 * pred$scale)
-
 
 
 

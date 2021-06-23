@@ -46,8 +46,8 @@ init_beta = function(m)
 
 init_gamma = function(m)
 {
+  m$unpenalized_info = info_gamma(m)
   m$chol_info_gamma = chol(info_gamma(m) + m$smooth[2] * m$scale$K)
-  m$penalized_info = info_gamma(m) - m$smooth[2] * m$scale$K
   fit = leastsquares(m$scale$Z, m$scale$K, 0.6351814 + log(abs(m$residuals$location)),
                      m$smooth[2])
   m$coefficients$scale = coef(fit)
