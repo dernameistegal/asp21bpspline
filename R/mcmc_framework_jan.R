@@ -145,13 +145,13 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
     faktor1 = -sum(Z %f*f% gamma)
     faktor2_helper = (y - X %f*f% beta) / exp(Z %f*f% gamma)
     faktor2 = -.5 * (t(faktor2_helper) %f*f% faktor2_helper)
-    faktor3 = -1/(2 * epsilon) * t(gamma) %f*f% K %f*f% gamma * nrow(X)
+    faktor3 = -1/(2 * epsilon) * t(gamma) %f*f% K %f*f% gamma #* nrow(X)
     return(faktor1 + faktor2 + faktor3)
   }
 
 
   logp = log_full_cond(proposal) - log_full_cond(gamma) + backward - forward
-
+  print(c(optim(gamma,log_full_cond, control=list(fnscale=-1))$value,log_full_cond(proposal), log_full_cond(gamma)))
 
 # accept whole vector
 accept = logp > log(runif(1))
@@ -199,8 +199,8 @@ source("R/spline/spline.R")
 
 
 set.seed(1)
-x = seq(0,20, length.out = 600)
-y = sin(x) + rnorm(600,0, 1)
+x = seq(0,20, length.out = 2000)
+y = sin(x) + rnorm(2000,0, 1)
 m = lmls(y~x, scale = ~x, light = F)
 m = spline_user_function(m, c(30,30), order = c(2,2), p_order = c(3,2), smooth = c(1,1))
 
