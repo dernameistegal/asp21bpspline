@@ -79,10 +79,10 @@ sample.beta = function(list, X, Z, y, K, i)
   gamma = matrix(list$gamma[i-1, ], ncol = 1)
   tau = list$tau[i]
 
-  sigmainv = diag(drop(1 / (exp(Z %*% gamma))^2))
+  sigmainv = diag(drop(1 / (exp(Z %f*f% as.matrix(gamma)))^2))
 
   cov = solve(t(X) %f*f% sigmainv %f*f% X + K / tau)
-  mean = cov %f*f% (t(X) %f*f% sigmainv %*% y)
+  mean = cov %f*f% (t(X) %f*f% sigmainv %f*f% as.matrix(y))
 
   beta = rmvnorm(1, mean, cov)
   return(beta)
@@ -111,12 +111,12 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
   chol_info_gamma = chol(info_gamma)
 
   ####new proposal####
-  fitted_values_scale = drop(exp(Z %*% gamma))
-  residuals = drop(y - X %*% beta)
-  score_gamma = ((residuals/fitted_values_scale)^2 - 1) %*% Z
+  fitted_values_scale = drop(exp(Z %f*f% as.matrix(gamma)))
+  residuals = drop(y - X %f*f% as.matrix(beta))
+  score_gamma = t((residuals/fitted_values_scale)^2 - 1) %f*f% Z
 
   fwd = forwardsolve(l = chol_info_gamma,
-                       x = t(score_gamma) - 1/epsilon * (K %*% gamma),
+                       x = t(score_gamma) - 1/epsilon * (K %f*f% as.matrix(gamma)),
                        upper.tri = TRUE, transpose = TRUE)
   step = backsolve(r = chol_info_gamma, x = fwd)
 
@@ -126,12 +126,12 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
   forward <- dmvnorm(proposal, mean_sampler, solve(info_gamma), log = TRUE)
 
   ##backward probability
-  fitted_values_scale = drop(exp(Z %*% proposal))
-  residuals = drop(y - X %*% beta)
-  score_proposal = ((residuals/fitted_values_scale)^2 - 1) %*% Z
+  fitted_values_scale = drop(exp(Z %f*f% as.matrix(proposal)))
+  residuals = drop(y - X %f*f% as.matrix(beta))
+  score_proposal = t((residuals/fitted_values_scale)^2 - 1) %f*f% Z
 
   fwd = forwardsolve(l = chol_info_gamma,
-                     x = t(score_proposal) - 1/epsilon * (K %*% proposal),
+                     x = t(score_proposal) - 1/epsilon * (K %f*f% as.matrix(proposal)),
                      upper.tri = TRUE, transpose = TRUE)
   step = backsolve(r = chol_info_gamma, x = fwd)
 
@@ -145,13 +145,13 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
     faktor1 = -sum(Z %f*f% gamma)
     faktor2_helper = (y - X %f*f% beta) / exp(Z %f*f% gamma)
     faktor2 = -.5 * (t(faktor2_helper) %f*f% faktor2_helper)
-    faktor3 = -1/(2 * epsilon) * t(gamma) %f*f% K %f*f% gamma #* nrow(X)
+    faktor3 = -1/(2 * epsilon) * t(gamma) %f*f% K %f*f% gamma
     return(faktor1 + faktor2 + faktor3)
   }
 
 
   logp = log_full_cond(proposal) - log_full_cond(gamma) + backward - forward
-  print(c(optim(gamma,log_full_cond, control=list(fnscale=-1))$value,log_full_cond(proposal), log_full_cond(gamma)))
+  print(c(optim(gamma,log_full_cond, control=list(fnscale=-1))$value,log_full_cond(proposal), log_full_cond(gamma), log_full_cond(proposal) >log_full_cond(gamma) ))
 
 # accept whole vector
 accept = logp > log(runif(1))
@@ -189,6 +189,7 @@ thin = function(result, thinning = 1)
   return(result)
 }
 
+
 source("src/RcppExport.R")
 source("R/spline/print_function.R")
 require(lmls)
@@ -199,8 +200,10 @@ source("R/spline/spline.R")
 
 
 set.seed(1)
-x = seq(0,20, length.out = 2000)
-y = sin(x) + rnorm(2000,0, 1)
+#x = seq(0,20, length.out = 600)
+x = sort(runif(500, 0,20))
+y =  (x-10) * rnorm(500,0, 1) + x + (x-10)^2/100 *  rnorm(500,0, 1) #da funktioniert es nicht... backward un und forward, sind dann sehr stark voneinander verschieden. Daher wird nie angenommen
+#y =  sin(x) + rnorm(500,0, 1) + x
 m = lmls(y~x, scale = ~x, light = F)
 m = spline_user_function(m, c(30,30), order = c(2,2), p_order = c(3,2), smooth = c(1,1))
 
@@ -219,6 +222,7 @@ b-a
 
 
 n = length(lol$tau)
+#seq1 = seq(1, n, length.out = n)
 seq1 = seq(1, n, length.out = n)
 plot(seq1, lol$tau, type = "l")
 plot(seq1, lol$epsilon, type = "l")
@@ -233,20 +237,19 @@ fit.spline = function(beta, gamma, X)
 {
 
 
-  location = X %*% beta
-  scale = exp(X %*% gamma)
+  location = X %f*f% as.matrix(beta)
+  scale = exp(X %f*f% as.matrix(gamma))
   return(list(location = location, scale =  scale))
 }
 
 
 pred = fit.spline(bmean, gmean, m$loc$X)
 
-plot(x, pred$location, ylim = c(-3,3))
+plot(x, pred$location)
 points(x, y)
 lines(x, pred$location + 1.96 * pred$scale)
 lines(x, pred$location - 1.96 * pred$scale)
 
 
-
-
+sqrt(31^2 + 18^2) / 2.54
 
