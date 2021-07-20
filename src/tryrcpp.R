@@ -1,6 +1,5 @@
 require(Rcpp)
 library(RcppEigen)
-.libPaths(c(.libPaths(), "C:/Users/Jan Schneider/AppData/Local/Temp/RtmpojvPKp/downloaded_packages"))
 sourceCpp("rcpptest.cpp")
 
 
