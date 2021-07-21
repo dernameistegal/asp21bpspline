@@ -1,0 +1,36 @@
+"
+Input spline user function
+m       LSLM          Objekt
+x       float         Wert der erklärenden Variable
+y       float         Wert der zu erklärenden Variable
+kn      integer       Zahl der Knoten die verwendet werden soll
+order   integer       Grad der verwendeten B-Splines
+lambda  float         Welcher order gehört die Penalization an
+p_order integer       Wie stark sollen die Parameter geglättet werden
+
+optional 
+range 2 float vector  Von wo bis wo soll simuliert werden
+"
+
+spline user function    => initialisation
+                        => estimation
+                        => output
+
+
+initialisation
+Modelmatrix erstellen
+Hilfsvariablen erstellen (Range, extended knots)
+
+
+Estimation
+estimate sigma^2 and mu parameters
+
+
+Output 
+bis jetzt undefinierte print funktionen
+
+
+Verbindung zum LSLM Paket
+Estimation procedures werden genutzt
+Ein LSLM Objekt kann übergeben werden
+
