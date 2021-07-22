@@ -156,9 +156,6 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
 
 
   logp = log_full_cond(proposal) - log_full_cond(gamma) + backward - forward
-  print(c(optim(gamma,log_full_cond, control=list(fnscale=-1))$value,
-                log_full_cond(proposal),
-                log_full_cond(gamma), log_full_cond(proposal) >log_full_cond(gamma) ))
 
 # accept whole vector
 accept = logp > log(runif(1))
