@@ -1,28 +1,16 @@
-Package: lmls
-Title: Gaussian Location-Scale Regression
-Version: 0.0.0.9000
-Authors@R: person("Hannes", "Riebl", email = "hriebl@uni-goettingen.de",
-                  role = c("aut", "cre"))
-Description: The Gaussian location-scale regression model is a multi-predictor
-    model with explanatory variables for the mean (= location) and the standard
-    deviation (= scale) of a response variable. This package implements maximum
-    likelihood and Markov chain Monte Carlo (MCMC) inference, a parametric
-    bootstrap algorithm, and diagnostic plots for the model class.
-Depends: R (>= 3.5.0)
-Imports: generics (>= 0.1.0)
-Suggests:
-    bookdown,
-    ggplot2,
-    knitr,
-    mvtnorm,
-    numDeriv,
-    patchwork,
-    rmarkdown,
-    testthat (>= 3.0.0)
+Package: asp21bpspline
+Type: Package
+Title: Bayesian P Splines for Location Scale Regression
+Version: 1.0
+Date: 2021-07-24
+Author: Valentin, Jonathan, Jan
+Maintainer: Who to complain to <yourfault@somewhere.net>
+Description: Work in Progress. This description is not yet written.
 License: MIT + file LICENSE
-Encoding: UTF-8
-LazyData: true
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
-VignetteBuilder: knitr
-Config/testthat/edition: 3
+Imports: Rcpp (>= 1.0.7),
+         RcppEigen,
+         generics (>= 0.1.0),
+         mvtnorm,
+         lmls, 
+         ggplot2
+LinkingTo: Rcpp, RcppEigen

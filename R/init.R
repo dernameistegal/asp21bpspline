@@ -21,6 +21,7 @@ initialisation = function(m, kn, p_order, order, smooth)
   m$spline$smooth = smooth
 
   m = m$spline
+  class(m) = "spline"
   return(m)
 }
 
