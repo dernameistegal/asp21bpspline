@@ -14,3 +14,4 @@ Imports: Rcpp (>= 1.0.7),
          lmls, 
          ggplot2
 LinkingTo: Rcpp, RcppEigen
+RoxygenNote: 7.1.1
