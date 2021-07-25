@@ -1,5 +1,52 @@
+print.spline <- function(m, digits = max(3, getOption("digits") - 3), ...) {
+  cat(
+    "\nCall:\n",
+    #paste(deparse(m$call), sep = "\n", collapse = "\n"),
+    "\n\n",
+    sep = ""
+  )
+  
+  if (length(coef(m)$location)) 
+  {
+    cat("Location coefficients:\n")
+    
+    print.default(
+      x = format(coef(m)$location, digits = digits),
+      print.gap = 2,
+      quote = FALSE
+    )
+  }
+  
+  else 
+  {
+    cat("No location coefficients\n")
+  }
+  
+  cat("\n")
+  
+  if (length(coef(m)$scale)) 
+  {
+    cat("Scale coefficients:\n")
+    
+    print.default(
+      x = format(coef(m)$scale, digits = digits),
+      print.gap = 2,
+      quote = FALSE
+    )
+  } 
+  
+  else 
+  {
+    cat("No scale coefficients\n")
+  }
+  
+  cat("\n")
+  invisible(m)
+}
+
+
 #Hier müssen noch x und y richtig definiert werden für den scatterplot
-print.spline <- function(m, sd = 1.96)
+plot.spline <- function(m, sd = 1.96)
 {
   data = data.frame(x = m$formerx, y = m$y,
                     ypred = m[["fitted.values"]]$location,
@@ -13,20 +60,16 @@ print.spline <- function(m, sd = 1.96)
     xlab("explaining variable")
 }
 
-predict.spline = function(beta, gamma, X)
+predict.spline = function(m, X, Z)
 {
-  
+  beta = m$coefficients$location
+  gamma = m$coefficients$scale
   
   location = X %f*f% as.matrix(beta)
-  scale = exp(X %f*f% as.matrix(gamma))
+  scale = exp(Z %f*f% as.matrix(gamma))
   return(list(location = location, scale =  scale))
 }
 
-plot.spline = function(model, par)
-{
-  #todo
-  return()
-}
 
 
 summary.spline = function(model, par)
@@ -37,10 +80,15 @@ summary.spline = function(model, par)
 
 
 
-plot.mcmcspline = function(model, par)
+plot.mcmcspline = function(m, sample, sd = 1.96)
 {
-  #todo
-  return()
+  m$coefficients$location = colMeans(sample$beta)
+  m$coefficients$scale = colMeans(sample$gamma)
+  
+  temp = predict.spline(m, m$loc$X, m$scale$Z)
+  m[["fitted.values"]]$location = temp[[1]]
+  m[["fitted.values"]]$scale = temp[[2]]
+  plot.spline(m)
 }
 
 
