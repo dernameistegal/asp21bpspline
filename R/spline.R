@@ -35,7 +35,7 @@
 spline = function(m, kn, order, p_order, smooth)
 {
   m = initialisation(m, kn, p_order, order, smooth)
-  m = estimation(m = m, maxit = 20)
+  m = estimation(m = m, maxit = 100)
   #m = output()
   return(m)
 

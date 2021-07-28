@@ -10,5 +10,5 @@ S3method(plot, spline)
 S3method(print, spline) # merge with plot
 S3method(summary, spline)
 
-S3method(plot, mcmcspline)
+export("plot.mcmcspline")
 S3method(summary, mcmcspline)

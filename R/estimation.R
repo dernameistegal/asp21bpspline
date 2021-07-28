@@ -1,5 +1,3 @@
-library(lmls)
-
 # Fisher Scoring Algorithm
 
 estimation = function(m, maxit = 100, reltol = sqrt(.Machine$double.eps))
