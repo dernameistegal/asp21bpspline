@@ -1,3 +1,13 @@
+#' print method for spline objects
+#'
+#' @param m 
+#' @param digits 
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' 
 print.spline <- function(m, digits = max(3, getOption("digits") - 3), ...) {
   cat(
     "\nCall:\n",
@@ -45,7 +55,15 @@ print.spline <- function(m, digits = max(3, getOption("digits") - 3), ...) {
 }
 
 
-#Hier müssen noch x und y richtig definiert werden für den scatterplot
+#' plot method for spline objects
+#'
+#' @param m 
+#' @param sd
+#'
+#' @return
+#' @export
+#'
+#' 
 plot.spline <- function(m, sd = 1.96)
 {
   data = data.frame(x = m$formerx, y = m$y,
@@ -60,6 +78,17 @@ plot.spline <- function(m, sd = 1.96)
     xlab("explaining variable")
 }
 
+
+#' predict method for spline objects
+#'
+#' @param m 
+#' @param X 
+#' @param Z 
+#'
+#' @return
+#' @export
+#'
+#' 
 predict.spline = function(m, X, Z)
 {
   beta = m$coefficients$location
@@ -71,7 +100,15 @@ predict.spline = function(m, X, Z)
 }
 
 
-
+#' summary method for spline objects
+#'
+#' @param model 
+#' @param par 
+#'
+#' @return
+#' @export
+#'
+#' 
 summary.spline = function(model, par)
 {
   #todo
@@ -79,19 +116,53 @@ summary.spline = function(model, par)
 }
 
 
-
-plot.mcmcspline = function(m, sample, sd = 1.96)
+#' predict method for spline objects
+#'
+#' @param m 
+#' @param sample 
+#'
+#' @return
+#' @export
+#'
+#' 
+predict.mcmcspline = function(m, sample)
 {
   m$coefficients$location = colMeans(sample$beta)
   m$coefficients$scale = colMeans(sample$gamma)
   
-  temp = predict.spline(m, m$loc$X, m$scale$Z)
-  m[["fitted.values"]]$location = temp[[1]]
-  m[["fitted.values"]]$scale = temp[[2]]
-  plot.spline(m)
+  return(predict.spline(m, m$loc$X, m$scale$Z))
 }
 
 
+
+#' plot function for MCMC samples of a spline model
+#'
+#' @param m 
+#' @param sample 
+#' @param sd 
+#'
+#' @return
+#' @export
+#'
+#' 
+plot.mcmcspline = function(m, sample)
+{
+  predict.mcmcspline(m, sample)
+  m[["fitted.values"]]$location = temp[[1]]
+  m[["fitted.values"]]$scale = temp[[2]]
+  plot.spline(m, sd =  1.96)
+}
+
+
+#' summary method for MCMC samples of a spline model
+#'
+#' @param m 
+#' @param par 
+#'
+#' @return
+#' @export
+#'
+#' 
 summary.mcmcspline = function(model, par)
 {
   #todo

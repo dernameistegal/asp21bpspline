@@ -12,7 +12,7 @@
 #' @export
 #'
 #'
-mcmc.spline = function(m, it, burning, thinning, cov)
+mcmc.spline = function(m, it, burning, thinning)
 {
 
 
