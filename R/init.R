@@ -29,7 +29,7 @@ initialisation = function(m, kn, p_order, order, smooth)
 basis_generation = function(X, kn, order, lmls = T)
 {
   # removing superfluous intercept
-  if (all(X[,1] == 1))
+  if (!is.null(dim(X)) & all(X[,1] == 1))
   {
     X = X[,-1]
   }
@@ -60,6 +60,12 @@ penalty = function(kn, p_order = 2)
     D = ones + nones
     return(ones + nones)
   }
+  
+  if (p_order == 0)
+  {
+    return(matrix(0, ncol = kn, nrow = kn))
+  }
+  
 
   # recursive definition of prerequisite for penalty matrix
   D = penalty(kn, 1)[1:(kn - p_order), 1:(kn - p_order + 1)]

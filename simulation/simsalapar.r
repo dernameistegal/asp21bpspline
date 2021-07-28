@@ -1,17 +1,35 @@
+require(simsalapar)
+require(asp21bpspline)
 
 
-require("simsalapar")
-varList <- varlist(
-  n.sim = list(type = "N", expr = quote(N[sim]), value = 32),
-  n = list(type = "grid", value = c(64, 256)),
-  d = list(type = "grid", value = c(5, 20, 100, 500)),
-  varWgts = list(type = "frozen", expr = quote(bold(w)),
-                 value = list("5" = 1, "20" = 1, "100" = 1, "500" = 1)),
-  qF = list(type = "frozen", expr = quote(F^{-1}),
-              value = list(qF = qnorm)),
-  family = list(type = "grid", expr = quote(C),
-                  value = c("Clayton", "Gumbel")),
-  tau = list(type = "grid", value = c(0.25, 0.5)),
-  alpha = list(type = "inner", value = c(0.95, 0.99, 0.999)))
+beta = read.csv("simulation/beta_sim1")
+gamma = read.csv("simulation/gamma_sim1")
 
-toLatex(varList, label = "tab:var", caption = "Variables which determine our simulation study.")
+simulation1 =  varlist(
+  n.sim = list(type = "N", expr = quote(N[sim]), value = 10),
+  n = list(type = "frozen", value = 1000),
+  its = list(type = "frozen", value = 1000),
+  beta = list(type = "frozen", value = beta),
+  gamma = list(type = "frozen", value = gamma),
+  knots = list(type = "frozen", value = 15),
+  order = list(type = "grid", value = rbind(c(3, 3), c(2, 2))),
+  p_order = list(type = "frozen", value = c(0, 0)),
+  smooth =  list(type = "frozen", value = c(1, 1))
+  
+  )
+
+doOne = function(n, its, beta, gamma, knots, order, p_order, smooth)
+{
+  x = runif(n, 0, 10)
+  y = predict.spline(m)
+  m = list(x = x, z = x, y = y)
+  model = spline(m, kn = knots, order = order, p_order = p_order, smooth = smooth)
+  dloc = sum((model$coefficients$location - beta)^2)
+  dscale = sum((model$coefficients$scale - gamma)^2)
+  ls = list(loc = dloc, scale = dscale)
+  return(ls)
+}
+
+doOne(1000, its = 1, beta, gamma, c(15,15), c(3,3), c(0,0), c(1,1))
+
+res = doLapply(simulation1, sfile = "simulation/simtest", doOne = doOne)
