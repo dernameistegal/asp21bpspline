@@ -14,6 +14,7 @@
 #'
 mcmc.spline = function(m, it, burning, thinning)
 {
+  pb = txtProgressBar(min = 0, max = it, style = 3)
 
 
   nbeta = length(m$coefficients$location)
@@ -50,8 +51,10 @@ mcmc.spline = function(m, it, burning, thinning)
     list[[2]][i, ] = sample.beta(list, X, Z, y, K1, i)
     list[[3]][i] =   sample.epsilon(list, K2, rk_K2, i)
     list[[4]][i, ] = sample.gamma(list, X, Z, y, K2, i, ngamma, cov, unpenalized_info)
+    setTxtProgressBar(pb, i)
   }
-
+  
+  close(pb)
   list = burn(list, burning)
   list = thin(list, thinning)
 
