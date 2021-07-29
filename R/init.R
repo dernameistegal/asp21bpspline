@@ -39,7 +39,7 @@ basis_generation = function(X, kn, order, lmls = T)
   formerx = X
 
   ext_kn = kn - 1 + order
-  mat = data.frame(matrix(0, nrow = length(x), ncol = ext_kn))
+  mat = data.frame(matrix(0, nrow = length(X), ncol = ext_kn))
   range = range(X)
 
   # applying basis function to every element
