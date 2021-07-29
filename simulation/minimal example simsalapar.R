@@ -7,6 +7,9 @@ simulation1 =  varlist(
   nvars = list(type = "grid", value = c(1, 2))
 )
 
+toLatex(simulation1)
+mkGrid(simulation1)
+
 
 doOne = function(n, nvars)
 {

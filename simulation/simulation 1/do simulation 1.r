@@ -2,23 +2,19 @@ require(simsalapar)
 require(asp21bpspline)
 
 
-beta = read.csv("simulation/beta_sim1")
-gamma = read.csv("simulation/gamma_sim1")
+beta = read.csv("simulation/simulation 1/beta_sim1")
+gamma = read.csv("simulation/simulation 1/gamma_sim1")
 
 simulation1 =  varlist(
-  n.sim = list(type = "N", expr = quote(N[sim]), value = 100),
-  n = list(type = "grid", value = c(100, 500, 1000)),
-  its = list(type = "frozen", value = 1000),
+  n.sim = list(type = "N", expr = quote(N[sim]), value = 1000),
+  n = list(type = "grid", value = 1000),
   beta = list(type = "frozen", expr = quote(beta), value = beta),
   gamma = list(type = "frozen", expr = quote(gamma), value = gamma),
   knots = list(type = "frozen", value = c(15, 15)),
   order = list(type = "frozen", value = c(3, 3)),
   p_order = list(type = "frozen", value = c(0,0)),
-  smooth =  list(type = "frozen", value = c(0,0))
-  )
+  smooth =  list(type = "frozen", value = c(0,0)))
 
-toLatex(simulation1)
-mkGrid(simulation1)
 
 doOne = function(n, beta, gamma, knots, order, p_order, smooth)
 { 
@@ -50,7 +46,7 @@ doOne(n = 1000, beta, gamma, knots = c(15, 15), order = c(3, 3),
       p_order = c(0,0), smooth = c(0,0))
 
 a = Sys.time()
-res10 = doLapply(simulation1, doOne = doOne)
+res10 = doLapply(simulation1, sfile = "simulation/simulation1/take 1", doOne = doOne)
 b = Sys.time()
 b-a
 
