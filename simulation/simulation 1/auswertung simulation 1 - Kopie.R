@@ -1,7 +1,7 @@
 library(simsalapar)
 
 simulation1 =  varlist(
-  n.sim = list(type = "N", expr = quote(N[sim]), value = 1000),
+  n.sim = list(type = "N", expr = quote(N[sim]), value = 10),
   n = list(type = "grid", value = 1000),
   beta = list(type = "frozen", expr = quote(beta), value = beta),
   gamma = list(type = "frozen", expr = quote(gamma), value = gamma),
@@ -12,7 +12,7 @@ simulation1 =  varlist(
 
 
 
-res10 = maybeRead("simulation/simulation 1/take_1")
+res10 = maybeRead("simulation/simulation 1/take_2")
 beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
 
@@ -22,8 +22,8 @@ betares = matrix(0, nrow = 17, ncol = n)
 gammares = matrix(0, nrow = 17, ncol = n)
 for (i in 1:n)
 {
-  betares[,i] = res10[[i]]$value[,1]
-  gammares[,i] = res10[[i]]$value[,2]
+  betares[,i] = res10[[i]]$value[,3]
+  gammares[,i] = res10[[i]]$value[,4]
 }
 meanbeta = rowSums(betares) / n
 meangamma = rowSums(gammares) / n
@@ -48,8 +48,4 @@ SEgamma = sqrt(rowSums(sop) / (n * n -1))
 
 data.frame(bias = biasbeta, SE = SEbeta)
 data.frame(bias = biasgamma, SE = SEgamma)
-colMeans(biasbeta)
-colMeans(biasgamma)
-mean(SEbeta)
-mean(SEgamma)
 
