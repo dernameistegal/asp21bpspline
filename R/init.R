@@ -4,6 +4,7 @@ initialisation = function(m, kn, p_order, order, smooth)
   templist = basis_generation(m$x, kn[1], order[1])
   m$spline$loc$X = templist$X
   m$spline$loc$ext_kn = templist$ext_kn
+  m$spline$formerx = templist$formerx
   D = penalty(m$spline$loc$ext_kn, p_order[1])
   m$spline$loc$K = t(D) %*% D
 
@@ -11,13 +12,12 @@ initialisation = function(m, kn, p_order, order, smooth)
   templist = basis_generation(m$z, kn[2], order[2])
   m$spline$scale$Z = templist$X
   m$spline$scale$ext_kn = templist$ext_kn
+  m$spline$formerz = m$formerx
   D = penalty(m$spline$scale$ext_kn, p_order[2])
   m$spline$scale$K = t(D) %*% D
 
   m$spline$p_order = p_order
   m$spline$y = m$y
-  m$spline$formerx = m$x[, -1]
-  m$spline$formerz = m$z[, -1]
   m$spline$smooth = smooth
 
   m = m$spline
@@ -29,11 +29,14 @@ initialisation = function(m, kn, p_order, order, smooth)
 basis_generation = function(X, kn, order, lmls = T)
 {
   # removing superfluous intercept
-  if (!is.null(dim(X)) & all(X[,1] == 1))
+  if (!is.null(dim(X)))
   {
-    X = X[,-1]
+    if (all(X[,1] == 1))
+    {
+      X = X[,-1]
+    }
   }
-
+  formerx = X
 
   ext_kn = kn - 1 + order
   mat = data.frame(matrix(0, nrow = length(x), ncol = ext_kn))
@@ -47,7 +50,7 @@ basis_generation = function(X, kn, order, lmls = T)
 
   X = model.matrix(~ . - 1, data = mat)
 
-  return(list(X = X, ext_kn = ext_kn))
+  return(list(X = X, ext_kn = ext_kn, formerx = formerx))
 }
 
 
