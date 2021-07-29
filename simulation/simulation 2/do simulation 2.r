@@ -2,61 +2,46 @@ require(simsalapar)
 require(asp21bpspline)
 
 
-beta = read.csv("simulation/simulation 1/beta_sim1")
-gamma = read.csv("simulation/simulation 1/gamma_sim1")
+rsimu2data <- function(n){
+  x = seq(0,20, length.out = n)
+  mean = -0.0004*x^4 + 0.005* x^3 - 0.05*x^2 + 2*x + 6*sin(x)
+  y =  mean + rnorm(n, 0, 0.5*(1 + x - (1/20) * x^2 + abs(3 - 1/10 * x)))
+  return(list(x = x , y = y))
+}
 
-simulation1 =  varlist(
+simulation2 =  varlist(
   n.sim = list(type = "N", expr = quote(N[sim]), value = 10),
   n = list(type = "grid", value = 1000),
   it = list(type = "frozen", value = 1000),
-  beta = list(type = "frozen", expr = quote(beta), value = beta),
-  gamma = list(type = "frozen", expr = quote(gamma), value = gamma),
-  knots = list(type = "frozen", value = c(15, 15)),
+  knots = list(type = "frozen", value = c(20,20)),
   order = list(type = "frozen", value = c(3, 3)),
-  p_order = list(type = "frozen", value = c(0,0)),
+  p_order = list(type = "frozen", value = c(2,2)),
   smooth =  list(type = "frozen", value = c(0,0)))
 
 
-doOne = function(n,it, beta, gamma, knots, order, p_order, smooth)
+doOne = function(n,it, knots, order, p_order, smooth)
 { 
-  # generate sample
-  x = runif(n, 0, 10)
-  x = sort(x)
-  y = x + rnorm(n)
-  
-  m = list()
-  class(m) = "spline"
-
-  # sample from the spline model
-  m$coefficients$location = beta
-  m$coefficients$scale = gamma
-  m$loc$knots = knots[1]
-  m$loc$order = order[1]
-  m$scale$knots= knots[2]
-  m$scale$order = order[1]
-  
-  pred = predict(m, x, x)
-  y = pred$location + rnorm(n, 0, pred$scale)
-  m1 = list(x = x, z = x, y = y)
-  
+  data <- rsimu2data(n)
+  m1 = list(x = data$x, z = data$x, y = data$y)
   
   # estimate parameters
-  model = spline(m1, knots, order = order, p_order = p_order, smooth = smooth)
+  model = spline(m = m1, kn = knots, order = order, p_order = p_order, smooth = smooth)
   loc = model$coefficients$location 
   scale = model$coefficients$scale 
   
   
-  model = mcmc.spline(model, it = it, burning = 1, thinning = 1)
+  model = mcmc.spline(model, it = it, burning = 200, thinning = 10)
   locmcmc = colMeans(model$beta)
   scalemcmc = colMeans(model$gamma)
-  return(cbind(loc, scale, locmcmc, scalemcmc))
+  return_stuff = cbind(loc, scale, locmcmc, scalemcmc)
+  colnames(return_stuff) = c("loc", "scale", "locmcmc", "scalemcmc")
+  return(return_stuff)
 }
 
-doOne(n = 1000, it = 1000, beta, gamma, knots = c(15, 15), order = c(3, 3), 
-      p_order = c(0,0), smooth = c(0,0))
+doOne(n = 100, it = 1000, knots = c(15, 15), order = c(3, 3),
+     p_order = c(2,2), smooth = c(0,0))
 
-a = Sys.time()
-res10 = doLapply(simulation1, sfile = "simulation/simulation 1/take_2", doOne = doOne)
-b = Sys.time()
-b-a
+
+res10 = doLapply(simulation2, sfile = "simulation/simulation 2/take_2", doOne = doOne, monitor = T)
+
 
