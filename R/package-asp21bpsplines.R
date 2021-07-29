@@ -5,7 +5,7 @@
 #' 
 #' 
 #' @docType package
-#' @name asp21bpsline
+#' @name asp21bpspline
 #' 
 #' 
 #' @useDynLib asp21bpspline
