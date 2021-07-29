@@ -82,17 +82,25 @@ plot.spline <- function(m, sd = 1.96)
 #' predict method for spline objects
 #'
 #' @param m 
-#' @param X 
-#' @param Z 
+#' @param X vector of new x values 
+#' @param Z vector of new z values
+#' @param isDesignmatrix Indication whether X and Z are already spline matrices
 #'
 #' @return
 #' @export
 #'
 #' 
-predict.spline = function(m, X, Z)
+predict.spline = function(m, X, Z, isDesignmatrix = F)
 {
   beta = m$coefficients$location
   gamma = m$coefficients$scale
+  
+  if (!isDesignmatrix)
+  {
+    X = basis_generation(X, m$loc$knots, m$loc$order)$X
+    Z = basis_generation(Z, m$scale$knots, m$scale$order)$X
+  }
+
   
   location = X %f*f% as.matrix(beta)
   scale = exp(Z %f*f% as.matrix(gamma))
@@ -130,7 +138,7 @@ predict.mcmcspline = function(m, sample)
   m$coefficients$location = colMeans(sample$beta)
   m$coefficients$scale = colMeans(sample$gamma)
   
-  return(predict.spline(m, m$loc$X, m$scale$Z))
+  return(predict.spline(m, m$loc$X, m$scale$Z, isDesignmatrix = T))
 }
 
 
@@ -147,7 +155,7 @@ predict.mcmcspline = function(m, sample)
 #' 
 plot.mcmcspline = function(m, sample)
 {
-  predict.mcmcspline(m, sample)
+  temp = predict.mcmcspline(m, sample)
   m[["fitted.values"]]$location = temp[[1]]
   m[["fitted.values"]]$scale = temp[[2]]
   plot.spline(m, sd =  1.96)
