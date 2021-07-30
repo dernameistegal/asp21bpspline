@@ -319,7 +319,7 @@ y = 5*sin(x) + rnorm(500, 0,sd =1 + (sin(x)))
 
 # fit spline and run mcmc
 m = lmls(y ~ x, scale = ~x, light = FALSE)
-m_spline = spline(m, kn = c(55,55), order = c(3,3), p_order = c(8,8), smooth = c(1000,1000))
+m_spline = spline(m, kn = c(55,55), order = c(3,3), p_order = c(1,1), smooth = c(1,1))
 plot(m_spline)
 mcmc_m_spline = mcmc.spline(m_spline, it = 1500, burning = 400, thinning = 10)
 
