@@ -346,7 +346,7 @@ y =  (x-10) * rnorm(500,0, 1) + x + (x-10)^2/100 *  rnorm(500,0, 1) #da funktion
 
 # fit spline and run mcmc
 m = lmls(y ~ x, scale = ~x, light = FALSE)
-m_spline = spline(m, kn = c(55,55), order = c(10,10), p_order = c(20,20), smooth = c(1,1))
+m_spline = spline(m, kn = c(55,55), order = c(5,5), p_order = c(15,15), smooth = c(1,1))
 plot(m_spline)
 mcmc_m_spline = mcmc.spline(m_spline, it = 1000, burning = 200, thinning = 1)
 
