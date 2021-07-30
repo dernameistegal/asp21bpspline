@@ -13,12 +13,13 @@ m = spline(m1, c(40,40), order = c(3,3), p_order = c(2,2), smooth = c(0,0))
 plot(m, sd = 1.96)
 
 
-n = 1000
+n = 10000
 
 a = Sys.time()
 lol = mcmc.spline(m, it = n, burning = 1, thinning = 1, stepsize = 1)
 b = Sys.time()
 b-a
+class(m) = "mcmcspline"
 
 
 
