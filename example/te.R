@@ -26,7 +26,8 @@ summary(lol$epsilon)
 
 hist(lol$epsilon, breaks = 50)
 hist(lol$tau, breaks = 50)
-plot.mcmcspline(m, lol)
+class(m) = "mcmcspline"
+plot(m, lol)
 
 n = length(lol$tau)
 seq1 = seq(1, n, length.out = n)

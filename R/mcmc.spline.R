@@ -83,7 +83,19 @@ sample.beta = function(list, X, Z, y, K, i)
   
   sigmainv = diag(drop(1 / (exp(Z %f*f% as.matrix(gamma)))^2))
   
-  cov = solve(t(X) %f*f% sigmainv %f*f% X + K / tau)
+  chol_helper = chol(t(X) %f*f% sigmainv %f*f% X + K / tau)
+  
+  
+  fwd = forwardsolve(l = chol_helper,
+                     x = diag(dim(chol_helper)[1]),
+                     upper.tri = TRUE, transpose = TRUE)
+  cov = backsolve(r = chol_helper, x = fwd )
+  
+  
+  
+  
+  #cov = solve(t(X) %f*f% sigmainv %f*f% X + K / tau)
+  
   mean = cov %f*f% (t(X) %f*f% sigmainv %f*f% as.matrix(y))
   
   beta = rmvnorm(1, mean, cov)
@@ -106,6 +118,35 @@ sample.epsilon = function(list, K, rk_K, i)
 
 sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
 {
+  rmvnorm <- function(n, mu = 0, chol_sig_inv) {
+    dim <- nrow(chol_sig_inv)
+    
+    std_norm <- matrix(rnorm(dim * n), dim, n)
+    scaled <- backsolve(chol_sig_inv, std_norm)
+    shifted <- scaled + mu
+    
+    shifted
+  }
+  
+  dmvnorm <- function(x, mu = 0, chol_sig_inv, log = FALSE) {
+    std_norm <- drop(chol_sig_inv %*% (x - mu))
+    correction <- sum(log(diag(chol_sig_inv)))
+    
+    log_prob <- dnorm(std_norm, log = TRUE)
+    
+    if (is.matrix(log_prob)) {
+      log_prob <- colSums(log_prob) + correction
+    } else {
+      log_prob <- sum(log_prob) + correction
+    }
+    
+    if (log) {
+      log_prob
+    } else {
+      exp(log_prob)
+    }
+  }
+  
   df = ncol(X) + ncol(Z)
   stepsize = sqrt(3) * (df)^(-1/6)
   gamma = matrix(list$gamma[i-1,], ncol = 1)
@@ -125,9 +166,13 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
   step = backsolve(r = chol_info_gamma, x = fwd)
   
   mean_sampler <- gamma + stepsize^2/2 * step
-  proposal <- drop(rmvnorm(1, mean_sampler, stepsize^2 * solve(info_gamma)))
   
-  forward <- dmvnorm(proposal, mean_sampler, stepsize * solve(info_gamma), log = TRUE)
+  
+  
+  
+  proposal <- drop(rmvnorm(1, mean_sampler, chol_info_gamma/stepsize))
+  
+  forward <- dmvnorm(proposal, mean_sampler, chol_info_gamma/stepsize, log = TRUE)
   
   ##backward probability
   fitted_values_scale = drop(exp(Z %f*f% as.matrix(proposal)))
@@ -140,7 +185,7 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
   step = backsolve(r = chol_info_gamma, x = fwd)
   
   mean_sampler_proposal <- proposal + stepsize^2/2 * step
-  backward <- dmvnorm(drop(gamma), mean_sampler_proposal, stepsize^2 * solve(info_gamma), log = TRUE)
+  backward <- dmvnorm(drop(gamma), mean_sampler_proposal, chol_info_gamma/stepsize, log = TRUE)
   ########
   
   log_full_cond = function(gamma)
@@ -237,6 +282,7 @@ source("R/helper.R")
 source("R/init.R")
 source("R/spline.R")
 source("R/methods.R")
+source("R/RcppExports.R")
 #source("R/lmls-helpers.R")
 
 
@@ -250,7 +296,7 @@ y <- 3*sin(x) + 0.1*x^2- 0.01*x^3+ 0.001* x^4 + e
 
 # fit spline and run mcmc
 m = lmls(y ~ x, scale = ~x, light = FALSE)
-m_spline = spline(m, kn = c(15,15), order = c(3,3), p_order = c(2,2), smooth = c(10,10))
+m_spline = spline(m, kn = c(15,15), order = c(3,3), p_order = c(5,5), smooth = c(10,10))
 plot(m_spline)
 mcmc_m_spline = mcmc.spline(m_spline, it = 500, burning = 100, thinning = 10)
 
@@ -273,9 +319,9 @@ y = 5*sin(x) + rnorm(500, 0,sd =1 + (sin(x)))
 
 # fit spline and run mcmc
 m = lmls(y ~ x, scale = ~x, light = FALSE)
-m_spline = spline(m, kn = c(55,55), order = c(5,5), p_order = c(1,1), smooth = c(1,1))
+m_spline = spline(m, kn = c(55,55), order = c(3,3), p_order = c(8,8), smooth = c(1000,1000))
 plot(m_spline)
-mcmc_m_spline = mcmc.spline(m_spline, it = 1000, burning = 400, thinning = 1)
+mcmc_m_spline = mcmc.spline(m_spline, it = 1500, burning = 400, thinning = 10)
 
 #plot beta and gamma components against time
 layout(matrix(c(1,2), 1, 2))
@@ -300,9 +346,9 @@ y =  (x-10) * rnorm(500,0, 1) + x + (x-10)^2/100 *  rnorm(500,0, 1) #da funktion
 
 # fit spline and run mcmc
 m = lmls(y ~ x, scale = ~x, light = FALSE)
-m_spline = spline(m, kn = c(55,55), order = c(5,5), p_order = c(1,1), smooth = c(1,1))
+m_spline = spline(m, kn = c(55,55), order = c(10,10), p_order = c(20,20), smooth = c(1,1))
 plot(m_spline)
-mcmc_m_spline = mcmc.spline(m_spline, it = 1000, burning = 100, thinning = 1)
+mcmc_m_spline = mcmc.spline(m_spline, it = 1000, burning = 200, thinning = 1)
 
 #plot beta and gamma components against time
 layout(matrix(c(1,2), 1, 2))
@@ -360,9 +406,9 @@ plot(seq1, lol$gamma[, 5], type = "l")
 
 
 
-bmean = colMeans(lol$beta)
-gmean = colMeans(lol$gamma)
-length(gmean)
+bmean = colMeans(mcmc_m_spline$beta)
+gmean = colMeans(mcmc_m_spline$gamma)
+
 
 fit.spline = function(beta, gamma, X)
 {
@@ -372,10 +418,11 @@ fit.spline = function(beta, gamma, X)
 }
 
 
-pred = fit.spline(bmean, gmean, m$loc$X)
+pred = fit.spline(bmean, gmean, m_spline$loc$X)
 
-plot(x, pred$location)
-points(x, y)
-lines(x, pred$location + 1.96 * pred$scale)
-lines(x, pred$location - 1.96 * pred$scale)
+plot(sort(x), pred$location[order(x)], xlim = range(x), ylim = range(y), type = "l", col = "red")
+points(x, y, cex = 0.3)
+lines(sort(x), (pred$location)[order(x)] + 1.96 * pred$scale[order(x)])
+lines(sort(x), (pred$location)[order(x)] - 1.96 * pred$scale[order(x)])
+
 
