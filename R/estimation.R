@@ -79,13 +79,8 @@ update_beta = function(m)
 
 leastsquares = function(X, K, y, lambda)
 {
-  
-  chol_helper = chol(crossprod(X) + K * lambda + diag(dim(K)[1]))
-  fwd = forwardsolve(l = chol_helper,
-                     x = t(X) %*% y,
-                     upper.tri = TRUE, transpose = TRUE)
-  beta_hat = backsolve(r = chol_helper, x = fwd )
 
+  beta_hat = solve(crossprod(X) + K * lambda) %*% t(X) %*% y
   y_hat = X %*% beta_hat
 
   fit = list()
@@ -103,11 +98,7 @@ w_leastsquares = function(m)
   y = m$y
   Z = m$loc$X
   W = diag(as.vector(m$fitted.values$scale))
-  chol_helper = chol(crossprod(X) + K * lambda + diag(dim(K)[1]))
-  fwd = forwardsolve(l = chol_helper,
-                     x = t(X) %*% y,
-                     upper.tri = TRUE, transpose = TRUE)
-  beta_hat = backsolve(r = chol_helper, x = fwd )
+  beta_hat = solve(t(Z) %*% W %*% Z +  m$loc$K * lambda) %*% t(Z) %*% W %*% y
   y_hat = Z %*% beta_hat
   fit = list()
   fit$fitted.values = y_hat
