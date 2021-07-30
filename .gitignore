@@ -46,3 +46,7 @@ po/*~
 
 # inst/doc
 inst/doc
+
+# compiled files
+src/*.o
+src/*.dll
