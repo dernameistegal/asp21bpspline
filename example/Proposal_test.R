@@ -2,6 +2,7 @@ library(lmls)
 library(asp21bpspline)
 library(mvtnorm)
 
+
 ####first data generating process (easy to fit with low order splines)####
 # data generating process and generating data
 set.seed(10)
@@ -51,6 +52,17 @@ ind = seq(1, length(mcmc_m_spline$gamma[,1]))
 gamma_first_component = mcmc_m_spline$gamma[,1]
 plot(ind, gamma_first_component, type = "l")
 layout(1)
+
+####third data generating process (large step size?)####
+set.seed(1)
+#x = seq(0,20, length.out = 600)
+x = sort(runif(500, 0,20))
+y =  (x-10) * rnorm(500,0, 1) + x + (x-10)^2/100 *  rnorm(500,0, 1) #da funktioniert es nicht... backward un und forward, sind dann sehr stark voneinander verschieden. Daher wird nie angenommen
+#y =  sin(x) + rnorm(500,0, 1) + x
+m = lmls(y~x, scale = ~x, light = F)
+m = spline_user_function(m, c(50,50), order = c(2,2), p_order = c(2,2), smooth = c(1,1))
+
+print.spl(m, sd = 1.96)
 
 ####needed values for update gamma in first iteration of mcmc sampler
 Z = m_spline$scale$Z
@@ -102,7 +114,7 @@ gradient_descent = function() {
     print(log_full_cond(gamma))
     stepsize[,i] = step
   }
-  return(list(gamma, stepsize))
+  return(list(optimum = gamma, stepsizes = stepsize))
 }
 
 optimum = gradient_descent()

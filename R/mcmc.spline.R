@@ -15,20 +15,20 @@
 mcmc.spline = function(m, it, burning, thinning)
 {
   pb = txtProgressBar(min = 0, max = it, style = 3)
-
-
+  
+  
   nbeta = length(m$coefficients$location)
   ngamma = length(m$coefficients$scale)
   sample_tau = numeric(it)
   sample_epsilon = numeric(it)
   sample_beta = matrix(NA, nrow = it, ncol = nbeta)
   sample_gamma = matrix(NA, nrow = it, ncol = ngamma)
-
+  
   list = list(tau = sample_tau,
               beta = sample_beta,
               epsilon = sample_epsilon,
               gamma = sample_gamma)
-
+  
   # extract elements
   X = m$loc$X
   y = m$y
@@ -38,13 +38,13 @@ mcmc.spline = function(m, it, burning, thinning)
   rk_K1 = m$loc$ext_kn - m$p_order[1]
   rk_K2 = m$scale$ext_kn - m$p_order[2]
   unpenalized_info = m$unpenalized_info
-
+  
   list$beta[1, ] = m$coefficients$location
   list$gamma[1, ] = m$coefficients$scale
   list$epsilon[1] = sample.epsilon(list, K2, rk_K2, 2)
   list$tau[1] =   sample.tau(list, K1, rk_K1, 2)
-
-
+  
+  
   for (i in 2:(it))
   {
     list[[1]][i] =   sample.tau(list, K1, rk_K1, i)
@@ -57,7 +57,7 @@ mcmc.spline = function(m, it, burning, thinning)
   close(pb)
   list = burn(list, burning)
   list = thin(list, thinning)
-
+  
   return(list)
 }
 
@@ -66,10 +66,10 @@ sample.tau = function(list, K, rk_K, i)
 {
   # check for validity
   beta = matrix(list$beta[i-1,], ncol = 1)
-
+  
   a = 1 + 1/2 * rk_K
   b = 0.0005 + 1/2 * t(beta) %f*f% K %f*f% beta
-
+  
   tau = 1 / rgamma(1, shape = a, scale = b)
   return(tau)
 }
@@ -80,12 +80,12 @@ sample.beta = function(list, X, Z, y, K, i)
   # check for validity
   gamma = matrix(list$gamma[i-1, ], ncol = 1)
   tau = list$tau[i]
-
+  
   sigmainv = diag(drop(1 / (exp(Z %f*f% as.matrix(gamma)))^2))
-
+  
   cov = solve(t(X) %f*f% sigmainv %f*f% X + K / tau)
   mean = cov %f*f% (t(X) %f*f% sigmainv %f*f% as.matrix(y))
-
+  
   beta = rmvnorm(1, mean, cov)
   return(beta)
 }
@@ -95,10 +95,10 @@ sample.epsilon = function(list, K, rk_K, i)
 {
   # check for validity
   gamma = matrix(list$gamma[i-1,], ncol = 1)
-
+  
   a = 1 + 1/2 * rk_K
   b = 0.0005 + 1/2 * t(gamma) %f*f% K %f*f% gamma
-
+  
   epsilon = 1 / rgamma(1, shape = a, scale = b)
   return(epsilon)
 }
@@ -106,42 +106,42 @@ sample.epsilon = function(list, K, rk_K, i)
 
 sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
 {
+  stepsize = 0.25
   gamma = matrix(list$gamma[i-1,], ncol = 1)
   beta = matrix(list$beta[i,], ncol = 1)
   epsilon = list$epsilon[i]
   info_gamma = unpenalized_info + 1/epsilon * K
   chol_info_gamma = chol(info_gamma)
-
+  
   ####new proposal####
   fitted_values_scale = drop(exp(Z %f*f% as.matrix(gamma)))
   residuals = drop(y - X %f*f% as.matrix(beta))
   score_gamma = t((residuals/fitted_values_scale)^2 - 1) %f*f% Z
-
+  
   fwd = forwardsolve(l = chol_info_gamma,
-                       x = t(score_gamma) - 1/epsilon * (K %f*f% as.matrix(gamma)),
-                       upper.tri = TRUE, transpose = TRUE)
+                     x = t(score_gamma) - 1/epsilon * (K %f*f% as.matrix(gamma)),
+                     upper.tri = TRUE, transpose = TRUE)
   step = backsolve(r = chol_info_gamma, x = fwd)
-
-  mean_sampler <- gamma + step
-  proposal <- drop(rmvnorm(1, mean_sampler, solve(info_gamma)))
-
-  forward <- dmvnorm(proposal, mean_sampler, solve(info_gamma), log = TRUE)
-
+  
+  mean_sampler <- gamma + stepsize/2 * step
+  proposal <- drop(rmvnorm(1, mean_sampler, stepsize * solve(info_gamma)))
+  
+  forward <- dmvnorm(proposal, mean_sampler, stepsize * solve(info_gamma), log = TRUE)
+  
   ##backward probability
   fitted_values_scale = drop(exp(Z %f*f% as.matrix(proposal)))
   residuals = drop(y - X %f*f% as.matrix(beta))
   score_proposal = t((residuals/fitted_values_scale)^2 - 1) %f*f% Z
-
+  
   fwd = forwardsolve(l = chol_info_gamma,
                      x = t(score_proposal) - 1/epsilon * (K %f*f% as.matrix(proposal)),
                      upper.tri = TRUE, transpose = TRUE)
   step = backsolve(r = chol_info_gamma, x = fwd)
-
-  mean_sampler_proposal <- proposal + step
-  backward <- dmvnorm(drop(gamma), mean_sampler_proposal, solve(info_gamma), log = TRUE)
+  
+  mean_sampler_proposal <- proposal + stepsize/2 * step
+  backward <- dmvnorm(drop(gamma), mean_sampler_proposal, stepsize * solve(info_gamma), log = TRUE)
   ########
-
-
+  
   log_full_cond = function(gamma)
   {
     faktor1 = -sum(Z %f*f% gamma)
@@ -150,13 +150,45 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
     faktor3 = -1/(2 * epsilon) * t(gamma) %f*f% K %f*f% gamma
     return(faktor1 + faktor2 + faktor3)
   }
-
-
+  
+  ####testsecion####
+  # stepsize = stepsize = matrix(nrow = length(gamma), ncol = 100)
+  # 
+  # gradient_descent = function() {
+  #   for( i in 1:100){
+  #     fitted_values_scale = drop(exp(Z %*% as.matrix(gamma)))
+  #     residuals = drop(y - X %*% as.matrix(beta))
+  #     score_gamma = t((residuals/fitted_values_scale)^2 - 1) %*% Z
+  # 
+  #     fwd = forwardsolve(l = chol_info_gamma,
+  #                        x = t(score_gamma) - 1/epsilon * (K %*% as.matrix(gamma)),
+  #                        upper.tri = TRUE, transpose = TRUE)
+  #     step = backsolve(r = chol_info_gamma, x = fwd)
+  # 
+  #     gamma <- gamma + step
+  #     print(log_full_cond(gamma))
+  #     stepsize[,i] = step
+  #   }
+  #   return(list(optimum = gamma, stepsizes = stepsize))
+  # }
+  # 
+  # optimum = gradient_descent()
+  # 
+  # optim(gamma,log_full_cond, method = "BFGS" ,control = list(fnscale = - 1))$value
+  # par = optim(gamma,log_full_cond, method = "BFGS", control = list(fnscale = - 1))$par
+  # log_full_cond(par)
+  # log_full_cond(gamma)
+  
+  ####end of test section####
+  
+  
+  
+  
   logp = log_full_cond(proposal) - log_full_cond(gamma) + backward - forward
   #print(c(optim(gamma,log_full_cond, control=list(fnscale=-1))$value,
   #             log_full_cond(proposal),
   #            log_full_cond(gamma), log_full_cond(proposal) >log_full_cond(gamma) ))
-
+  
   # accept whole vector
   accept = logp > log(runif(1))
   if (accept == T)
@@ -192,3 +224,155 @@ thin = function(result, thinning = 1)
   result$gamma = result$gamma[s,]
   return(result)
 }
+
+
+####testsection####
+require(lmls)
+require(ggplot2)
+require(Rcpp)
+require(mvtnorm)
+source("R/estimation.R")
+source("R/helper.R")
+source("R/init.R")
+source("R/spline.R")
+source("R/methods.R")
+#source("R/lmls-helpers.R")
+
+
+n = 100
+####first data generating process (easy to fit with low order splines)####
+# data generating process and generating data
+set.seed(10)
+x <- runif(1000, 0 , 10)
+e <- rnorm(1000,sd = (3*sin(x) + 0.1*x^2- 0.01*x^3+ 0.0005* x^4)/3+3)
+y <- 3*sin(x) + 0.1*x^2- 0.01*x^3+ 0.001* x^4 + e
+
+# fit spline and run mcmc
+m = lmls(y ~ x, scale = ~x, light = FALSE)
+m_spline = spline(m, kn = c(15,15), order = c(3,3), p_order = c(2,2), smooth = c(10,10))
+plot(m_spline)
+mcmc_m_spline = mcmc.spline(m_spline, it = 500, burning = 100, thinning = 10)
+
+#plot beta and gamma components against time
+layout(matrix(c(1,2), 1, 2))
+ind = seq(1, length(mcmc_m_spline$beta[,1]))
+beta_first_component = mcmc_m_spline$beta[,1]
+plot(ind, beta_first_component, type = "l")
+
+ind = seq(1, length(mcmc_m_spline$gamma[,1]))
+gamma_first_component = mcmc_m_spline$gamma[,1]
+plot(ind, gamma_first_component, type = "l")
+layout(1)
+
+####second data generating process (hard to fit with low order splines)####
+# data generating process and generating data
+set.seed(10)
+x = seq(0,20, length.out = 500)
+y = 5*sin(x) + rnorm(500, 0,sd =1 + (sin(x)))
+
+# fit spline and run mcmc
+m = lmls(y ~ x, scale = ~x, light = FALSE)
+m_spline = spline(m, kn = c(55,55), order = c(5,5), p_order = c(1,1), smooth = c(1,1))
+plot(m_spline)
+mcmc_m_spline = mcmc.spline(m_spline, it = 1000, burning = 100, thinning = 10)
+
+#plot beta and gamma components against time
+layout(matrix(c(1,2), 1, 2))
+ind = seq(1, length(mcmc_m_spline$beta[,1]))
+beta_first_component = mcmc_m_spline$beta[,1]
+plot(ind, beta_first_component, type = "l")
+
+ind = seq(1, length(mcmc_m_spline$gamma[,1]))
+gamma_first_component = mcmc_m_spline$gamma[,1]
+plot(ind, gamma_first_component, type = "l")
+layout(1)
+
+####third data generating process (large step size?)####
+# data generating process and generating data
+set.seed(10)
+#x = seq(0,20, length.out = 600)
+x = sort(runif(500, 0,20))
+y =  (x-10) * rnorm(500,0, 1) + x + (x-10)^2/100 *  rnorm(500,0, 1) #da funktioniert es nicht... backward un und forward, sind dann sehr stark voneinander verschieden. Daher wird nie angenommen
+#y =  sin(x) + rnorm(500,0, 1) + x
+
+# fit spline and run mcmc
+m = lmls(y ~ x, scale = ~x, light = FALSE)
+m_spline = spline(m, kn = c(55,55), order = c(5,5), p_order = c(1,1), smooth = c(1,1))
+plot(m_spline)
+mcmc_m_spline = mcmc.spline(m_spline, it = 1000, burning = 100, thinning = 10)
+
+#plot beta and gamma components against time
+layout(matrix(c(1,2), 1, 2))
+ind = seq(1, length(mcmc_m_spline$beta[,1]))
+beta_first_component = mcmc_m_spline$beta[,1]
+plot(ind, beta_first_component, type = "l")
+
+ind = seq(1, length(mcmc_m_spline$gamma[,1]))
+gamma_first_component = mcmc_m_spline$gamma[,1]
+plot(ind, gamma_first_component, type = "l")
+layout(1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+n = length(lol$tau)
+seq1 = seq(1, n, length.out = n)
+plot(seq1, lol$tau, type = "l")
+plot(seq1, lol$epsilon, type = "l")
+plot(seq1, lol$beta[, 1], type = "l")
+plot(seq1, lol$gamma[, 5], type = "l")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+bmean = colMeans(lol$beta)
+gmean = colMeans(lol$gamma)
+length(gmean)
+
+fit.spline = function(beta, gamma, X)
+{
+  location = X %*% beta
+  scale = exp(X %*% gamma)
+  return(list(location = location, scale =  scale))
+}
+
+
+pred = fit.spline(bmean, gmean, m$loc$X)
+
+plot(x, pred$location)
+points(x, y)
+lines(x, pred$location + 1.96 * pred$scale)
+lines(x, pred$location - 1.96 * pred$scale)
+
