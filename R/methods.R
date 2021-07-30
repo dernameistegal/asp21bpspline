@@ -104,7 +104,7 @@ predict.spline = function(m, X, Z, isDesignmatrix = F)
   
   location = X %f*f% as.matrix(beta)
   scale = exp(Z %f*f% as.matrix(gamma))
-  return(list(location = location, scale =  scale))
+  return(list(location = location, scale =scale))
 }
 
 
@@ -126,14 +126,14 @@ summary.spline = function(model, par)
 
 #' predict method for spline objects
 #'
-#' @param m 
-#' @param sample 
+#' @param sample sample from the mcmc.spline function
+#' @param m model from the spline function 
 #'
 #' @return
 #' @export
 #'
 #' 
-predict.mcmcspline = function(m, sample)
+predict.mcmcspline = function(sample, m)
 {
   m$coefficients$location = colMeans(sample$beta)
   m$coefficients$scale = colMeans(sample$gamma)
@@ -153,9 +153,9 @@ predict.mcmcspline = function(m, sample)
 #' @export
 #'
 #' 
-plot.mcmcspline = function(m, sample)
+plot.mcmcspline = function(sample, m)
 {
-  temp = predict.mcmcspline(m, sample)
+  temp = predict.mcmcspline(sample, m)
   m[["fitted.values"]]$location = temp[[1]]
   m[["fitted.values"]]$scale = temp[[2]]
   plot.spline(m, sd =  1.96)
