@@ -83,7 +83,13 @@ sample.beta = function(list, X, Z, y, K, i)
 
   sigmainv = diag(drop(1 / (exp(Z %f*f% as.matrix(gamma)))^2))
 
-  cov = solve(t(X) %f*f% sigmainv %f*f% X + K / tau)
+  chol_helper = chol(t(X) %f*f% sigmainv %f*f% X + K / tau)
+  
+  
+  fwd = forwardsolve(l = chol_helper,
+                     x = diag(dim(chol_helper)[1]),
+                     upper.tri = TRUE, transpose = TRUE)
+  cov = backsolve(r = chol_helper, x = fwd )
   mean = cov %f*f% (t(X) %f*f% sigmainv %f*f% as.matrix(y))
 
   beta = rmvnorm(1, mean, cov)
@@ -121,11 +127,10 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info, step
                        x = t(score_gamma) - 1/epsilon * (K %f*f% as.matrix(gamma)),
                        upper.tri = TRUE, transpose = TRUE)
   step = backsolve(r = chol_info_gamma, x = fwd)
-
+  
   mean_sampler <- gamma + stepsize^2/2 * step
-  proposal <- drop(rmvnorm(1, mean_sampler, stepsize^2 * solve(info_gamma)))
-
-  forward <- dmvnorm(proposal, mean_sampler, stepsize^2 * solve(info_gamma), log = TRUE)
+  proposal <- drop(rmvnorm(1, mean_sampler, chol_info_gamma/stepsize))
+  forward <- dmvnorm(proposal, mean_sampler, chol_info_gamma/stepsize, log = TRUE)
 
   ##backward probability
   fitted_values_scale = drop(exp(Z %f*f% as.matrix(proposal)))
@@ -138,7 +143,7 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info, step
   step = backsolve(r = chol_info_gamma, x = fwd)
 
   mean_sampler_proposal <- proposal + stepsize^2/2 * step
-  backward <- dmvnorm(drop(gamma), mean_sampler_proposal, stepsize^2 * solve(info_gamma), log = TRUE)
+  backward <- dmvnorm(drop(gamma), mean_sampler_proposal, chol_info_gamma/stepsize, log = TRUE)
   ########
 
 
