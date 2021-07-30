@@ -12,7 +12,7 @@
 #' @export
 #'
 #'
-mcmc.spline = function(m, it, burning, thinning)
+mcmc.spline = function(m, it, burning, thinning, stepsize = sqrt(3) * (ncol(m$loc$X) + ncol(m$scale$Z))^(-1/6))
 {
   pb = txtProgressBar(min = 0, max = it, style = 3)
 
@@ -50,7 +50,7 @@ mcmc.spline = function(m, it, burning, thinning)
     list[[1]][i] =   sample.tau(list, K1, rk_K1, i)
     list[[2]][i, ] = sample.beta(list, X, Z, y, K1, i)
     list[[3]][i] =   sample.epsilon(list, K2, rk_K2, i)
-    list[[4]][i, ] = sample.gamma(list, X, Z, y, K2, i, ngamma, cov, unpenalized_info)
+    list[[4]][i, ] = sample.gamma(list, X, Z, y, K2, i, ngamma, cov, unpenalized_info, stepsize)
     setTxtProgressBar(pb, i)
   }
   
@@ -104,7 +104,7 @@ sample.epsilon = function(list, K, rk_K, i)
 }
 
 
-sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
+sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info, stepsize)
 {
   gamma = matrix(list$gamma[i-1,], ncol = 1)
   beta = matrix(list$beta[i,], ncol = 1)
@@ -122,10 +122,10 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
                        upper.tri = TRUE, transpose = TRUE)
   step = backsolve(r = chol_info_gamma, x = fwd)
 
-  mean_sampler <- gamma + step
-  proposal <- drop(rmvnorm(1, mean_sampler, solve(info_gamma)))
+  mean_sampler <- gamma + stepsize^2/2 * step
+  proposal <- drop(rmvnorm(1, mean_sampler, stepsize^2 * solve(info_gamma)))
 
-  forward <- dmvnorm(proposal, mean_sampler, solve(info_gamma), log = TRUE)
+  forward <- dmvnorm(proposal, mean_sampler, stepsize^2 * solve(info_gamma), log = TRUE)
 
   ##backward probability
   fitted_values_scale = drop(exp(Z %f*f% as.matrix(proposal)))
@@ -137,8 +137,8 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
                      upper.tri = TRUE, transpose = TRUE)
   step = backsolve(r = chol_info_gamma, x = fwd)
 
-  mean_sampler_proposal <- proposal + step
-  backward <- dmvnorm(drop(gamma), mean_sampler_proposal, solve(info_gamma), log = TRUE)
+  mean_sampler_proposal <- proposal + stepsize^2/2 * step
+  backward <- dmvnorm(drop(gamma), mean_sampler_proposal, stepsize^2 * solve(info_gamma), log = TRUE)
   ########
 
 
