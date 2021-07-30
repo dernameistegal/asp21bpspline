@@ -106,7 +106,8 @@ sample.epsilon = function(list, K, rk_K, i)
 
 sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
 {
-  stepsize = 0.25
+  df = ncol(X) + ncol(Z)
+  stepsize = sqrt(3) * (df)^(-1/6)
   gamma = matrix(list$gamma[i-1,], ncol = 1)
   beta = matrix(list$beta[i,], ncol = 1)
   epsilon = list$epsilon[i]
@@ -123,8 +124,8 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
                      upper.tri = TRUE, transpose = TRUE)
   step = backsolve(r = chol_info_gamma, x = fwd)
   
-  mean_sampler <- gamma + stepsize/2 * step
-  proposal <- drop(rmvnorm(1, mean_sampler, stepsize * solve(info_gamma)))
+  mean_sampler <- gamma + stepsize^2/2 * step
+  proposal <- drop(rmvnorm(1, mean_sampler, stepsize^2 * solve(info_gamma)))
   
   forward <- dmvnorm(proposal, mean_sampler, stepsize * solve(info_gamma), log = TRUE)
   
@@ -138,8 +139,8 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
                      upper.tri = TRUE, transpose = TRUE)
   step = backsolve(r = chol_info_gamma, x = fwd)
   
-  mean_sampler_proposal <- proposal + stepsize/2 * step
-  backward <- dmvnorm(drop(gamma), mean_sampler_proposal, stepsize * solve(info_gamma), log = TRUE)
+  mean_sampler_proposal <- proposal + stepsize^2/2 * step
+  backward <- dmvnorm(drop(gamma), mean_sampler_proposal, stepsize^2 * solve(info_gamma), log = TRUE)
   ########
   
   log_full_cond = function(gamma)
@@ -264,7 +265,7 @@ gamma_first_component = mcmc_m_spline$gamma[,1]
 plot(ind, gamma_first_component, type = "l")
 layout(1)
 
-####second data generating process (hard to fit with low order splines)####
+####second data generating process####
 # data generating process and generating data
 set.seed(10)
 x = seq(0,20, length.out = 500)
@@ -274,7 +275,7 @@ y = 5*sin(x) + rnorm(500, 0,sd =1 + (sin(x)))
 m = lmls(y ~ x, scale = ~x, light = FALSE)
 m_spline = spline(m, kn = c(55,55), order = c(5,5), p_order = c(1,1), smooth = c(1,1))
 plot(m_spline)
-mcmc_m_spline = mcmc.spline(m_spline, it = 1000, burning = 100, thinning = 10)
+mcmc_m_spline = mcmc.spline(m_spline, it = 1000, burning = 400, thinning = 1)
 
 #plot beta and gamma components against time
 layout(matrix(c(1,2), 1, 2))
@@ -286,6 +287,8 @@ ind = seq(1, length(mcmc_m_spline$gamma[,1]))
 gamma_first_component = mcmc_m_spline$gamma[,1]
 plot(ind, gamma_first_component, type = "l")
 layout(1)
+
+length(unique(gamma_first_component))/length(gamma_first_component)
 
 ####third data generating process (large step size?)####
 # data generating process and generating data
@@ -299,7 +302,7 @@ y =  (x-10) * rnorm(500,0, 1) + x + (x-10)^2/100 *  rnorm(500,0, 1) #da funktion
 m = lmls(y ~ x, scale = ~x, light = FALSE)
 m_spline = spline(m, kn = c(55,55), order = c(5,5), p_order = c(1,1), smooth = c(1,1))
 plot(m_spline)
-mcmc_m_spline = mcmc.spline(m_spline, it = 1000, burning = 100, thinning = 10)
+mcmc_m_spline = mcmc.spline(m_spline, it = 1000, burning = 100, thinning = 1)
 
 #plot beta and gamma components against time
 layout(matrix(c(1,2), 1, 2))
