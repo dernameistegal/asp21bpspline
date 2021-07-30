@@ -6,13 +6,14 @@
 #' @param burning integer   Number  of iterations to be burned
 #' @param thinning integer   Number of iterations to be ignored between two
 #'                           consecutive iterations
-#' @param cov to be deleted
+#' @param stepsize stepsize of the update step for the gamma sampler
 #'
 #' @return MCMC sample for epsilon, tau, gamma and beta
 #' @export
 #'
 #'
-mcmc.spline = function(m, it, burning, thinning, stepsize = sqrt(3) * (ncol(m$loc$X) + ncol(m$scale$Z))^(-1/6))
+mcmc.spline = function(m, it, burning, thinning, 
+                       stepsize = sqrt(3) * (ncol(m$loc$X) + ncol(m$scale$Z))^(-1/6))
 {
   pb = txtProgressBar(min = 0, max = it, style = 3)
 
@@ -57,7 +58,7 @@ mcmc.spline = function(m, it, burning, thinning, stepsize = sqrt(3) * (ncol(m$lo
   close(pb)
   list = burn(list, burning)
   list = thin(list, thinning)
-
+  class(list) = "mcmcspline"
   return(list)
 }
 

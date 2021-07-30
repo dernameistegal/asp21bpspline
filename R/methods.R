@@ -126,14 +126,14 @@ summary.spline = function(model, par)
 
 #' predict method for spline objects
 #'
-#' @param m 
-#' @param sample 
+#' @param sample sample from the mcmc.spline function
+#' @param m model from the spline function 
 #'
 #' @return
 #' @export
 #'
 #' 
-predict.mcmcspline = function(m, sample)
+predict.mcmcspline = function(sample, m)
 {
   m$coefficients$location = colMeans(sample$beta)
   m$coefficients$scale = colMeans(sample$gamma)
