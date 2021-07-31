@@ -58,6 +58,7 @@ mcmc.spline = function(m, it, burning, thinning)
   list = burn(list, burning)
   list = thin(list, thinning)
   
+  class(list) = "mcmcspline"
   return(list)
 }
 

@@ -13,14 +13,12 @@ m = spline(m1, kn = c(10,10), order = c(3,3), p_order = c(2,2), smooth = c(0,0))
 plot(m, sd = 1.96)
 
 
-n = 100
+n = 1000
 
 a = Sys.time()
 lol = mcmc.spline(m, it = n, burning = 1, thinning = 1)
 b = Sys.time()
 b-a
-class(m) = "mcmcspline"
-
 
 
 plot(lol, m)
@@ -46,40 +44,14 @@ m1 = list(x = x, z = x, y = y)
 # #so ist es schon viel besser
 # m = spline(m1, kn = c(40,40), order = c(3,3), p_order = c(3,3), smooth = c(0,0))
 #noch besser
-m = spline(m1, kn = c(40,40), order = c(3,3), p_order = c(3,3), smooth = c(0,0))
+m = spline(m1, kn = c(50,50), order = c(3,3), p_order = c(2, 2), smooth = c(0,0))
 
 
 plot(m, sd = 1.96)
 lol = mcmc.spline(m, it = 1200, burning = 200, thinning = 10)
 
 
-####second data generating process####
-# data generating process and generating data
-bmean = colMeans(lol$beta)
-gmean = colMeans(lol$gamma)
-
-
-fit.spline = function(beta, gamma, X)
-{
-  location = X %*% beta
-  scale = exp(X %*% gamma)
-  return(list(location = location, scale =  scale))
-}
-pred = fit.spline(bmean, gmean, m$loc$X)
-
-plot(sort(x), pred$location[order(x)], xlim = range(x), ylim = range(y), type = "l", col = "red")
-points(x, y, cex = 0.3)
-lines(sort(x), (pred$location)[order(x)] + 1.96 * pred$scale[order(x)])
-lines(sort(x), (pred$location)[order(x)] - 1.96 * pred$scale[order(x)])
-
-
-
-
-
-
-
-
-
+plot(lol, m)
 
 
 
