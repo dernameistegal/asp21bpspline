@@ -13,6 +13,10 @@ rmvnorm2 = function(n, mu = 0, chol_sig_inv)
   
   return(shifted)
 }
+#das wäre nötig für den verbleibenden fall, dann wäre es aber eine untere Dreiecksmatrix und das ganze daher nicht wirklich lösbar mit
+#der vorhandenen FUnktion, daher (L^t^-1), daher erstmal weiterhin rmtnorm Package genutzt
+#cov(t(rmvnorm2(1000,c(1,1),solve(t(chol(a))))))
+
 
 dmvnorm2 = function(x, mu = 0, chol_sig_inv, log = FALSE) {
   std_norm = drop(chol_sig_inv %*% (x - mu))
