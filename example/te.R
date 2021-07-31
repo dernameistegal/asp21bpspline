@@ -34,8 +34,8 @@ require(asp21bpspline)
 
 set.seed(1)
 n = 1000
-x = seq(0,20, length.out = 1500)
-y = 5*sin(x) + rnorm(1500, 0, sd = 1 + (sin(x)))
+x = seq(0,20, length.out = 200)
+y = 5*sin(x) + rnorm(200, 0, sd = 1 + (sin(x)))
 
 plot(x,y)
 m1 = list(x = x, z = x, y = y)

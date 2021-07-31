@@ -24,8 +24,9 @@ mcmc.spline = function(m, it, burning, thinning, stepsize = NA)
   sample_epsilon = numeric(it)
   sample_beta = matrix(NA, nrow = it, ncol = nbeta)
   sample_gamma = matrix(NA, nrow = it, ncol = ngamma)
-  if (isNA(stepsize))
+  if (is.na(stepsize))
   {
+    df = ncol(m$loc$X) + ncol(m$scale$Z)
     stepsize = sqrt(3) * (df)^(-1/6)
   }
   
@@ -55,7 +56,7 @@ mcmc.spline = function(m, it, burning, thinning, stepsize = NA)
     list[[1]][i] =   sample.tau(list, K1, rk_K1, i)
     list[[2]][i, ] = sample.beta(list, X, Z, y, K1, i)
     list[[3]][i] =   sample.epsilon(list, K2, rk_K2, i)
-    list[[4]][i, ] = sample.gamma(list, X, Z, y, K2, i, ngamma, cov, unpenalized_info)
+    list[[4]][i, ] = sample.gamma(list, X, Z, y, K2, i, ngamma, cov, unpenalized_info, stepsize)
     setTxtProgressBar(pb, i)
   }
   
@@ -122,7 +123,7 @@ sample.epsilon = function(list, K, rk_K, i)
 }
 
 
-sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
+sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info, stepsize)
 {
   rmvnorm = function(n, mu = 0, chol_sig_inv) 
   {
@@ -158,8 +159,6 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info)
       return(exp(log_prob))
     }
   }
-  
-  df = ncol(X) + ncol(Z)
   gamma = matrix(list$gamma[i-1,], ncol = 1)
   beta = matrix(list$beta[i,], ncol = 1)
   epsilon = list$epsilon[i]
