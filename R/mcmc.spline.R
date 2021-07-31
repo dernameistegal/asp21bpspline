@@ -122,43 +122,9 @@ sample.epsilon = function(list, K, rk_K, i)
   return(epsilon)
 }
 
-
 sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info, stepsize)
 {
-  rmvnorm = function(n, mu = 0, chol_sig_inv) 
-  {
-    dim = nrow(chol_sig_inv)
-    
-    std_norm = matrix(rnorm(dim * n), dim, n)
-    scaled = backsolve(chol_sig_inv, std_norm)
-    shifted = scaled + mu
-    
-    return(shifted)
-  }
-  
-  dmvnorm = function(x, mu = 0, chol_sig_inv, log = FALSE) {
-    std_norm = drop(chol_sig_inv %*% (x - mu))
-    correction = sum(log(diag(chol_sig_inv)))
-    
-    log_prob = dnorm(std_norm, log = TRUE)
-    
-    if (is.matrix(log_prob)) 
-    {
-      log_prob = colSums(log_prob) + correction
-    } else 
-    {
-      log_prob = sum(log_prob) + correction
-    }
-    
-    if (log) 
-    {
-      return(log_prob)
-    } 
-    else 
-    {
-      return(exp(log_prob))
-    }
-  }
+ 
   gamma = matrix(list$gamma[i-1,], ncol = 1)
   beta = matrix(list$beta[i,], ncol = 1)
   epsilon = list$epsilon[i]
@@ -180,9 +146,9 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info, step
   
   
   
-  proposal = drop(rmvnorm(1, mean_sampler, chol_info_gamma/stepsize))
+  proposal = drop(rmvnorm2(1, mean_sampler, chol_info_gamma/stepsize))
   
-  forward = dmvnorm(proposal, mean_sampler, chol_info_gamma/stepsize, log = TRUE)
+  forward = dmvnorm2(proposal, mean_sampler, chol_info_gamma/stepsize, log = TRUE)
   
   ##backward probability
   fitted_values_scale = drop(exp(Z %f*f% as.matrix(proposal)))
@@ -195,7 +161,7 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info, step
   step = backsolve(r = chol_info_gamma, x = fwd)
   
   mean_sampler_proposal = proposal + stepsize^2/2 * step
-  backward = dmvnorm(drop(gamma), mean_sampler_proposal, chol_info_gamma/stepsize, log = TRUE)
+  backward = dmvnorm2(drop(gamma), mean_sampler_proposal, chol_info_gamma/stepsize, log = TRUE)
   ########
   
   log_full_cond = function(gamma)
