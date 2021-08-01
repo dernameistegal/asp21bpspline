@@ -1,5 +1,6 @@
-# Fisher Scoring Algorithm
-
+'Fisher Scoring Algorithm
+'
+# Main function of Fisher Scoring algorithm
 estimation = function(m, maxit = 100, reltol = sqrt(.Machine$double.eps))
 {
   m  = init_beta(m)
@@ -17,12 +18,11 @@ estimation = function(m, maxit = 100, reltol = sqrt(.Machine$double.eps))
     m = update_gamma(m)
     m = update_beta(m)
     after =  sum(m$coefficients$location)
-
     enough = abs(after - before) > reltol * (abs(before) + reltol)
 
     if (it >= maxit)
     {
-      warning("Estimation did not converge, maximum number of iterations reached")
+      warning("Estimation did not converge after 100 iterations. The Maximum number of iterations was reached.")
       break
     }
   }
@@ -31,7 +31,7 @@ estimation = function(m, maxit = 100, reltol = sqrt(.Machine$double.eps))
 }
 
 
-#### estimation####
+# Initialization of beta
 init_beta = function(m)
 {
   fit = leastsquares(m$loc$X, m$loc$K , m$y, m$smooth[1])
@@ -41,7 +41,7 @@ init_beta = function(m)
   return(m)
 }
 
-
+# Initialization of gamma
 init_gamma = function(m)
 {
   m$unpenalized_info = info_gamma(m)
@@ -53,6 +53,7 @@ init_gamma = function(m)
   return(m)
 }
 
+# Update of gamma
 update_gamma = function(m)
 {
   fwd = forwardsolve(l = m$chol_info_gamma,
@@ -64,7 +65,7 @@ update_gamma = function(m)
   return(m)
 }
 
-
+# Update of beta
 update_beta = function(m)
 {
   fit = w_leastsquares(m)
@@ -74,9 +75,7 @@ update_beta = function(m)
   return(m)
 }
 
-
-# own helper
-
+# Least squares estimation of beta with added ridge
 leastsquares = function(X, K, y, lambda)
 {
 
@@ -95,7 +94,7 @@ leastsquares = function(X, K, y, lambda)
   return(fit)
 }
 
-# vermutlich ist das auch so nicht ganz richtig, weil sich auch m$K * lambda ändern müsste
+# Weighted least squares estimation of beta with added ridge
 w_leastsquares = function(m)
 {
   lambda = m$smooth[1]
@@ -115,45 +114,3 @@ w_leastsquares = function(m)
 
   return(fit)
 }
-
-
-#### helpers from lmls
-
-# changed from source lmls
-score_beta = function(m)
-{
-  ups = t(m$residuals$location / m$fitted.values$scale^2) %*% m$loc$X
-  return(drop(ups))
-}
-
-# changed from source lmls
-score_gamma = function(m)
-{
-  ups = (t(m$residuals/ m$fitted.values$scale)^2 - 1) %*% m$scale$Z
-  return(drop(ups))
-}
-
-# changed from source lmls
-info_beta = function(m)
-{
-  crossprod(m$x, diag(as.vector(1/(m$fitted.values$scale^2))) %*% m$loc$X)
-}
-
-# not changed from source
-info_gamma = function(m)
-{
-  2 * crossprod(m$scale$Z)
-}
-
-# not changed from source
-set_gamma = function(m, gamma)
-{
-  m$coefficients$scale = gamma
-  m$fitted.values$scale = exp(m$scale$Z %*% gamma)
-  return(m)
-}
-
-# x = seq(0,10, length.out = 100)
-# y = x + rnorm(100, 0, 0.1)
-# m = lmls(y ~ x, light = F)
-#spline_user_function(m, 10, 2, 2, 0)

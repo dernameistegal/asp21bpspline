@@ -35,7 +35,7 @@ mcmc.spline = function(m, it, burning, thinning, stepsize = NA)
               epsilon = sample_epsilon,
               gamma = sample_gamma)
   
-  # extract elements
+  # Extract elements from model object
   X = m$loc$X
   y = m$y
   Z = m$scale$Z
@@ -44,13 +44,12 @@ mcmc.spline = function(m, it, burning, thinning, stepsize = NA)
   rk_K1 = m$loc$ext_kn - m$p_order[1]
   rk_K2 = m$scale$ext_kn - m$p_order[2]
   unpenalized_info = m$unpenalized_info
-  
   list$beta[1, ] = m$coefficients$location
   list$gamma[1, ] = m$coefficients$scale
   list$epsilon[1] = sample.epsilon(list, K2, rk_K2, 2)
   list$tau[1] =   sample.tau(list, K1, rk_K1, 2)
   
-  
+  # Loop for MCMC-algorithm
   for (i in 2:(it))
   {
     list[[1]][i] =   sample.tau(list, K1, rk_K1, i)
@@ -68,70 +67,53 @@ mcmc.spline = function(m, it, burning, thinning, stepsize = NA)
   return(list)
 }
 
-
+# Method to sample from full conditional of Tau
 sample.tau = function(list, K, rk_K, i)
 {
-  # check for validity
   beta = matrix(list$beta[i-1,], ncol = 1)
-  
   a = 1 + 1/2 * rk_K
   b = 0.0005 + 1/2 * t(beta) %f*f% K %f*f% beta
-  
   tau = 1 / rgamma(1, shape = a, scale = b)
   return(tau)
 }
 
-
+# Method to sample from full conditional of beta
 sample.beta = function(list, X, Z, y, K, i)
 {
-  # check for validity
   gamma = matrix(list$gamma[i-1, ], ncol = 1)
   tau = list$tau[i]
-  
   sigmainv = diag(drop(1 / (exp(Z %f*f% as.matrix(gamma)))^2))
-  
   chol_helper = chol(t(X) %f*f% sigmainv %f*f% X + K / tau)
-  
   
   fwd = forwardsolve(l = chol_helper,
                      x = diag(dim(chol_helper)[1]),
                      upper.tri = TRUE, transpose = TRUE)
   cov = backsolve(r = chol_helper, x = fwd )
-  
-  
-  
-  
-  #cov = solve(t(X) %f*f% sigmainv %f*f% X + K / tau)
-  
   mean = cov %f*f% (t(X) %f*f% sigmainv %f*f% as.matrix(y))
-  
   beta = rmvnorm(1, mean, cov)
   return(beta)
 }
 
-
+# Method to sample from full conditional of epsilon
 sample.epsilon = function(list, K, rk_K, i)
 {
-  # check for validity
   gamma = matrix(list$gamma[i-1,], ncol = 1)
-  
   a = 1 + 1/2 * rk_K
   b = 0.0005 + 1/2 * t(gamma) %f*f% K %f*f% gamma
-  
   epsilon = 1 / rgamma(1, shape = a, scale = b)
   return(epsilon)
 }
 
+# Method to sample from proposal density of gamma and decide whether to accept or not
 sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info, stepsize)
 {
- 
   gamma = matrix(list$gamma[i-1,], ncol = 1)
   beta = matrix(list$beta[i,], ncol = 1)
   epsilon = list$epsilon[i]
   info_gamma = unpenalized_info + 1/epsilon * K
   chol_info_gamma = chol(info_gamma)
   
-  ####new proposal####
+  # New proposal and forward probability
   fitted_values_scale = drop(exp(Z %f*f% as.matrix(gamma)))
   residuals = drop(y - X %f*f% as.matrix(beta))
   score_gamma = t((residuals/fitted_values_scale)^2 - 1) %f*f% Z
@@ -140,17 +122,13 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info, step
                      x = t(score_gamma) - 1/epsilon * (K %f*f% as.matrix(gamma)),
                      upper.tri = TRUE, transpose = TRUE)
   step = backsolve(r = chol_info_gamma, x = fwd)
-  
   mean_sampler = gamma + stepsize^2/2 * step
   
   
-  
-  
   proposal = drop(rmvnorm2(1, mean_sampler, chol_info_gamma/stepsize))
-  
   forward = dmvnorm2(proposal, mean_sampler, chol_info_gamma/stepsize, log = TRUE)
   
-  ##backward probability
+  # Backward probability
   fitted_values_scale = drop(exp(Z %f*f% as.matrix(proposal)))
   residuals = drop(y - X %f*f% as.matrix(beta))
   score_proposal = t((residuals/fitted_values_scale)^2 - 1) %f*f% Z
@@ -162,8 +140,8 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info, step
   
   mean_sampler_proposal = proposal + stepsize^2/2 * step
   backward = dmvnorm2(drop(gamma), mean_sampler_proposal, chol_info_gamma/stepsize, log = TRUE)
-  ########
   
+  # Log full conditional of gamma
   log_full_cond = function(gamma)
   {
     faktor1 = -sum(Z %f*f% gamma)
@@ -173,14 +151,10 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info, step
     return(faktor1 + faktor2 + faktor3)
   }
   
-  
+  # Acceptance probability and decision
   logp = log_full_cond(proposal) - log_full_cond(gamma) + backward - forward
-  #print(c(optim(gamma,log_full_cond, control=list(fnscale=-1))$value,
-  #             log_full_cond(proposal),
-  #            log_full_cond(gamma), log_full_cond(proposal) >log_full_cond(gamma) ))
-  
-  # accept whole vector
   accept = logp > log(runif(1))
+  
   if (accept == T)
   {
     return(proposal)
@@ -191,8 +165,7 @@ sample.gamma = function(list, X, Z, y, K, i, ngamma, cov, unpenalized_info, step
   }
 }
 
-
-
+# burns prespecified amount of iterations from MCMC-algorithm
 burn = function(result, burning = 1)
 {
   len = length(result$epsilon)
@@ -203,7 +176,7 @@ burn = function(result, burning = 1)
   return(result)
 }
 
-
+# thins prespecified prespecified amount of iterations
 thin = function(result, thinning = 1)
 {
   len = length(result$epsilon)

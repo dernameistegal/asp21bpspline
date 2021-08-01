@@ -1,6 +1,7 @@
+# Main function to initialize Design matrices and penalty matrices
 initialisation = function(m, kn, p_order, order, smooth)
 {
-  #building Matrices for location
+  #Building Matrices for location (Design and Penalty)
   templist = basis_generation(m$x, kn[1], order[1])
   m$spline$loc$X = templist$X
   m$spline$loc$ext_kn = templist$ext_kn
@@ -10,7 +11,7 @@ initialisation = function(m, kn, p_order, order, smooth)
   D = penalty(m$spline$loc$ext_kn, p_order[1])
   m$spline$loc$K = t(D) %*% D
 
-  #building Matrices for scale
+  #Building Matrices for scale (Design and Penalty)
   templist = basis_generation(m$z, kn[2], order[2])
   m$spline$scale$Z = templist$X
   m$spline$scale$ext_kn = templist$ext_kn
@@ -29,10 +30,10 @@ initialisation = function(m, kn, p_order, order, smooth)
   return(m)
 }
 
-
+# Generates model matrices
 basis_generation = function(X, kn, order, lmls = T)
 {
-  # removing superfluous intercept
+  # Removing superfluous intercept if present
   if (!is.null(dim(X)))
   {
     if (all(X[,1] == 1))
@@ -46,7 +47,7 @@ basis_generation = function(X, kn, order, lmls = T)
   mat = data.frame(matrix(0, nrow = length(X), ncol = ext_kn))
   range = range(X)
 
-  # applying basis function to every element
+  # Applying basis functions to every data point
   for (i in 1:ext_kn)
   {
     mat[,i]= basis(kn, i, order, range, X, pos = NA)
@@ -57,7 +58,7 @@ basis_generation = function(X, kn, order, lmls = T)
   return(list(X = X, ext_kn = ext_kn, formerx = formerx))
 }
 
-
+# Generates penalty matrices
 penalty = function(kn, p_order = 2)
 {
   if (p_order == 1)
@@ -74,24 +75,20 @@ penalty = function(kn, p_order = 2)
   }
   
 
-  # recursive definition of prerequisite for penalty matrix
+  # Recursive definition of prerequisite for penalty matrix (not yet the true penalty matrix)
   D = penalty(kn, 1)[1:(kn - p_order), 1:(kn - p_order + 1)]
   D = D %*% penalty(kn, p_order - 1)
   return(D)
 }
 
-" The functions in this section compute the basis for a b-spline model
-
-"
-
-# setitup is called in basis function to provide an accurate extended pos vector
+# A helper function to provide external knots needed for recursive definition of basis functions
 setitup = function(kn, d, range, len)
 {
   pos = rep(NA, times = kn + 2 * d)
   low = 1 + d
   up = kn + d
   pos[(low):(up)] = seq(min(range), max(range), length.out = kn)
-  #extend by d cases
+  #Extend by d cases
   for (i in 1:(d))
   {
     pos[low-i] = pos[low - i + 1] - len
@@ -101,13 +98,10 @@ setitup = function(kn, d, range, len)
   return(pos)
 }
 
-
-
-# recursive definition of bspline based on kneib p 429
-# order is renamed d here to provide more readable code
+# Recursive definition of basis splines based on Kneib p. 429. order is renamed d here to provide more readable code.
 recursivespline = function(i, d, range, x, pos)
 {
-  # defining base case
+  # Defining base case
   if (d == 0)
   {
     index = pos[i] <= x & x < pos[i + 1]
@@ -118,7 +112,7 @@ recursivespline = function(i, d, range, x, pos)
     return(out)
   }
 
-  # defining recursive case
+  # Defining recursive case
   iterand1 = recursivespline(i - 1, d - 1, range, x, pos = pos)
   iterand2 = recursivespline(i    , d - 1, range, x, pos = pos)
 
@@ -131,13 +125,12 @@ recursivespline = function(i, d, range, x, pos)
   faktor2 = (pos[i + 1] - x) / (pos[i + 1] - pos[i + 1 - d])
   product2 = iterand2 * faktor2
 
-  # cat("Called:", "i:", i,"d:", d,"range:", range, "x:", x, "out:", product1 + product2, "\n")
   return(product1 + product2)
 }
 
 
 
-# main function
+# Main function to calculate values of basis functions
 basis = function(kn, i, order, range, x, pos = NA)
 {
   len = (max(range) - min(range)) / (kn - 1)
@@ -149,19 +142,3 @@ basis = function(kn, i, order, range, x, pos = NA)
   out = recursivespline(i, order, range, x, pos)
   return(out)
 }
-
-
-
-# library(lmls)
-#
-# set.seed(100)
-# x <- runif(1000,0,10)
-# y <- 0.5 * x + cos(x) +rnorm(1000)
-#
-# m = lmls(y ~ x, light = FALSE)
-# m = initialisation(m, 11, 2, 2)
-
-
-
-
-

@@ -54,7 +54,6 @@ print.spline <- function(m, digits = max(3, getOption("digits") - 3), ...) {
   invisible(m)
 }
 
-
 #' plot method for spline objects
 #'
 #' @param m 
@@ -77,7 +76,6 @@ plot.spline <- function(m, sd = 1.96)
     ylab("dependent variable")+
     xlab("explaining variable")
 }
-
 
 #' predict method for spline objects
 #'
@@ -107,7 +105,6 @@ predict.spline = function(m, X, Z, isDesignmatrix = F)
   return(list(location = location, scale =scale))
 }
 
-
 #' summary method for spline objects
 #'
 #' @param model 
@@ -122,7 +119,6 @@ summary.spline = function(model, par)
   #todo
   return()
 }
-
 
 #' predict method for spline objects
 #'
@@ -140,8 +136,6 @@ predict.mcmcspline = function(sample, m)
   
   return(predict.spline(m, m$loc$X, m$scale$Z, isDesignmatrix = T))
 }
-
-
 
 #' plot function for MCMC samples of a spline model
 #'
@@ -161,7 +155,6 @@ plot.mcmcspline = function(sample, m)
   plot.spline(m, sd =  1.96)
 }
 
-
 #' summary method for MCMC samples of a spline model
 #'
 #' @param m 
@@ -176,4 +169,3 @@ summary.mcmcspline = function(model, par)
   #todo
   return()
 }
-

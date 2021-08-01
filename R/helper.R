@@ -1,8 +1,10 @@
+# Faster Matrix multiplication with C++
 `%f*f%` <- function(a, b)
 {
   eigenMapMatMult(a, b)
 }
 
+# Alternative rmvnorm function to avoid using "solve" 
 rmvnorm2 = function(n, mu = 0, chol_sig_inv) 
 {
   dim = nrow(chol_sig_inv)
@@ -13,11 +15,8 @@ rmvnorm2 = function(n, mu = 0, chol_sig_inv)
   
   return(shifted)
 }
-#das wäre nötig für den verbleibenden fall, dann wäre es aber eine untere Dreiecksmatrix und das ganze daher nicht wirklich lösbar mit
-#der vorhandenen FUnktion, daher (L^t^-1), daher erstmal weiterhin rmtnorm Package genutzt
-#cov(t(rmvnorm2(1000,c(1,1),solve(t(chol(a))))))
 
-
+# Alternative dmvnorm function to avoid using "solve" 
 dmvnorm2 = function(x, mu = 0, chol_sig_inv, log = FALSE) {
   std_norm = drop(chol_sig_inv %*% (x - mu))
   correction = sum(log(diag(chol_sig_inv)))
@@ -40,4 +39,38 @@ dmvnorm2 = function(x, mu = 0, chol_sig_inv, log = FALSE) {
   {
     return(exp(log_prob))
   }
+}
+
+# Calculate score of beta
+score_beta = function(m)
+{
+  ups = t(m$residuals$location / m$fitted.values$scale^2) %*% m$loc$X
+  return(drop(ups))
+}
+
+# Calculate score of gamma
+score_gamma = function(m)
+{
+  ups = (t(m$residuals/ m$fitted.values$scale)^2 - 1) %*% m$scale$Z
+  return(drop(ups))
+}
+
+# Calculate Fisher information of beta
+info_beta = function(m)
+{
+  crossprod(m$x, diag(as.vector(1/(m$fitted.values$scale^2))) %*% m$loc$X)
+}
+
+# Calculate Fisher information of gamma
+info_gamma = function(m)
+{
+  2 * crossprod(m$scale$Z)
+}
+
+# Helper function to update gamma in the Fisher scoring algorithm
+set_gamma = function(m, gamma)
+{
+  m$coefficients$scale = gamma
+  m$fitted.values$scale = exp(m$scale$Z %*% gamma)
+  return(m)
 }
