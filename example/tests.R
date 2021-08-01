@@ -8,15 +8,15 @@ y =  mean + rnorm(n, 0, 0.05 *x + 0.3)
 
 plot(x,y)
 m1 = list(x = x, z = x, y = y)
-m = spline(m1, kn = c(10,10), order = c(3,3), p_order = c(2,2), smooth = c(0,0))
+m = spline(m1, kn = c(50,50), order = c(3,3), p_order = c(2,2), smooth = c(0,0))
 
 plot(m, sd = 1.96)
 
 
-n = 1000
+n = 2000
 
 a = Sys.time()
-lol = mcmc.spline(m, it = n, burning = 1, thinning = 1)
+lol = mcmc.spline(m, it = n, burning = 100, thinning = 10)
 b = Sys.time()
 b-a
 
