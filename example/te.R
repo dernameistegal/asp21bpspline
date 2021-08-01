@@ -34,8 +34,8 @@ require(asp21bpspline)
 
 set.seed(1)
 n = 1000
-x = seq(0,20, length.out = 200)
-y = 5*sin(x) + rnorm(200, 0, sd = 1 + (sin(x)))
+x = seq(0,20, length.out = n)
+y = 5*sin(x) + rnorm(n, 0, sd = 1 + (sin(x)))
 
 plot(x,y)
 m1 = list(x = x, z = x, y = y)
@@ -44,16 +44,38 @@ m1 = list(x = x, z = x, y = y)
 # #so ist es schon viel besser
 # m = spline(m1, kn = c(40,40), order = c(3,3), p_order = c(3,3), smooth = c(0,0))
 #noch besser
-m = spline(m1, kn = c(50,50), order = c(3,3), p_order = c(2, 2), smooth = c(0,0))
+m = spline(m1, kn = c(40,40), order = c(3,3), p_order = c(3, 3), smooth = c(0,0))
 
 
 plot(m, sd = 1.96)
 lol = mcmc.spline(m, it = 1200, burning = 200, thinning = 10)
 
-
 plot(lol, m)
 
+##############################################
 
+require(asp21bpspline)
+
+set.seed(1)
+n = 1500
+x = seq(0,20, length.out = n)
+mean = -0.0004*x^4 + 0.005* x^3 - 0.05*x^2 + 2*x + 6*sin(x)
+y =  mean + rnorm(n, 0, 0.5*(1 + x - (1/20) * x^2 + abs(3 - 1/10 * x)))
+
+plot(x,y)
+m1 = list(x = x, z = x, y = y)
+# #so funktioniert es nicht
+# m = spline(m1, kn = c(40,40), order = c(3,3), p_order = c(1,1), smooth = c(0,0))
+# #so ist es schon viel besser
+# m = spline(m1, kn = c(40,40), order = c(3,3), p_order = c(3,3), smooth = c(0,0))
+#noch besser
+m = spline(m1, kn = c(40,40), order = c(3,3), p_order = c(3, 3), smooth = c(0,0))
+
+
+plot(m, sd = 1.96)
+lol = mcmc.spline(m, it = 1200, burning = 200, thinning = 10)
+
+plot(lol, m)
 
 
 

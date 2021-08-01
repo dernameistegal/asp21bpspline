@@ -1,5 +1,5 @@
 library(simsalapar)
-res20 = maybeRead("simulation/simulation 2/take_2")
+res20 = maybeRead("simulation/simulation 2/take_10")
 val = getArray(res20)
 
 
@@ -36,10 +36,11 @@ mcmc_result <- predict_simulation(rowMeans(val[,3,1,]),rowMeans(val[,4,1,]), sim
 
 
 # wie weit liegen die Werte von den wahren Werten weg?
-plot(x,type = "l", simu2_mean(x))
+plot(x,type = "l", 5*sin(x))
 #lines(x,type = "l", -0.04*x^2 + 0.5* x + 2*(0.05 *x + 0.3), col = "blue")
 #lines(x,type = "l", -0.04*x^2 + 0.5* x - 2*(0.05 *x + 0.3), col = "blue")
 lines(x, splines_result[[1]], col = "red")
 #lines(x, spline_Werte[[1]] + 2 * spline_Werte[[2]], col = "red")
 #lines(x, spline_Werte[[1]] - 2 * spline_Werte[[2]], col = "red")
 lines(x, mcmc_result[[1]], col = "Blue")
+

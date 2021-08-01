@@ -4,7 +4,9 @@ require(lmls)
 require(asp21bpspline)
 set.seed(1)
 n = 1000
-
+simu2_mean <- function(x){
+  return(-0.0004*x^4 + 0.005* x^3 - 0.05*x^2 + 2*x + 6*sin(x))
+}
 rsimu2data <- function(n){
   x = seq(0,20, length.out = n)
   mean = -0.0004*x^4 + 0.005* x^3 - 0.05*x^2 + 2*x + 6*sin(x)
@@ -19,7 +21,7 @@ plot(x,y)
 
 
 m1 = lmls(y~x, scale = ~x, light = F)
-m = spline(m1, c(15,15), order = c(3,3), p_order = c(2,2), smooth = c(1,1))
+m = spline(m1, c(15,15), order = c(3,3), p_order = c(5,5), smooth = c(1,1))
 
 plot(m, sd = 1.96)
 plot(x,y)
