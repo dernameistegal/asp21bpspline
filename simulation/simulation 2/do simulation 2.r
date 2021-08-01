@@ -1,19 +1,21 @@
 require(simsalapar)
 require(asp21bpspline)
 
+
 rsimu2data <- function(n){
   x = seq(0,20, length.out = n)
-  y = 5*sin(x) + rnorm(n, 0, sd = 1 + (sin(x)))
+  mean = -0.0004*x^4 + 0.005* x^3 - 0.05*x^2 + 2*x + 6*sin(x)
+  y =  mean + rnorm(n, 0, 0.5*(1 + x - (1/20) * x^2 + abs(3 - 1/10 * x)))
   return(list(x = x , y = y))
 }
 
 simulation2 =  varlist(
-  n.sim = list(type = "N", expr = quote(N[sim]), value = 4),
-  n = list(type = "grid", value = 1000),
-  it = list(type = "frozen", value = 1200),
-  knots = list(type = "frozen", value = c(40,40)),
+  n.sim = list(type = "N", expr = quote(N[sim]), value = 10),
+  n = list(type = "grid", value = 500),
+  it = list(type = "frozen", value = 100),
+  knots = list(type = "frozen", value = c(20,20)),
   order = list(type = "frozen", value = c(3, 3)),
-  p_order = list(type = "frozen", value = c(3,3)),
+  p_order = list(type = "frozen", value = c(2,2)),
   smooth =  list(type = "frozen", value = c(0,0)))
 
 
@@ -36,11 +38,10 @@ doOne = function(n,it, knots, order, p_order, smooth)
   return(return_stuff)
 }
 
-doOne(n = 500, it = 1200, knots = c(40,40), order = c(3, 3),
-     p_order = c(3,3), smooth = c(0,0))
+doOne(n = 100, it = 1000, knots = c(15, 15), order = c(3, 3),
+      p_order = c(2,2), smooth = c(0,0))
 
 
-res10 = doClusterApply(simulation2, sfile = "simulation/simulation 2/take_11", doOne = doOne, monitor = T)
+res10 = doLapply(simulation2, sfile = "simulation/simulation 2/take_22222", doOne = doOne, monitor = T)
 
 
-doClusterApply()
