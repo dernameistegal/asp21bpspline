@@ -61,13 +61,13 @@ mcmc.spline = function(m, it, burning, thinning, stepsize = NA, betastart = NA,
   if (is.na(epsstart)) {
     list$epsilon[1] = 0.001
   } else {
-    list$epsilon[1, ] = epsstart
+    list$epsilon[1] = epsstart
   }
   
   if (is.na(taustart)) {
     list$tau[1] = 0.001
   } else {
-    list$tau[1, ] = taustart
+    list$tau[1] = taustart
   }
   
   # Loop for MCMC-algorithm

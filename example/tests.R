@@ -13,10 +13,10 @@ m = spline(m1, kn = c(50,50), order = c(3,3), p_order = c(2,2), smooth = c(0,0))
 plot(m, sd = 1.96)
 
 
-n = 2000
+n = 200
 
 a = Sys.time()
-lol = mcmc.spline(m, it = n, burning = 100, thinning = 10)
+lol = mcmc.spline(m, it = n, burning = 100, thinning = 10, taustart = 1)
 b = Sys.time()
 b-a
 
