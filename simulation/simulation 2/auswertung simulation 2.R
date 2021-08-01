@@ -1,5 +1,5 @@
 library(simsalapar)
-res20 = maybeRead("simulation/simulation 2/take_10")
+res20 = maybeRead("simulation/simulation 2/take_9_andere")
 val = getArray(res20)
 
 
