@@ -13,7 +13,8 @@
 #' @export
 #'
 #'
-mcmc.spline = function(m, it, burning, thinning, stepsize = NA)
+mcmc.spline = function(m, it, burning, thinning, stepsize = NA, betastart = NA, 
+                       gammastart = NA, epsstart = NA, taustart = NA)
 {
   pb = txtProgressBar(min = 0, max = it, style = 3)
   
@@ -35,7 +36,7 @@ mcmc.spline = function(m, it, burning, thinning, stepsize = NA)
               epsilon = sample_epsilon,
               gamma = sample_gamma)
   
-  # Extract elements from model object
+  # Extract elements from model object and initialize starting values for MCMC algorithm
   X = m$loc$X
   y = m$y
   Z = m$scale$Z
@@ -44,10 +45,30 @@ mcmc.spline = function(m, it, burning, thinning, stepsize = NA)
   rk_K1 = m$loc$ext_kn - m$p_order[1]
   rk_K2 = m$scale$ext_kn - m$p_order[2]
   unpenalized_info = m$unpenalized_info
-  list$beta[1, ] = m$coefficients$location
-  list$gamma[1, ] = m$coefficients$scale
-  list$epsilon[1] = sample.epsilon(list, K2, rk_K2, 2)
-  list$tau[1] =   sample.tau(list, K1, rk_K1, 2)
+  
+  if (is.na(betastart)) {
+    list$beta[1, ] = m$coefficients$location
+  } else {
+    list$beta[1, ] = betastart
+  }
+  
+  if (is.na(gammastart)) {
+    list$gamma[1, ] = m$coefficients$scale
+  } else {
+    list$gamma[1, ] = gammastart
+  }
+  
+  if (is.na(epsstart)) {
+    list$epsilon[1] = 0.001
+  } else {
+    list$epsilon[1, ] = epsstart
+  }
+  
+  if (is.na(taustart)) {
+    list$tau[1] = 0.001
+  } else {
+    list$tau[1, ] = taustart
+  }
   
   # Loop for MCMC-algorithm
   for (i in 2:(it))
