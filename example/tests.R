@@ -60,7 +60,7 @@ set.seed(1)
 n = 1500
 x = seq(0,20, length.out = n)
 mean = -0.0004*x^4 + 0.005* x^3 - 0.05*x^2 + 2*x + 6*sin(x)
-y =  mean + rnorm(n, 0, 0.5*(1 + x - (1/20) * x^2 + abs(3 - 1/10 * x)))
+y =  mean + rnorm(n,sd = (2.1 + 2*sin(x) + x^2/200))
 
 plot(x,y)
 m1 = list(x = x, z = x, y = y)
