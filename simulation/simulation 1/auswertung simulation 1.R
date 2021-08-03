@@ -16,9 +16,14 @@ res10 = maybeRead("simulation/simulation 1/take_1")
 beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
 
-biasSE_parameters(beta, gamma, get.n.sim(simulation1), res10)
+biasSE_parameters(beta, gamma, get.n.sim(simulation1), res10, MCMC = F)
+biasSE_parameters(beta, gamma, get.n.sim(simulation1), res10, MCMC = T)
 
-
+meanbeta = findmean(17, 10, res10, 1)
+meangamma = findmean(17,10, res10, 2)
+x = seq(0, 20, length.out = 100)
+pred = predict_simulation(meanbeta, meangamma, knots = c(15, 15), order = c(3,3), x)
+plot_simulation(pred, x)
 
 ##### ab hier hat Valentin was gemacht#####
 m = list()
