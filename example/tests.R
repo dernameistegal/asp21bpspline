@@ -67,8 +67,8 @@ mean = -0.0004*x^4 + 0.005* x^3 - 0.05*x^2 + 2*x + 4*sin(x)
 y =  mean + rnorm(n,sd = (2.1 + 2*sin(x) + x^2/200))
 
 plot(x,mean)
-lines(x,mean + 1*(2.1 + 2*sin(x) + x^2/200))
-lines(x,mean - 1*(2.1 + 2*sin(x) + x^2/200))
+lines(x,mean + 1.96*(2.1 + 2*sin(x) + x^2/200))
+lines(x,mean - 1.96*(2.1 + 2*sin(x) + x^2/200))
 m1 = list(x = x, z = x, y = y)
 # #so funktioniert es nicht
 # m = spline(m1, kn = c(40,40), order = c(3,3), p_order = c(1,1), smooth = c(0,0))

@@ -25,7 +25,6 @@ sim2_predict = function(val, simulation, nseq) {
   number_posterior_samples = (dim(val)[2]-2)/2
   number_diff_datasizes = dim(val)[3]
   number_simulations = dim(val)[4]
-  pb = txtProgressBar(min = 0, max = number_simulations, initial = 0,  style = 3) 
   
   posterior_means = array(dim = c(number_components_parameter, 2, number_diff_datasizes, number_simulations))
   
@@ -51,14 +50,12 @@ sim2_predict = function(val, simulation, nseq) {
         results[, 1, j, k] = predictions$location
         results[, 2, j, k] = predictions$scale
       }
-      setTxtProgressBar(pb,k)
     }
-  close(pb)
   return(results)
 }
 
 # predict scale and location with posterior mean for each simulation and for each sample size of underlying data set
-sim2_prediction = sim2_predict(val, simulation2, nseq = 100)
+sim2_prediction = sim2_predict(val, simulation2, nseq = 1000)
 
 # function to compute the sample bias for scale and location with predictions obtained by posterior mean
 sim2_compute_bias = function(sim2_prediction) {
@@ -105,39 +102,47 @@ sim2_bias_sd = sim2_compute_bias_sd(sim2_prediction)
 abs(sim2_bias) < sim2_bias_sd * 1.96
 
 # plot simulation function from simulation 1 (not changed)
-plot_simulation = function(predictions, truth, x)
+plot_simulation = function(truth_and_pred, sd = 1.96)
 {
-  sd = 1.96
-  data = data.frame(x = x,
-                    ypred = predictions[[1]],
-                    scalepred = predictions[[2]],
-                    ytrue = truth[[1]],
-                    scaletrue = truth[[2]])
-  ggplot2::ggplot(data, mapping = aes(x = x)) +
-    geom_line(aes(y = ypred), colour = "brown4", size = 1)+
-    geom_line(aes(y = ypred + sd * scalepred), colour = "brown3", size = 0.5)+
-    geom_line(aes(y = ypred - sd * scalepred), colour = "brown3", size = 0.5)+
-    geom_line(aes(y = ytrue), colour = "dodgerblue4", size = 1)+
-    geom_line(aes(y = y_true + sd * scaletrue), colour = "dodgerblue3", size = 0.5)+
-    geom_line(aes(y = y_true - sd * scaletrue), colour = "dodgerblue3", size = 0.5)+
-    ylab("dependent variable")+
-    xlab("explaining variable")
+  ggplot2::ggplot(truth_and_pred, aes(x = x, colour = true_or_pred))+
+    geom_line(aes(y = loc), size = 1.5)+
+    geom_line(aes(y = loc + sd * scale), size = 1)+
+    geom_line(aes(y = loc - sd * scale), size = 1)+
+    scale_color_brewer(palette="Dark2")
+    
 }
 
 # plot mean of predictions obtained from posterior mean
 plot_predictions = function(sim2_prediction) {
   dim = dim(sim2_prediction)
+  pred_seq = seq(0, 20, length.out = dim[1])
+  true_loc = loc_sim2(pred_seq) # function from file do simulation 2.r
+  true_scale = scale_sim2(pred_seq) # function from file do simulation 2.r
+  truth = data.frame(x = pred_seq, loc = true_loc, scale = true_scale, true_or_pred = rep("true",length(pred_seq)))
   mean_predictions = apply(sim2_prediction, c(1, 2, 3), mean)
+  
   for (i in 1:dim[3]) {
     mean_predictemp = mean_predictions[,,i]
-    mean_predictemp = list(loc = mean_predictemp[,1], scale = mean_predictemp[,2])
-    pred_seq = seq(0, 20, length.out = dim(sim2_prediction)[1])
-    print(plot_simulation(predictions = mean_predictemp, x = pred_seq))
+    pred = data.frame(x = pred_seq, loc = mean_predictemp[,1], scale = mean_predictemp[,2], true_or_pred = rep("pred", length(pred_seq)))
+    truth_and_pred = rbind(truth, pred)
+    print(plot_simulation(truth_and_pred = truth_and_pred))
     }
   
 }
 require(ggplot2)
 plot_predictions(sim2_prediction)
+
+
+
+ggplot(df, aes(x = instance, y = total_hits)) +
+  geom_point(size = 1) + 
+  geom_line()+
+  geom_line(aes(x=instance, y = line1, colour="myline1")) +
+  geom_vline(xintercept=805) + 
+  geom_line(aes(x=instance, y = line2, colour="myline2"))+
+  geom_line(aes(x=instance, y = line3, colour="myline3")) +
+
+
 
 
 
@@ -274,4 +279,16 @@ for (i in 1:11){
 #lines(x, spline_Werte[[1]] + 2 * spline_Werte[[2]], col = "red")
 #lines(x, spline_Werte[[1]] - 2 * spline_Werte[[2]], col = "red")
 lines(x, mcmc_result[[1]], col = "Blue")
+
+
+
+
+
+
+
+
+
+
+
+
 
