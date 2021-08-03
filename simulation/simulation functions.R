@@ -95,5 +95,20 @@ getQuantiles = function(spline_values, quantile = c(0.025, 0.975), location = T)
 }
 
 
-
-
+#zeigt an welche objekte 0 sind im val objekt
+whereNA = function(val){
+  elemente = which(is.na(val), arr.ind = T)[,c(3:4)]
+  return(unique(elemente))
+}
+#haut alle NAs aus dem val objekt
+cleanNA = function(val){
+  nas = whereNA(val)
+  for ( i in 1:nrow(nas)){
+    #das minus i, damit die richtigen Zeilen rausgehauen werden
+    val = val[,,nas[i,1],- (nas[i,2] - i + 1), drop = F]
+  }
+  return(val)
+}
+# # val ist ein getarray objekt
+# whereNA(val)
+# any(is.na(cleanNA(val)))
