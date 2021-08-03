@@ -16,7 +16,11 @@ plot(m, sd = 1.96)
 n = 200
 
 a = Sys.time()
-lol = mcmc.spline(m, it = n, burning = 100, thinning = 10, taustart = 1)
+lol = mcmc.spline(m, it = 1000, burning = 500, thinning = 10)
+length(lol)
+acf(lol$gamma[,11])
+
+
 b = Sys.time()
 b-a
 
@@ -59,10 +63,12 @@ require(asp21bpspline)
 set.seed(1)
 n = 1500
 x = seq(0,20, length.out = n)
-mean = -0.0004*x^4 + 0.005* x^3 - 0.05*x^2 + 2*x + 6*sin(x)
+mean = -0.0004*x^4 + 0.005* x^3 - 0.05*x^2 + 2*x + 4*sin(x)
 y =  mean + rnorm(n,sd = (2.1 + 2*sin(x) + x^2/200))
 
-plot(x,y)
+plot(x,mean)
+lines(x,mean + 1*(2.1 + 2*sin(x) + x^2/200))
+lines(x,mean - 1*(2.1 + 2*sin(x) + x^2/200))
 m1 = list(x = x, z = x, y = y)
 # #so funktioniert es nicht
 # m = spline(m1, kn = c(40,40), order = c(3,3), p_order = c(1,1), smooth = c(0,0))
@@ -70,7 +76,6 @@ m1 = list(x = x, z = x, y = y)
 # m = spline(m1, kn = c(40,40), order = c(3,3), p_order = c(3,3), smooth = c(0,0))
 #noch besser
 m = spline(m1, kn = c(40,40), order = c(3,3), p_order = c(3, 3), smooth = c(0,0))
-
 
 plot(m, sd = 1.96)
 lol = mcmc.spline(m, it = 1200, burning = 200, thinning = 10)
