@@ -17,27 +17,6 @@ predict_simulation = function(beta, gamma, simulation, x)
 }
 
 
-bias_parameters = function(beta, gamma, simulation)
-{
-  
-  simulation = getarray(simulation)
-
-  for (i in 1:n)
-  {
-    betares[,i] = res10[[i]]$value[,1]
-    gammares[,i] = res10[[i]]$value[,2]
-  }
-  meanbeta = rowSums(betares) / n
-  meangamma = rowSums(gammares) / n
-  
-  # Estimation of bias
-  biasbeta = meanbeta - beta
-  biasgamma = meangamma - gamma
-  
-}
-
-
-
 # helper funktion für die simulation study, um confidence intervals für
 # Grafiken zu erstellen
 
