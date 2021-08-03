@@ -16,6 +16,9 @@ res10 = maybeRead("simulation/simulation 1/take_1")
 beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
 
+
+arra = getArray(res10)
+
 n = get.n.sim(simulation1)
 
 betares = matrix(0, nrow = 17, ncol = n)
@@ -52,6 +55,8 @@ colMeans(biasbeta)
 colMeans(biasgamma)
 mean(SEbeta)
 mean(SEgamma)
+
+
 ##### ab hier hat Valentin was gemacht#####
 m = list()
 class(m) = "spline"
