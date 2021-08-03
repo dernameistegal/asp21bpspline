@@ -74,23 +74,17 @@ getEstimateSplines = function(val, simulation, x)
 # location             sollen location oder scale Werte abgerufen werden
 
 # return               für jede simulation quantile der vorhersagen.
-getQuantiles = function(spline_values, quantile = c(0.025, 0.975), location = T)
+getQuantiles = function(spline_values, quantile = c(0.025, 0.975))
 {
-  if (location)
-  {
-    location = 1
-  }
-  else
-  {
-    location = 2
-  }
-  
-  
+
+  print(dim(spline_values))
   #dier erste dimension geht wegen dem subsetting verloren
-  quantiles = apply(X = spline_values[location,,,,,drop = F], FUN = quantile, 
-                    c(1,2,4,5), quantile)
+  quantiles = apply(X = spline_values, FUN = quantile, 
+                    c(1,2,4,5), quantile, na.rm = T)
+  print(dim(quantiles))
+  quantiles = apply(quantiles, FUN = mean, c(1,2,3,4), na.rm = T)
+  print(dim(quantiles))
   
-  quantiles = apply(quantiles, FUN = mean, c(1,2,3))
   return(quantiles)
 }
 
@@ -103,6 +97,9 @@ whereNA = function(val){
 #haut alle NAs aus dem val objekt
 cleanNA = function(val){
   nas = whereNA(val)
+  if (length(nas) == 0){
+    return(val)
+  }
   for ( i in 1:nrow(nas)){
     #das minus i, damit die richtigen Zeilen rausgehauen werden
     val = val[,,nas[i,1],- (nas[i,2] - i + 1), drop = F]
