@@ -20,7 +20,7 @@ simulation2 =  varlist(
 dim(val)
 
 # function to compute predictions for scale and location with posterior mean for each simulation (n.sim) and for each sample size of underlying data set (n)
-sim2_predict = function(val, simulation, nseq) {
+sim2_compute_posterior_means = function(val) {
   number_components_parameter = dim(val)[1]
   number_posterior_samples = (dim(val)[2]-2)/2
   number_diff_datasizes = dim(val)[3]
@@ -31,31 +31,36 @@ sim2_predict = function(val, simulation, nseq) {
   for (i in 1:2) {
     for (j in 1:number_diff_datasizes) {
       for (k in 1:number_simulations) {
-      ind1 = 3 + (number_posterior_samples) * (i - 1)
-      ind2 = 2 + (number_posterior_samples) * i
-      posterior_means[,i,j,k] = rowMeans(val[,ind1:ind2,j,k])
+        ind1 = 3 + (number_posterior_samples) * (i - 1)
+        ind2 = 2 + (number_posterior_samples) * i
+        posterior_means[,i,j,k] = rowMeans(val[,ind1:ind2,j,k])
       }
     }
   }
-  
-  pred_seq = seq(0, 20, length.out = nseq)
-  results = array(dim = c(nseq, 2, number_diff_datasizes, number_simulations))
-  
-
-    for (j in 1:number_diff_datasizes) {
-      for (k in 1:number_simulations) {
-        location_coef = posterior_means[, 1, j, k]
-        scale_coef = posterior_means[, 2, j, k]
-        predictions = predict_simulation(location_coef, scale_coef, simulation, pred_seq)
-        results[, 1, j, k] = predictions$location
-        results[, 2, j, k] = predictions$scale
-      }
-    }
-  return(results)
+  return(posterior_means)
 }
 
+sim2_posterior_means = sim2_compute_posterior_means(val)
+
+# sim2_predict = function(sim2_posterior_means, simulation, nseq = 1000) {
+#   pred_seq = seq(0, 20, length.out = nseq)
+#   results = array(dim = c(nseq, 2, number_diff_datasizes, number_simulations))
+# 
+# 
+#     for (j in 1:number_diff_datasizes) {
+#       for (k in 1:number_simulations) {
+#         location_coef = posterior_means[, 1, j, k]
+#         scale_coef = posterior_means[, 2, j, k]
+#         predictions = predict_simulation(location_coef, scale_coef, simulation, pred_seq)
+#         results[, 1, j, k] = predictions$location
+#         results[, 2, j, k] = predictions$scale
+#       }
+#     }
+#   return(results)
+# }
+
 # predict scale and location with posterior mean for each simulation and for each sample size of underlying data set
-sim2_prediction = sim2_predict(val, simulation2, nseq = 1000)
+sim2_prediction = sim2_predict(sim2_posterior_means, simulation2)
 
 # function to compute the sample bias for scale and location with predictions obtained by posterior mean
 sim2_compute_bias = function(sim2_prediction) {
@@ -109,7 +114,7 @@ plot_simulation = function(truth_and_pred, sd = 1.96)
     geom_line(aes(y = loc + sd * scale), size = 1)+
     geom_line(aes(y = loc - sd * scale), size = 1)+
     scale_color_brewer(palette="Dark2")
-    
+  
 }
 
 # plot mean of predictions obtained from posterior mean
@@ -126,7 +131,7 @@ plot_predictions = function(sim2_prediction) {
     pred = data.frame(x = pred_seq, loc = mean_predictemp[,1], scale = mean_predictemp[,2], true_or_pred = rep("pred", length(pred_seq)))
     truth_and_pred = rbind(truth, pred)
     print(plot_simulation(truth_and_pred = truth_and_pred))
-    }
+  }
   
 }
 require(ggplot2)
@@ -141,109 +146,50 @@ ggplot(df, aes(x = instance, y = total_hits)) +
   geom_vline(xintercept=805) + 
   geom_line(aes(x=instance, y = line2, colour="myline2"))+
   geom_line(aes(x=instance, y = line3, colour="myline3")) +
-
-
-
-
-
-getEstimateSplines = function(val, simulation, x)
-{
-  # ermittle die anzahl der für mcmc relevanten Spalten
-  dimension = dim(val)
-  iterations = (dimension[2] - 2)/2
   
-  pb = txtProgressBar(min = 0, max = dimension[4], initial = 0,  style = 3) 
   
-  # entferne ML estimates
-  val = val[,3:dimension[2], , , drop = F]
   
-  # Dummy Matrix um ergebnisse zu speichen
-  results = array(data = NA, dim = c(2,length(x), iterations, 
-                                     dimension[3], dimension[4]))
   
-  for (k in 1:dimension[4])
+  
+  getEstimateSplines = function(val, simulation, x)
   {
-    for (j in 1:dimension[3])
-    {
-      for (i in 1:iterations)
-      {
-        location_coef = val[,i, j, k]
-        scale_coef = val[, iterations + i, j, k]
-        predictions = predict_simulation(location_coef, scale_coef, simulation, x)
-        results[, 1, i, j, k] = predictions$location
-        results[, 2, i, j, k] = predictions$scale
-      }
-    }
-    setTxtProgressBar(pb,k)
-  }
-  close(pb)
-  return(results)
-}
-
+    # ermittle die anzahl der für mcmc relevanten Spalten
+    dimension = dim(val)
+    iterations = (dimension[2] - 2)/2
     
+    pb = txtProgressBar(min = 0, max = dimension[4], initial = 0,  style = 3) 
+    
+    # entferne ML estimates
+    val = val[,3:dimension[2], , , drop = F]
+    
+    # Dummy Matrix um ergebnisse zu speichen
+    results = array(data = NA, dim = c(2,length(x), iterations, 
+                                       dimension[3], dimension[4]))
+    
+    for (k in 1:dimension[4])
+    {
+      for (j in 1:dimension[3])
+      {
+        for (i in 1:iterations)
+        {
+          location_coef = val[,i, j, k]
+          scale_coef = val[, iterations + i, j, k]
+          predictions = predict_simulation(location_coef, scale_coef, simulation, x)
+          results[, 1, i, j, k] = predictions$location
+          results[, 2, i, j, k] = predictions$scale
+        }
+      }
+      setTxtProgressBar(pb,k)
+    }
+    close(pb)
+    return(results)
+  }
+
+
 
 
 
 ##### ab hier hat Valentin was gemacht#####
-x <- seq(0,20, length.out = 1000)
-predict_simulation <- function(location_coef, scale_coef, simulation, x){
-  m = list()
-  class(m) = "spline"
-  m$coefficients$location = location_coef
-  m$coefficients$scale = scale_coef
-  m$loc$knots = simulation[["knots"]]$value[1]
-  m$loc$order = simulation[["order"]]$value[1]
-  m$scale$knots= simulation[["knots"]]$value[2]
-  m$scale$order = simulation[["order"]]$value[2]
-  spline_Werte <- predict(m, x, x)
-  return(spline_Werte)
-}
-
-
-
-
-
-#val            Ergebnisse der durchgeführten Simulation als array
-#simulation     name der durchgeführten Simulation
-# x             an welchen stellen sollen die x werte betrachtet werden
-getEstimateSplines = function(val, simulation, x){
-  dimension = dim(val)
-  nr_diff_obs = (dimension[2] - 2)/2
-  #die zwei ist für die location und die scale parameter
-  pb = txtProgressBar(min = 0, max = dimension[4], initial = 0,  style = 3) 
-  results = array(data = NA, dim = c(2,length(x), nr_diff_obs, dimension[3], dimension[4]))
-  for ( k in 1:dimension[4]){
-    for (j in 1:dimension[3]){
-      for (i in 1 : nr_diff_obs){
-        location_coef = val[,i,j,k]
-        scale_coef = val[, nr_diff_obs + i , j, k]
-        predictions = predict_simulation(location_coef, scale_coef, simulation, x)
-        results[1, ,i,j, k] = predictions[[1]]
-        results[2, ,i,j, k] = predictions[[2]]
-      }
-    }
-    setTxtProgressBar(pb,k)
-  }
-  #dimnames(results) = c("sca/loc", "y", "obs", "n", "n.sim")
-  close(pb)
-  return(results)
-}
-dim(spline_values)
-# spline_values       y Werte der geschätzten Splines für alle Dimensionen
-#qunatile             Welche Quantilswerte
-#location             sollen location oder scale Werte abgerufen werden
-
-#return               quantiles of location wise spline
-getQunatiles = function(spline_values, quanti = c(0.025, 0.975), location = T){
-  if (location){
-    location = 1
-  }else{
-    location = 2
-  }
-  #dier erste dimension geht wegen dem subsetting verloren
-  quantiles = apply(X = spline_values[location,,,,,drop = F], FUN = quantile, c(1,2,4,5), quanti)
-  return(quantiles)
-}
 x <- seq(0,20, length.out = 1000)
 spline_values  = getEstimateSplines(val, simulation2, x)
 quantile_values = getQunatiles(spline_values)
