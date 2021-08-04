@@ -1,14 +1,17 @@
-library(simsalapar)
+source("simulation/analysis_functions.R")
 
 simulation1 =  varlist(
-  n.sim = list(type = "N", expr = quote(N[sim]), value = 10),
+  n.sim = list(type = "N", expr = quote(N[sim]), value = 2),
   n = list(type = "grid", value = 1000),
+  it = list(type = "frozen", value = 1500),
   beta = list(type = "frozen", expr = quote(beta), value = beta),
   gamma = list(type = "frozen", expr = quote(gamma), value = gamma),
   knots = list(type = "frozen", value = c(15, 15)),
   order = list(type = "frozen", value = c(3, 3)),
   p_order = list(type = "frozen", value = c(0,0)),
-  smooth =  list(type = "frozen", value = c(0,0)))
+  smooth =  list(type = "frozen", value = c(0,0)),
+  burning =  list(type = "frozen", value = 500),
+  thinning =  list(type = "frozen", value = 10))
 
 
 
@@ -23,9 +26,13 @@ bias = biasSE(truth, res10, MCMC = F, parameter = T, simulation1, x = NA)
 abs(bias$location[,1]) > bias$location[,2] * 1.96
 abs(bias$scale[,1]) > bias$scale[,2] * 1.96
 
-bias = biasSE_parameters(beta, gamma, get.n.sim(simulation1), res10, MCMC = T)
-abs(bias$beta[,1]) > bias$beta[,2] * 1.96
-abs(bias$gamma[,1]) > bias$gamma[,2] * 1.96
+
+# checking for bias in predictions
+x = seq(0,20, length.out = 100)
+truepred = predict_simulation(beta, gamma, simulation1, x)
+bias = biasSE(truepred, res10, MCMC = F, parameter = F, simulation1, x = x)
+abs(bias$location[,1]) > bias$location[,2] * 1.96
+abs(bias$scale[,1]) > bias$scale[,2] * 1.96
 
 
 # plotting mean prediction
