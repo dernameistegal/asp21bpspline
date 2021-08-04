@@ -34,7 +34,7 @@ predict_simulation = function(beta, gamma, knots, order, x)
 }
 
 
-plot_interval = function(predictions, SE, x)
+plot_quantile = function(predictions, SE, x)
 {
   sd = 1.96
   data = data.frame(x = x,
