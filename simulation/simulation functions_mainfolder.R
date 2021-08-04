@@ -22,49 +22,27 @@ predict_simulation = function(beta, gamma, simulation, x)
 # helper funktion für die simulation study, um confidence intervals für
 # Grafiken zu erstellen
 
-#val            Ergebnis der durchgeführten Simulation als array
-# 1. Dimension länge des beta/gamma vectors
-# 2. Dimension anzahl zurückgegebener Werte
-#              hier Beta_ML, Gamma_ML, Beta_MCMC, Gamma_MCMC
-# MCMC spalten können auch aus der gesamten ECDF bestehen
-# 3. Dimension Elemente im Grid, Eintrag hier: n = 1000
-# 4. Dimension Anzahl der Simuliationen
+#input ist eine Liste des doOne mit MCMC, 2 Die Daten zur Simulation,
+# an welchen Stellen geschätt werden soll
 
-#simulation     varlist der durchgeführten simulation
-# x             X vektor für predictions.
-
-# returns predicted location and scale parameters for every simulation and iteration
-getEstimateSplines = function(val, simulation, x)
+# returns 1 scale or location 2 value at specific x postion, 3 which iteration
+getEstimateValues = function(reslist, simulation, x)
 {
   # ermittle die anzahl der für mcmc relevanten Spalten
-  dimension = dim(val)
-  iterations = (dimension[2] - 2)/2
-  
-  pb = txtProgressBar(min = 0, max = dimension[4], initial = 0,  style = 3) 
-  
+  iteration = (dim(reslist)[2] - 2)/2
   # entferne ML estimates
-  val = val[,3:dimension[2], , , drop = F]
-  
+  reslist = reslist[,3:dim(reslist)[2]]
   # Dummy Matrix um ergebnisse zu speichen
-  results = array(data = NA, dim = c(2,length(x), iterations, 
-                                     dimension[3], dimension[4]))
-  
-  for (k in 1:dimension[4])
-  {
-    for (j in 1:dimension[3])
+  results = array(data = NA, dim = c( length(x),2, iteration))
+      for (i in 1:iteration)
     {
-      for (i in 1:iterations)
-      {
-        location_coef = val[,i, j, k]
-        scale_coef = val[, iterations + i, j, k]
-        predictions = predict_simulation(location_coef, scale_coef, simulation, x)
-        results[1, ,i,j, k] = predictions$location
-        results[2, ,i,j, k] = predictions$scale
-      }
+      location_coef = reslist[,i]
+      scale_coef = reslist[, iteration + i]
+      predictions = predict_simulation(location_coef,
+                                       scale_coef, simulation, x)
+      results[ ,1,i] = predictions$location
+      results[ ,2,i] = predictions$scale
     }
-    setTxtProgressBar(pb,k)
-  }
-  close(pb)
   return(results)
 }
 
@@ -79,15 +57,36 @@ getEstimateSplines = function(val, simulation, x)
 getQuantiles = function(spline_values, quantile = c(0.025, 0.975))
 {
   
-  print(dim(spline_values))
   #dier erste dimension geht wegen dem subsetting verloren
   quantiles = apply(X = spline_values, FUN = quantile, 
-                    c(1,2,4,5), quantile, na.rm = T)
-  print(dim(quantiles))
-  quantiles = apply(quantiles, FUN = mean, c(1,2,3,4), na.rm = T)
-  print(dim(quantiles))
+                    c(1,2), quantile)
   
   return(quantiles)
+}
+
+# res_zeile Ist eine Zeile des Resultats
+# x         sind die x Werte
+# qunatile  selbsterklärend
+# simulaiton Simulationsobjekt
+
+#return dimension 1 sind die Quantile, dimension 2 sind die Stellen an
+#denen geschätzt wurde, DImension drei sind location bzw. Scale
+
+estimate_quantile_splines <- function(res_zeile,x, quantile = c(0.025, 0.975)
+                                      ,simulation){
+  # wie viele durchläufe hatte doOne für den Parameter der Grid
+  n = length(res_zeile)
+  data = array(data=NA, dim = c(n,length(quantile),length(x),2))
+  pb = txtProgressBar(min = 0, max = n, style = 3)
+  for (i in 1:n){
+    estimations = getEstimateValues(res_zeile[[i]]$value,simulation, x)
+    estimations = getQuantiles(estimations, quantile)
+    data[i,,,] = estimations
+    setTxtProgressBar(pb, i)
+  }
+  data = apply(data,MARGIN =c(2,3,4) ,FUN = mean )
+  close(pb)
+  return(data)
 }
 
 
@@ -111,32 +110,19 @@ cleanNA = function(val){
 # # val ist ein getarray objekt
 # whereNA(val)
 # any(is.na(cleanNA(val)))
-
-# plot function to be used in simulation 1 and 2
-plot_simulation = function(truth_and_pred, sd = 1.96)
-{
-  ggplot2::ggplot(truth_and_pred, aes(x = x, colour = true_or_pred))+
-    geom_line(aes(y = loc), size = 1.5)+
-    geom_line(aes(y = loc + sd * scale), size = 1)+
-    geom_line(aes(y = loc - sd * scale), size = 1)+
-    scale_color_brewer(palette="Dark2")
-  
+#nimmt ein Array mit MCMC schätzern und wandelt sie zu einem Array
+#wo nur noch loc scale locmcmc und scalemcmc vorkommen um
+ToNormal <- function(reslist){
+  dimension = dim(reslist)
+  nobs = (dimension[2] - 2)/2
+  locmcmc = rowMeans(reslist[,3:nobs + 2])
+  scalemcmc = rowMeans(reslist[,(nobs+3):dimension[2]])
+  return(cbind(reslist[,1:2],locmcmc,scalemcmc))
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#erweiterung der ToNormal funktion auf einen ganzen Vektor des Ergebnisses
+all_ToNormal = function(resline){
+  for (i in 1:length(resline)){
+    resline[[i]]$value = ToNormal(resline[[i]]$value)
+  }
+  return(resline)
+}
