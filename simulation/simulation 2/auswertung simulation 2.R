@@ -1,23 +1,36 @@
 library(simsalapar)
-res20 = maybeRead("simulation/simulation 2/simulation2_test1")
-val = getArray(res20)
-val_withNA = val[,,1,,drop = F] # check of NA values were simulated (not final)
-val = val[,,c(2,3),,drop = F] # check of NA values were simulated (not final)
-any(is.na(val)) # check of NA values were simulated (not final)
+# result from simulation
+res = maybeRead("simulation/simulation 2/test99")
 
-# just copied from do simulation 2.r
+# simulation object
 simulation2 =  varlist(
-  n.sim = list(type = "N", expr = quote(N[sim]), value = 50),
-  n = list(type = "grid", value = c(250,500,1000)),
+  n.sim = list(type = "N", expr = quote(N[sim]), value = 5),
+  n = list(type = "grid", value = c(500)),
   it = list(type = "frozen", value = 1500),
   knots = list(type = "frozen", value = c(40,40)),
   order = list(type = "frozen", value = c(3, 3)),
   p_order = list(type = "frozen", value = c(3,3)),
   smooth =  list(type = "frozen", value = c(0,0)))
 
-# 1: number of components in parameter vector, 2: (n-2)/2 samples from posterior for beta and gamma and one MLE estimate for beta and gamma, 
-# 3: number of different amounts of available data, 4: number of simulations
-dim(val)
+# 
+
+
+
+# n anzahl simu, len anzahl parameterkomponenten, j = 3 (locmcmc) j = 4 scalemcmc, res = res)
+findmean = function(len, n, res, j)
+{
+  
+  vector = matrix(0, nrow = len, ncol = n)
+  
+  for (i in 1:n)
+  {
+    vector[,i] = res[[i]]$value[,j]
+  }
+  mean = rowSums(vector) / n
+  return(mean)
+}
+
+
 
 # function to compute predictions for scale and location with posterior mean for each simulation (n.sim) and for each sample size of underlying data set (n)
 sim2_compute_posterior_means = function(val) {

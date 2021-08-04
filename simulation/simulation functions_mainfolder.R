@@ -109,3 +109,32 @@ cleanNA = function(val){
 # # val ist ein getarray objekt
 # whereNA(val)
 # any(is.na(cleanNA(val)))
+
+# plot function to be used in simulation 1 and 2
+plot_simulation = function(truth_and_pred, sd = 1.96)
+{
+  ggplot2::ggplot(truth_and_pred, aes(x = x, colour = true_or_pred))+
+    geom_line(aes(y = loc), size = 1.5)+
+    geom_line(aes(y = loc + sd * scale), size = 1)+
+    geom_line(aes(y = loc - sd * scale), size = 1)+
+    scale_color_brewer(palette="Dark2")
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
