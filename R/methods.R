@@ -69,12 +69,12 @@ plot.spline <- function(m, sd = 1.96)
                     ypred = m[["fitted.values"]]$location,
                     scalepred = m[["fitted.values"]]$scale)
   ggplot2::ggplot(data, mapping = aes(x = m$formerx)) +
-    geom_point(aes(y = y)) +
-    geom_line(aes(y = ypred), colour = "green", size = 2)+
-    geom_line(aes(y = ypred + sd * scalepred), colour = "blue", size = 1)+
-    geom_line(aes(y = ypred - sd * scalepred), colour = "blue", size = 1)+
-    ylab("dependent variable")+
-    xlab("explaining variable")
+    geom_point(aes(y = y), size = 1, alpha = 0.4) +
+    geom_line(aes(y = ypred), colour = "black", alpha = 0.9, size = 1)+
+    geom_line(aes(y = ypred + sd * scalepred), colour = "black", alpha = 0.9, size = 1)+
+    geom_line(aes(y = ypred - sd * scalepred), colour = "black", alpha = 0.9, size = 1)+
+    ylab("response")+
+    xlab("predictor")
 }
 
 #' predict method for spline objects
@@ -98,7 +98,7 @@ predict.spline = function(m, X, Z, isDesignmatrix = F)
     X = basis_generation(X, m$loc$knots, m$loc$order)$X
     Z = basis_generation(Z, m$scale$knots, m$scale$order)$X
   }
-
+  
   
   location = X %f*f% as.matrix(beta)
   scale = exp(Z %f*f% as.matrix(gamma))
