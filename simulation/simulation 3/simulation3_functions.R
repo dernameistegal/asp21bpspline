@@ -92,9 +92,10 @@ cleanNA = function(val){
 # any(is.na(cleanNA(val)))
 #nimmt ein Array mit MCMC schätzern und wandelt sie zu einem Array
 #wo nur noch loc scale locmcmc und scalemcmc vorkommen um
-ToNormal <- function(reslist){
+ToNormal = function(reslist){
   dimension = dim(reslist)
   nobs = (dimension[2] - 2)/2
+  browser()
   locmcmc = rowMeans(reslist[,3:nobs + 2])
   scalemcmc = rowMeans(reslist[,(nobs+3):dimension[2]])
   return(cbind(reslist[,1:2],locmcmc,scalemcmc))

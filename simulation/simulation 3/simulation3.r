@@ -1,6 +1,6 @@
 require(simsalapar)
 require(asp21bpspline)
-source("simulation/simulation 1/simulation functions.R")
+source("simulation/simulation 1/simulation1_functions.R")
 
 beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
