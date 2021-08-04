@@ -1,5 +1,3 @@
-source("simulation/simulation functions_mainfolder.R")
-
 # done 
 findmean = function(result, j)
 {
