@@ -12,15 +12,16 @@ simulation1 =  varlist(
 
 
 
-res10 = maybeRead("simulation/simulation 1/take_1")
+res10 = maybeRead("simulation/simulation 1/take1")
 beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
 
+truth = list(beta, gamma)
 
 # checking for bias in parameters
-bias = biasSE_parameters(beta, gamma, get.n.sim(simulation1), res10, MCMC = F)
-abs(bias$beta[,1]) > bias$beta[,2] * 1.96
-abs(bias$gamma[,1]) > bias$gamma[,2] * 1.96
+bias = biasSE(truth, res10, MCMC = F, parameter = T, simulation1, x = NA)
+abs(bias$location[,1]) > bias$location[,2] * 1.96
+abs(bias$scale[,1]) > bias$scale[,2] * 1.96
 
 bias = biasSE_parameters(beta, gamma, get.n.sim(simulation1), res10, MCMC = T)
 abs(bias$beta[,1]) > bias$beta[,2] * 1.96
