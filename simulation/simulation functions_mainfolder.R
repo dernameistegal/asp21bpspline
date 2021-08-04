@@ -76,7 +76,7 @@ getEstimateSplines = function(val, simulation, x)
 # return               für jede simulation quantile der vorhersagen.
 getQuantiles = function(spline_values, quantile = c(0.025, 0.975))
 {
-
+  
   print(dim(spline_values))
   #dier erste dimension geht wegen dem subsetting verloren
   quantiles = apply(X = spline_values, FUN = quantile, 

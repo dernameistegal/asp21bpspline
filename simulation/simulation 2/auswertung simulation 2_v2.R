@@ -1,6 +1,6 @@
 source("simulation/simulation functions.R")
 
-
+library(asp21bpspline)
 library(simsalapar)
 res20 = maybeRead("simulation/simulation 2/simulation2_test1")
 val = getArray(res20)
@@ -30,6 +30,7 @@ est_250 = getEstimateSplines(val_250, simulation2, x)
 quant_250  = getQuantiles(est_250)
 any(is.na(est_250))
 #### for rest ####
+set.seed(1)
 est_rest = getEstimateSplines(val_rest, simulation2, x)
 quant_rest  = getQuantiles(est_rest)
 any(is.na(est_rest))
