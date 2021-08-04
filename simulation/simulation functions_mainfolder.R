@@ -1,4 +1,6 @@
 library(simsalapar)
+require(ggplot2)
+require(asp21bpspline)
 
 # predictions for location and scale new x values
 # simulation is the variable list
