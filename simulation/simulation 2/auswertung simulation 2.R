@@ -16,27 +16,22 @@ simulation2 =  varlist(
   p_order = list(type = "frozen", value = c(3,3)),
   smooth =  list(type = "frozen", value = c(0,0)))
 
-plot_simulation = function(truth_and_pred, sd = 1.96)
+plot_simulation = function(truth_and_pred, sd = 1)
 {
-  ggplot2::ggplot(truth_and_pred, aes(x = x, linetype = true_or_pred))+
+  ggplot2::ggplot(truth_and_pred, aes(x = x, linetype = true_or_pred, alpha = true_or_pred))+
     geom_line(aes(y = loc), size = 1)+
     geom_line(aes(y = loc + sd * scale), size = 1)+
     geom_line(aes(y = loc - sd * scale), size = 1)+
     labs(x = "predictor", y = "location and scale value")+
     theme(legend.title = element_blank())+
-    scale_color_brewer(palette="Dark2")+
+    scale_alpha_manual(values = c(0.4, 1), guide = "none")+
     scale_linetype_manual(values = c(1, 3),
-                          labels = c("true", "predicted"))
+                          labels = c("true", "predicted"))+
+    scale_color_brewer(palette="Dark2")
 }
 
-#biasSE(list(true_loc, true_scale), res20, MCMC = F, parameter = F, simulation2, x = pred_seq)
-# bias = biasSE(list(true_loc, true_scale), res20, MCMC = F, parameter = F, simulation2, x = pred_seq)
-# abs(bias$location[,1]) > bias$location[,2] * 1.96
-# abs(bias$scale[,1]) > bias$scale[,2] * 1.96
-# data.frame(pred_seq, bias = bias$location[,1],se196= bias$location[,2] * 1.96, biased= abs(bias$location[,1]) > bias$location[,2] * 1.96)
-
-
-# plot
+# plot (true values need to be obtained in a different way depending on the simulation and need to be
+# provided in vector form with names true_loc and true_scale)
 meanbeta = findmean(res20, 3)
 meangamma = findmean(res20, 4)
 pred_seq = seq(0, 20, length.out = 10000)
@@ -50,7 +45,13 @@ truth = data.frame(x = pred_seq, loc = true_loc, scale = true_scale, true_or_pre
 truth_pred = rbind(truth, pred)
 plot_simulation(truth_and_pred = truth_pred, sd = 1.96)
 
+#compute bias and standard error
+biasSE(list(true_loc, true_scale), res20, MCMC = T, parameter = F, simulation2, x = pred_seq)
 
+# bias = biasSE(list(true_loc, true_scale), res20, MCMC = F, parameter = F, simulation2, x = pred_seq)
+# abs(bias$location[,1]) > bias$location[,2] * 1.96
+# abs(bias$scale[,1]) > bias$scale[,2] * 1.96
+# data.frame(pred_seq, bias = bias$location[,1],se196= bias$location[,2] * 1.96, biased= abs(bias$location[,1]) > bias$location[,2] * 1.96)
 
 
 
