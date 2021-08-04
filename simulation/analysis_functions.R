@@ -53,9 +53,6 @@ biasSE = function(truth, result, MCMC = F, parameter = T, varlist, x = NA)
   
   
   # Estimation of Standard Error
-  helper1 = matrix(0, nrow = len, ncol = n)
-  helper2 = matrix(0, nrow = len, ncol = n)
-  
   betares = matrix(0, nrow = len, ncol = n)
   gammares = matrix(0, nrow = len, ncol = n)
   
@@ -67,6 +64,8 @@ biasSE = function(truth, result, MCMC = F, parameter = T, varlist, x = NA)
   
   if (parameter == T)
   {
+    helper1 = matrix(0, nrow = len, ncol = n)
+    helper2 = matrix(0, nrow = len, ncol = n)
     for (i in 1:n)
     {
       helper1[,i] = (betares[,i] - meanbeta)^2
@@ -76,16 +75,23 @@ biasSE = function(truth, result, MCMC = F, parameter = T, varlist, x = NA)
   
   else if (parameter == F)
   {
+    helper1 = matrix(0, nrow = length(x), ncol = n)
+    helper2 = matrix(0, nrow = length(x), ncol = n)
+    
+    predall = list(loc = matrix(0, nrow = length(x),ncol = n), 
+                   scale =matrix(0, nrow = length(x),ncol = n))
     # do predictions for every simulation
     for (i in 1:n)
     {
       temp = predict_simulation(betares[,i], gammares[,i], varlist, x)
+      predall[[1]][,i] = temp[[1]]
+      predall[[2]][,i] = temp[[2]]
     }
     
     for (i in 1:n)
     {
-      helper1[,i] = (temp[[1]][,i] - pred[[1]])^2
-      helper2[,i] = (temp[[2]][,i] - pred[[2]])^2
+      helper1[,i] = (predall[[1]][,i] - pred[[1]])^2
+      helper2[,i] = (predall[[2]][,i] - pred[[2]])^2
     }
     
   }
