@@ -67,4 +67,3 @@ doOne = function(init, n, beta, gamma, it, knots, order, p_order, smooth, burnin
 
 res3 = doLapply(simulation3, sfile = "simulation/simulation 3/simulation3_test1"
                 , monitor = T, doOne = doOne)
-
