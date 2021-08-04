@@ -44,14 +44,14 @@ plot_simulation(pred, x)
 
 # checking for MSE in predictions
 MSE = MSE_predictions(beta, gamma, get.n.sim(simulation1), res10, seq = x, knots = c(15,15), 
-                order = c(3,3))
+                      order = c(3,3))
 sd = sqrt(MSE)
 
 
 
 
 bias = bias_predictions(beta, gamma, get.n.sim(simulation1), res10, seq = x, knots = c(15,15), 
-                order = c(3,3))
+                        order = c(3,3))
 bias
 colMeans(bias)
 

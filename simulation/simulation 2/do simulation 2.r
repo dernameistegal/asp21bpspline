@@ -48,6 +48,6 @@ doOne = function(n,it, knots, order, p_order, smooth)
 #       p_order = c(2,2), smooth = c(0,0))
 
 
-res10 = doLapply(simulation2, sfile = "simulation/simulation 2/test99", doOne = doOne, monitor = T)
+res10 = doLapply(simulation2, sfile = "simulation/simulation 2/test100", doOne = doOne, monitor = T)
 
 
