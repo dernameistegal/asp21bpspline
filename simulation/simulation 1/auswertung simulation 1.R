@@ -16,31 +16,35 @@ res10 = maybeRead("simulation/simulation 1/take_1")
 beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
 
-biasSE_parameters(beta, gamma, get.n.sim(simulation1), res10, MCMC = F)
-biasSE_parameters(beta, gamma, get.n.sim(simulation1), res10, MCMC = T)
 
+# checking for bias in parameters
+bias = biasSE_parameters(beta, gamma, get.n.sim(simulation1), res10, MCMC = F)
+abs(bias$beta[,1]) > bias$beta[,2] * 1.96
+abs(bias$gamma[,1]) > bias$gamma[,2] * 1.96
+
+bias = biasSE_parameters(beta, gamma, get.n.sim(simulation1), res10, MCMC = T)
+abs(bias$beta[,1]) > bias$beta[,2] * 1.96
+abs(bias$gamma[,1]) > bias$gamma[,2] * 1.96
+
+
+# plotting mean prediction
 meanbeta = findmean(17, 10, res10, 1)
 meangamma = findmean(17,10, res10, 2)
 x = seq(0, 20, length.out = 100)
 pred = predict_simulation(meanbeta, meangamma, knots = c(15, 15), order = c(3,3), x)
 plot_simulation(pred, x)
 
-##### ab hier hat Valentin was gemacht#####
-m = list()
-class(m) = "spline"
-m$coefficients$location = meanbeta
-m$coefficients$scale = meangamma
-m$loc$knots = simulation1[["knots"]]$value[1]
-m$loc$order = simulation1[["order"]]$value[1]
-m$scale$knots= simulation1[["knots"]]$value[2]
-m$scale$order = simulation1[["order"]]$value[2]
-x <- seq(0,20, length.out = 1000)
-spline_Werte <- predict(m, x, x)
+# checking for MSE in predictions
+MSE = MSE_predictions(beta, gamma, get.n.sim(simulation1), res10, seq = x, knots = c(15,15), 
+                order = c(3,3))
+sd = sqrt(MSE)
 
-# wie weit liegen die Werte von den wahren Werten weg?
-plot(x,type = "l", -0.04*x^2 + 0.5* x, col = "green")
-lines(x,type = "l", -0.04*x^2 + 0.5* x + 2*(0.05 *x + 0.3), col = "blue")
-lines(x,type = "l", -0.04*x^2 + 0.5* x - 2*(0.05 *x + 0.3), col = "blue")
-lines(x, spline_Werte[[1]])
-lines(x, spline_Werte[[1]] + 2 * spline_Werte[[2]], col = "red")
-lines(x, spline_Werte[[1]] - 2 * spline_Werte[[2]], col = "red")
+
+
+
+bias = bias_predictions(beta, gamma, get.n.sim(simulation1), res10, seq = x, knots = c(15,15), 
+                order = c(3,3))
+bias
+colMeans(bias)
+
+
