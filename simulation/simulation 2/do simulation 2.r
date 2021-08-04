@@ -19,9 +19,9 @@ rsimu2data <- function(n){
 }
 
 simulation2 =  varlist(
-  n.sim = list(type = "N", expr = quote(N[sim]), value = 5),
-  n = list(type = "grid", value = c(500)),
-  it = list(type = "frozen", value = 1500),
+  n.sim = list(type = "N", expr = quote(N[sim]), value = 200),
+  n = list(type = "grid", value = c(1500)),
+  it = list(type = "frozen", value = 2000),
   knots = list(type = "frozen", value = c(40,40)),
   order = list(type = "frozen", value = c(3, 3)),
   p_order = list(type = "frozen", value = c(3,3)),
@@ -48,6 +48,5 @@ doOne = function(n,it, knots, order, p_order, smooth)
 #       p_order = c(2,2), smooth = c(0,0))
 
 
-res10 = doLapply(simulation2, sfile = "simulation/simulation 2/test100", doOne = doOne, monitor = T)
-
+res10 = doLapply(simulation2, sfile = "simulation/simulation 2/test111", doOne = doOne, monitor = T)
 
