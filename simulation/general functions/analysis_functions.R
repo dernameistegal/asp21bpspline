@@ -1,4 +1,4 @@
-# done 
+# computes mean of parameters over all simulations 
 findmean = function(result, j)
 {
   n = length(result)
@@ -15,7 +15,7 @@ findmean = function(result, j)
 
 
 # The function expects truth to be a list object with
-# two vectors beta and gamma the true spline parameters or the true spline values
+# two vectors beta and gamma the true spline parameters or the true (spline) mean values
 # if parameter = F the function expects the same form of truth but for the
 # bias the predictions are computed first, also an x needs to be specified
 # varlist is the variable list of the simulation
