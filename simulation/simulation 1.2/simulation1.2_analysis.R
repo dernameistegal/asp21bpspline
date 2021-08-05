@@ -1,5 +1,6 @@
 source("simulation/general functions/analysis_functions.R")
 source("simulation/general functions/generic_simulation_functions.R")
+source("simulation/simulation 2/simulation2_functions.R")
 library(simsalapar)
 library(ggplot2)
 require(asp21bpspline)
@@ -20,7 +21,7 @@ simulation1 =  varlist(
 
 
 
-res10 = maybeRead("simulation/simulation 1/take3")
+res10 = maybeRead("simulation/simulation 1/take2")
 beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
 
