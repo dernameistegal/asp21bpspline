@@ -47,8 +47,8 @@ est_quantile_error = estimate_quantile_splines(clean_error, x, quantile = c(0.1,
 plot_simulation3(est_mean_normal, est_quantile_normal,x)
 plot_simulation3(est_mean_random, est_quantile_random,x)
 plot_simulation3(est_mean_error, est_quantile_error,x)
-  
-a = predict_simulation(beta, gamma,simulation3, x )
-ggplot(mapping = aes(x = x)) + geom_line(aes(y = a[[1]])) + geom_line(aes(y = a[[1]]+ 1.96*a[[2]]))+
-   geom_line(aes(y = a[[1]]- 1.96*a[[2]]))
-
+#   
+# a = predict_simulation(beta, gamma,simulation3, x )
+# ggplot(mapping = aes(x = x)) + geom_line(aes(y = a[[1]])) + geom_line(aes(y = a[[1]]+ 1.96*a[[2]]))+
+#    geom_line(aes(y = a[[1]]- 1.96*a[[2]]))
+# 

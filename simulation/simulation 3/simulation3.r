@@ -12,7 +12,7 @@ simulation3 =  varlist(
   it = list(type = "frozen", value = 1500),
   beta = list(type = "frozen", expr = quote(beta), value = beta),
   gamma = list(type = "frozen", expr = quote(gamma), value = gamma),
-  knots = list(type = "frozen", value = c(15, 15)),
+  knots = list(type = "frozen", value = c(40, 40)),
   order = list(type = "frozen", value = c(3, 3)),
   p_order = list(type = "frozen", value = c(0,0)),
   smooth =  list(type = "frozen", value = c(0,0)),
