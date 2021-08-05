@@ -1,5 +1,10 @@
-source("simulation/analysis_functions.R")
-source("simulation/simulation functions_mainfolder.R")
+source("simulation/general functions/analysis_functions.R")
+source("simulation/general functions/generic_simulation_functions.R")
+source("simulation/simulation 2/simulation2_functions.R")
+library(simsalapar)
+library(ggplot2)
+require(asp21bpspline)
+
 
 simulation1 =  varlist(
   n.sim = list(type = "N", expr = quote(N[sim]), value = 2),

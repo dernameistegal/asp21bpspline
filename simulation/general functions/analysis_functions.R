@@ -163,7 +163,7 @@ mean_MSE = function(truth, result, MCMC = F, parameter = T, varlist, x = NA)
     }
   }
 
-  return(c(mean(MSE$loc), mean(MSE$scale)))
+  return(c(colMeans(MSE$loc), colMeans(MSE$scale)))
 }
 
 
