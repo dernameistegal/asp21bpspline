@@ -25,8 +25,7 @@ getEstimateValues = function(reslist, simulation, x)
   }
   return(results)
 }
-
-
+apply(res3[[3,3]]$value[,104:204], 1, quantile)
 
 
 # spline_values        return der getEstimatesSplines funktion
@@ -52,7 +51,7 @@ getQuantiles = function(spline_values, quantile = c(0.025, 0.975))
 #return dimension 1 sind die Quantile, dimension 2 sind die Stellen an
 #denen geschätzt wurde, DImension drei sind location bzw. Scale
 
-estimate_quantile_splines <- function(res_zeile,x, quantile = c(0.025, 0.975)
+estimate_quantile_splines = function(res_zeile,x, quantile = c(0.025, 0.975)
                                       ,simulation){
   # wie viele durchläufe hatte doOne für den Parameter der Grid
   n = length(res_zeile)
@@ -95,7 +94,6 @@ cleanNA = function(val){
 ToNormal = function(reslist){
   dimension = dim(reslist)
   nobs = (dimension[2] - 2)/2
-  browser()
   locmcmc = rowMeans(reslist[,3:nobs + 2])
   scalemcmc = rowMeans(reslist[,(nobs+3):dimension[2]])
   return(cbind(reslist[,1:2],locmcmc,scalemcmc))
@@ -107,3 +105,59 @@ all_ToNormal = function(resline){
   }
   return(resline)
 }
+
+plot_simulation3 = function(est_mean, est_quant, x){
+  data = data.frame(x = x, loc_mean = est_mean$location, 
+                    loc_quant_lower = est_quant[1,,1],loc_quant_upper = est_quant[2,,1],
+                    sc_mean = est_mean$scale,
+                    sc_qu_low = est_quant[1,,2], sc_qu_upper = est_quant[2,,2])
+  ggplot(data, aes(x = x)) + geom_line(aes(y = loc_mean))+
+    geom_ribbon(aes(ymin=loc_quant_lower,ymax=loc_quant_upper),alpha=0.3)+
+    geom_line(aes(y= loc_mean + 1.96 * sc_mean))+
+    geom_line(aes(y= loc_mean - 1.96 * sc_mean))+
+    geom_ribbon(aes(ymin=loc_mean - 1.96 * sc_qu_upper,ymax=loc_mean - 1.96 *sc_qu_low )
+                ,alpha=0.3)+
+    geom_ribbon(aes(ymin=loc_mean + 1.96 * sc_qu_low,ymax=loc_mean + 1.96 *sc_qu_upper )
+                ,alpha=0.3)+
+    labs(x = "predictor" , y = "mean and credible intevalls")
+}
+# Eine Simulationliste ist der Input
+# Returned wird ob der MCMC Sampler für Gamma irgendwann stuck ist
+
+FindStuck <- function(resij)
+{
+  n = (ncol(resij$value)-2) / 2
+  quants = apply(resij$value[,(n+3):(2*n + 2)], 1, quantile, c(0,1))
+  return(all(quants[1,] == quants[2,]))
+}
+#entfernt in einer Zeile alle Stucks, bzw. zeigt alle an die Stuck sind
+CleanStuck = function(resi, remove = T){
+  n = length(resi)
+  stucks = c(rep(NA,n))
+  for (j in 1:n)
+  {
+    stucks[j] = FindStuck(resi[[j]])
+  }
+  print(paste0(100 * sum(stucks)/(length(stucks)), "% sind stuck"))
+  if (!remove)
+  {
+    return(stucks)
+  }
+  else
+  {
+    unstuck = list()
+    for (j in 1:length(stucks))
+    {
+      if (!stucks[j])
+      {
+        unstuck = append(unstuck,resi[j])
+      }
+      else
+      {
+        next
+      }
+    }
+    return(unstuck)
+  }
+}
+
