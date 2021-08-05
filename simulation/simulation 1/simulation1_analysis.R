@@ -87,5 +87,22 @@ truth = data.frame(x = x,
 truth_pred = rbind(truth, pred)
 plot_simulation(truth_and_pred = truth_pred, sd = 1.96)
 
+#Plotting quantiles
+x = seq(0,20, length.out = 1000)
+#without MCMC
+spline_values = getEstimateValuesFourData(res10, simulation1, x, MCMC = F)
+est_quantile = getQuantiles(spline_values, quantile = c(0.01,0.99))
+est_mean = predict_simulation(findmean(res10, 1),findmean(res10,2),simulation1,x)
+plot_simulation3(est_mean, est_quantile,x)
+
+#with MCMC
+spline_values = getEstimateValuesFourData(res10, simulation1, x, MCMC = T)
+est_quantile = getQuantiles(spline_values, quantile = c(0.01,0.99))
+est_mean = predict_simulation(findmean(res10, 3),findmean(res10,4),simulation1,x)
+plot_simulation3(est_mean, est_quantile,x)
+
+
+
+
 
 

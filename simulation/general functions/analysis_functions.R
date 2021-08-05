@@ -167,4 +167,51 @@ mean_MSE = function(truth, result, MCMC = F, parameter = T, varlist, x = NA)
 }
 
 
+getEstimateValuesFourData = function(resi, simulation, x, MCMC = F)
+{
+  mcmc = 1 + MCMC * 2
+  n = length(resi)
+  results = array(data = NA, dim = c( length(x),2, n))
+  for (j in 1:n)
+  {
+    location_coef = resi[[j]]$value[,mcmc]
+    scale_coef = resi[[j]]$value[,mcmc + 1]
+    predictions = predict_simulation(location_coef,
+                                     scale_coef, simulation, x)
+    results[ ,1,j] = predictions$location
+    results[ ,2,j] = predictions$scale
+  }
+  return(results)
+}
+# spline_values        return der getEstimatesSplines funktion
+# quantile             Welche Quantilswerte
 
+# return               für jede simulation quantile der vorhersagen.
+getQuantiles = function(spline_values, quantile = c(0.025, 0.975))
+{
+  
+  #dier erste dimension geht wegen dem subsetting verloren
+  quantiles = apply(X = spline_values, FUN = quantile, 
+                    c(1,2), quantile)
+  
+  return(quantiles)
+}
+
+# est_mean    an object which was created by predict_simulation
+#est_quant    an object which was created by get quantiles c(lower,upper) or from estimate_quantile_splines
+#x            the values which you want to plot
+plot_simulation3 = function(est_mean, est_quant, x){
+  data = data.frame(x = x, loc_mean = est_mean$location, 
+                    loc_quant_lower = est_quant[1,,1],loc_quant_upper = est_quant[2,,1],
+                    sc_mean = est_mean$scale,
+                    sc_qu_low = est_quant[1,,2], sc_qu_upper = est_quant[2,,2])
+  ggplot(data, aes(x = x)) + geom_line(aes(y = loc_mean))+
+    geom_ribbon(aes(ymin=loc_quant_lower,ymax=loc_quant_upper),alpha=0.3)+
+    geom_line(aes(y= loc_mean + 1.96 * sc_mean))+
+    geom_line(aes(y= loc_mean - 1.96 * sc_mean))+
+    geom_ribbon(aes(ymin=loc_mean - 1.96 * sc_qu_upper,ymax=loc_mean - 1.96 *sc_qu_low )
+                ,alpha=0.3)+
+    geom_ribbon(aes(ymin=loc_mean + 1.96 * sc_qu_low,ymax=loc_mean + 1.96 *sc_qu_upper )
+                ,alpha=0.3)+
+    labs(x = "predictor" , y = "mean and credible intevalls")
+}

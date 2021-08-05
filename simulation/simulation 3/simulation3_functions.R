@@ -25,23 +25,7 @@ getEstimateValues = function(reslist, simulation, x)
   }
   return(results)
 }
-apply(res3[[3,3]]$value[,104:204], 1, quantile)
 
-
-# spline_values        return der getEstimatesSplines funktion
-# quantile             Welche Quantilswerte
-# location             sollen location oder scale Werte abgerufen werden
-
-# return               für jede simulation quantile der vorhersagen.
-getQuantiles = function(spline_values, quantile = c(0.025, 0.975))
-{
-  
-  #dier erste dimension geht wegen dem subsetting verloren
-  quantiles = apply(X = spline_values, FUN = quantile, 
-                    c(1,2), quantile)
-  
-  return(quantiles)
-}
 
 # res_zeile Ist eine Zeile des Resultats
 # x         sind die x Werte
@@ -69,26 +53,6 @@ estimate_quantile_splines = function(res_zeile,x, quantile = c(0.025, 0.975)
 }
 
 
-#zeigt an welche objekte 0 sind im val objekt
-whereNA = function(val){
-  elemente = which(is.na(val), arr.ind = T)[,c(3:4)]
-  return(unique(elemente))
-}
-#haut alle NAs aus dem val objekt
-cleanNA = function(val){
-  nas = whereNA(val)
-  if (length(nas) == 0){
-    return(val)
-  }
-  for ( i in 1:nrow(nas)){
-    #das minus i, damit die richtigen Zeilen rausgehauen werden
-    val = val[,,nas[i,1],- (nas[i,2] - i + 1), drop = F]
-  }
-  return(val)
-}
-# # val ist ein getarray objekt
-# whereNA(val)
-# any(is.na(cleanNA(val)))
 #nimmt ein Array mit MCMC schätzern und wandelt sie zu einem Array
 #wo nur noch loc scale locmcmc und scalemcmc vorkommen um
 ToNormal = function(reslist){
@@ -106,21 +70,6 @@ all_ToNormal = function(resline){
   return(resline)
 }
 
-plot_simulation3 = function(est_mean, est_quant, x){
-  data = data.frame(x = x, loc_mean = est_mean$location, 
-                    loc_quant_lower = est_quant[1,,1],loc_quant_upper = est_quant[2,,1],
-                    sc_mean = est_mean$scale,
-                    sc_qu_low = est_quant[1,,2], sc_qu_upper = est_quant[2,,2])
-  ggplot(data, aes(x = x)) + geom_line(aes(y = loc_mean))+
-    geom_ribbon(aes(ymin=loc_quant_lower,ymax=loc_quant_upper),alpha=0.3)+
-    geom_line(aes(y= loc_mean + 1.96 * sc_mean))+
-    geom_line(aes(y= loc_mean - 1.96 * sc_mean))+
-    geom_ribbon(aes(ymin=loc_mean - 1.96 * sc_qu_upper,ymax=loc_mean - 1.96 *sc_qu_low )
-                ,alpha=0.3)+
-    geom_ribbon(aes(ymin=loc_mean + 1.96 * sc_qu_low,ymax=loc_mean + 1.96 *sc_qu_upper )
-                ,alpha=0.3)+
-    labs(x = "predictor" , y = "mean and credible intevalls")
-}
 # Eine Simulationliste ist der Input
 # Returned wird ob der MCMC Sampler für Gamma irgendwann stuck ist
 
