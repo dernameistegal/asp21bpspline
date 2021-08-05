@@ -1,4 +1,5 @@
 source("simulation/analysis_functions.R")
+source("simulation/simulation functions_mainfolder.R")
 
 simulation1 =  varlist(
   n.sim = list(type = "N", expr = quote(N[sim]), value = 2),
@@ -23,36 +24,44 @@ truth = list(beta, gamma)
 
 # checking for bias in parameters
 bias = biasSE(truth, res10, MCMC = F, parameter = T, simulation1, x = NA)
-abs(bias$location[,1]) > bias$location[,2] * 1.96
-abs(bias$scale[,1]) > bias$scale[,2] * 1.96
+abs(bias$location[,1]) < bias$location[,2] * 1.96
+abs(bias$scale[,1]) < bias$scale[,2] * 1.96
+
+# checking for bias in parameters MCMC
+bias = biasSE(truth, res10, MCMC = T, parameter = T, simulation1, x = NA)
+abs(bias$location[,1]) < bias$location[,2] * 1.96
+abs(bias$scale[,1]) < bias$scale[,2] * 1.96
+
 
 
 # checking for bias in predictions
-x = seq(0,20, length.out = 100)
+x = seq(0,20, length.out = 1000)
 truepred = predict_simulation(beta, gamma, simulation1, x)
 bias = biasSE(truepred, res10, MCMC = F, parameter = F, simulation1, x = x)
-abs(bias$location[,1]) > bias$location[,2] * 1.96
-abs(bias$scale[,1]) > bias$scale[,2] * 1.96
+abs(bias$location[,1]) < bias$location[,2] * 1.96
+abs(bias$scale[,1]) < bias$scale[,2] * 1.96
+
+# checking for bias in predictions MCMC
+bias = biasSE(truepred, res10, MCMC = F, parameter = F, simulation1, x = x)
+abs(bias$location[,1]) < bias$location[,2] * 1.96
+abs(bias$scale[,1]) < bias$scale[,2] * 1.96
 
 
 # plotting mean prediction
-meanbeta = findmean(17, 10, res10, 1)
-meangamma = findmean(17,10, res10, 2)
-x = seq(0, 20, length.out = 100)
-pred = predict_simulation(meanbeta, meangamma, knots = c(15, 15), order = c(3,3), x)
-plot_simulation(pred, x)
+meanbeta = findmean(res10, 3)
+meangamma = findmean(res10, 4)
+pred = predict_simulation(meanbeta, meangamma, simulation1, x)
+pred = data.frame(x = x, 
+                  loc = as.vector(pred$location), 
+                  scale = as.vector(pred$scale), 
+                  true_or_pred = rep("4", length(x)))
 
-# checking for MSE in predictions
-MSE = MSE_predictions(beta, gamma, get.n.sim(simulation1), res10, seq = x, knots = c(15,15), 
-                      order = c(3,3))
-sd = sqrt(MSE)
+truth = data.frame(x = x, 
+                   loc = truepred[[1]], 
+                   scale = truepred[[2]], 
+                   true_or_pred = rep("2",length(x)))
+truth_pred = rbind(truth, pred)
+plot_simulation(truth_pred, x)
 
-
-
-
-bias = bias_predictions(beta, gamma, get.n.sim(simulation1), res10, seq = x, knots = c(15,15), 
-                        order = c(3,3))
-bias
-colMeans(bias)
 
 

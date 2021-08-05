@@ -104,8 +104,8 @@ biasSE = function(truth, result, MCMC = F, parameter = T, varlist, x = NA)
 
 
 
-# uses list form of result of simulation study
-mean_MSE = function(beta, gamma, n, result, seq, knots, order, MCMC = F)
+# same form as in BiasSE
+mean_MSE = function(truth, result, MCMC = F, parameter = T, varlist, x = NA)
 {
   # chooses appropriate columns of result
   j = 1
@@ -114,39 +114,56 @@ mean_MSE = function(beta, gamma, n, result, seq, knots, order, MCMC = F)
     j = 3
   }
   len = length(result[[1]]$value[,1])
+  n = length(result)
   
+  # extract values from result object
   betares = matrix(0, nrow = len, ncol = n)
   gammares = matrix(0, nrow = len, ncol = n)
   
   for (i in 1:n)
   {
-    betares[,i] = res10[[i]]$value[,j]
-    gammares[,i] = res10[[i]]$value[,j + 1]
+    betares[,i] = result[[i]]$value[,j]
+    gammares[,i] = result[[i]]$value[,j + 1]
   }
   
+  meanbeta = findmean(result, j)
+  meangamma = findmean(result, j + 1)
   
-  # find true mean and scale values
-  truth = predict_simulation(beta, gamma, knots, order, seq)
-  truth = cbind(truth[[1]], truth[[2]])
   
-  pred = array(0, dim = c(length(seq), 2, n))
-  
-  # do predictions for result
-  for (i in 1:n)
+  if (parameter == T)
   {
-    temp =predict_simulation(betares[,i], gammares[,i], knots, order, seq)
-    pred[,,i] = cbind(temp[[1]], temp[[2]])
+    MSE = list(loc = matrix(0, nrow = len, ncol = 1), 
+               scale = matrix(0, nrow = len, ncol = 1))
+    for (i in 1:n)
+    {
+      MSE$loc = MSE$loc + (truth[[1]] - betares[,i])^2 / n
+      MSE$scale = MSE$scale + (truth[[2]] - gammares[,i])^2 / n
+    }
   }
   
-  deviation = array(0, dim = c(length(seq), 2, n))
-  # MSE 
-  for (i in 1:n)
+  else if (parameter == F)
   {
-    deviation[,,i] = (pred[,,i] - truth)^2
+    MSE = list(loc = matrix(0, nrow = length(x), ncol = 1), 
+               scale = matrix(0, nrow = length(x), ncol = 1))
+    
+    predall = list(loc = matrix(0, nrow = length(x),ncol = n), 
+                   scale =matrix(0, nrow = length(x),ncol = n))
+    # do predictions for every simulation
+    for (i in 1:n)
+    {
+      temp = predict_simulation(betares[,i], gammares[,i], varlist, x)
+      predall[[1]][,i] = temp[[1]]
+      predall[[2]][,i] = temp[[2]]
+    }
+    
+    for (i in 1:n)
+    {
+      MSE$loc = MSE$loc + (predall[[1]][,i] - truth[[1]])^2 / n 
+      MSE$scale = MSE$scale + (predall[[2]][,i] - truth[[2]])^2 / n
+    }
   }
-  
-  deviation = apply(deviation, FUN = mean, MARGIN = c(1,2)) / n
-  return(deviation)
+
+  return(c(mean(MSE$loc), mean(MSE$scale)))
 }
 
 
