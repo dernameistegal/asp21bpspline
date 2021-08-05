@@ -4,12 +4,12 @@
 \alias{predict.mcmcspline}
 \title{predict method for spline objects}
 \usage{
-\method{predict}{mcmcspline}(m, sample)
+\method{predict}{mcmcspline}(sample, m)
 }
 \arguments{
-\item{m}{}
+\item{sample}{sample from the mcmc.spline function}
 
-\item{sample}{}
+\item{m}{model from the spline function}
 }
 \value{
 

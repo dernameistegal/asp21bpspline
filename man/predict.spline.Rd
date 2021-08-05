@@ -4,14 +4,16 @@
 \alias{predict.spline}
 \title{predict method for spline objects}
 \usage{
-\method{predict}{spline}(m, X, Z)
+\method{predict}{spline}(m, X, Z, isDesignmatrix = F)
 }
 \arguments{
 \item{m}{}
 
-\item{X}{}
+\item{X}{vector of new x values}
 
-\item{Z}{}
+\item{Z}{vector of new z values}
+
+\item{isDesignmatrix}{Indication whether X and Z are already spline matrices}
 }
 \value{
 

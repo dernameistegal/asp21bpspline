@@ -4,12 +4,12 @@
 \alias{plot.mcmcspline}
 \title{plot function for MCMC samples of a spline model}
 \usage{
-\method{plot}{mcmcspline}(m, sample)
+\method{plot}{mcmcspline}(sample, m)
 }
 \arguments{
-\item{m}{}
-
 \item{sample}{}
+
+\item{m}{}
 
 \item{sd}{}
 }

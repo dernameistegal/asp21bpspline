@@ -85,6 +85,7 @@ mcmc.spline = function(m, it, burning, thinning, stepsize = NA, betastart = NA,
   list = thin(list, thinning)
   
   class(list) = "mcmcspline"
+  list$call = match.call()
   return(list)
 }
 

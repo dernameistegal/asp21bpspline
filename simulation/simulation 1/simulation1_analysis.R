@@ -100,9 +100,3 @@ spline_values = getEstimateValuesFourData(res10, simulation1, x, MCMC = T)
 est_quantile = getQuantiles(spline_values, quantile = c(0.01,0.99))
 est_mean = predict_simulation(findmean(res10, 3),findmean(res10,4),simulation1,x)
 plot_simulation3(est_mean, est_quantile,x)
-
-
-
-
-
-

@@ -11,7 +11,7 @@
 print.spline <- function(m, digits = max(3, getOption("digits") - 3), ...) {
   cat(
     "\nCall:\n",
-    #paste(deparse(m$call), sep = "\n", collapse = "\n"),
+    paste(deparse(m$call), sep = "\n", collapse = "\n"),
     "\n\n",
     sep = ""
   )
@@ -120,6 +120,62 @@ summary.spline = function(model, par)
   return()
 }
 
+#' print method for mcmcspline objects
+#'
+#' @param m 
+#' @param digits 
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' 
+print.mcmcspline <- function(m, digits = max(3, getOption("digits") - 3), ...) {
+  cat(
+    "\nCall:\n",
+    paste(deparse(m$call), sep = "\n", collapse = "\n"),
+    "\n\n",
+    sep = ""
+  )
+  
+  if (length(m$beta[1,])) 
+  {
+    cat("Posterior mean location coefficients:\n")
+    
+    print.default(
+      x = format(colMeans(m$beta), digits = digits),
+      print.gap = 2,
+      quote = FALSE
+    )
+  }
+  
+  else 
+  {
+    cat("No location coefficients\n")
+  }
+  
+  cat("\n")
+  
+  if (length(m$gamma[1,]))
+  {
+    cat("Posterior mean scale coefficients:\n")
+    
+    print.default(
+      x = format(colMeans(m$gamma), digits = digits),
+      print.gap = 2,
+      quote = FALSE
+    )
+  } 
+  
+  else 
+  {
+    cat("No scale coefficients\n")
+  }
+  
+  cat("\n")
+  invisible(m)
+}
+
 #' predict method for spline objects
 #'
 #' @param sample sample from the mcmc.spline function
@@ -166,6 +222,46 @@ plot.mcmcspline = function(sample, m)
 #' 
 summary.mcmcspline = function(model, par)
 {
-  #todo
-  return()
+  
+  spline_values = getEstimateValues2(cbind(1,1,t(m$beta),t(m$gamma)), )
+  quantile = getQuantiles(spline_values, quantile = c(0.1,0.2,0.8,0.9))
+  
+  return(quantile)
 }
+
+
+
+
+
+getEstimateValues2 = function(reslist, simulation, x)
+{
+  # ermittle die anzahl der für mcmc relevanten Spalten
+  iteration = (dim(reslist)[2] - 2)/2
+  # entferne ML estimates
+  reslist = reslist[,3:dim(reslist)[2]]
+  # Dummy Matrix um ergebnisse zu speichen
+  results = array(data = NA, dim = c( length(x),2, iteration))
+  for (i in 1:iteration)
+  {
+    location_coef = reslist[,i]
+    scale_coef = reslist[, iteration + i]
+    predictions = predict(m$m, m$m$formerx, m$m$fomerx)
+    results[ ,1,i] = predictions$location
+    results[ ,2,i] = predictions$scale
+  }
+  return(results)
+}
+
+getQuantiles = function(spline_values, quantile = c(0.025, 0.975))
+{
+  
+  #dier erste dimension geht wegen dem subsetting verloren
+  quantiles = apply(X = spline_values, FUN = quantile, 
+                    c(1,2), quantile)
+  
+  return(quantiles)
+}
+
+
+
+

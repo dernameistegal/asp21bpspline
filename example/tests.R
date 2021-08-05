@@ -16,7 +16,7 @@ plot(m, sd = 1.96)
 n = 200
 
 a = Sys.time()
-lol = mcmc.spline(m, it = 1000, burning = 500, thinning = 10)
+lol = mcmc.spline(m, it = 100, burning = 50, thinning = 2)
 length(lol)
 acf(lol$gamma[,11])
 
