@@ -94,8 +94,8 @@ biasSE = function(truth, result, MCMC = F, parameter = T, varlist, x = NA)
     
   }
   
-  SEloc = sqrt(rowSums(helper1) / (n * n -1))
-  SEscale = sqrt(rowSums(helper2) / (n * n -1))
+  SEloc = sqrt(rowSums(helper1) / (n * (n -1)))
+  SEscale = sqrt(rowSums(helper2) / (n * (n -1)))
   
   
   return(list(location = data.frame(bias = biasloc, SE = SEloc),
