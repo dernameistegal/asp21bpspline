@@ -200,7 +200,8 @@ getQuantiles = function(spline_values, quantile = c(0.025, 0.975))
 # est_mean    an object which was created by predict_simulation
 #est_quant    an object which was created by get quantiles c(lower,upper) or from estimate_quantile_splines
 #x            the values which you want to plot
-plot_simulation3 = function(est_mean, est_quant, x){
+plot_simulation3 = function(est_mean, est_quant, x ,ylim = c(-25,20))
+{
   data = data.frame(x = x, loc_mean = est_mean$location, 
                     loc_quant_lower = est_quant[1,,1],loc_quant_upper = est_quant[2,,1],
                     sc_mean = est_mean$scale,
@@ -212,6 +213,6 @@ plot_simulation3 = function(est_mean, est_quant, x){
     geom_ribbon(aes(ymin=loc_mean - 1.96 * sc_qu_upper,ymax=loc_mean - 1.96 *sc_qu_low )
                 ,alpha=0.3)+
     geom_ribbon(aes(ymin=loc_mean + 1.96 * sc_qu_low,ymax=loc_mean + 1.96 *sc_qu_upper )
-                ,alpha=0.3)+
+                ,alpha=0.3)+ xlim(min(x),max(x)) + ylim(ylim[1],ylim[2])+
     labs(x = "predictor" , y = "mean and credible intevalls")
 }
