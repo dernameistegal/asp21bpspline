@@ -36,5 +36,5 @@ ggplot2::ggplot(data, mapping = aes(x = x)) +
   ylab("dependent variable")+
   xlab("explaining variable")
 
-write.csv(as.vector(beta), file = "simulation/simulation 1/beta_sim1", row.names = F)
-write.csv(as.vector(gamma), file = "simulation/simulation 1/gamma_sim1", row.names = F)
+#write.csv(as.vector(beta), file = "simulation/simulation 1/beta_sim1", row.names = F)
+#write.csv(as.vector(gamma), file = "simulation/simulation 1/gamma_sim1", row.names = F)

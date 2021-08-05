@@ -44,13 +44,13 @@ mean_MSE(truth, res10, MCMC = T, parameter = T, simulation1, x = NA)
 x = seq(0,20, length.out = 1000)
 truepred = predict_simulation(beta, gamma, simulation1, x)
 bias = biasSE(truepred, res10, MCMC = F, parameter = F, simulation1, x = x)
-abs(bias$location[,1]) < bias$location[,2] * 1.96
-abs(bias$scale[,1]) < bias$scale[,2] * 1.96
+mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
+mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
 
 # checking for bias in predictions MCMC
-bias = biasSE(truepred, res10, MCMC = F, parameter = F, simulation1, x = x)
-abs(bias$location[,1]) < bias$location[,2] * 1.96
-abs(bias$scale[,1]) < bias$scale[,2] * 1.96
+bias = biasSE(truepred, res10, MCMC = T, parameter = F, simulation1, x = x)
+mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
+mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
 
 
 # plotting mean prediction ML
