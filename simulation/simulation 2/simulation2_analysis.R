@@ -33,74 +33,31 @@ truth = data.frame(x = pred_seq, loc = true_loc, scale = true_scale, true_or_pre
 truth_pred = rbind(truth, pred)
 plot_simulation(truth_and_pred = truth_pred, sd = 1.96)
 
-#compute bias and standard error
-biasSE(list(true_loc, true_scale), res20, MCMC = T, parameter = F, simulation2, x = pred_seq)
+# percent unbiased
+bias = biasSE(list(true_loc, true_scale), res20, MCMC = T, parameter = F, simulation2, x = pred_seq)
 
-#HIER WEITER MACHEN
-# bias = biasSE(list(true_loc, true_scale), res20, MCMC = F, parameter = F, simulation2, x = pred_seq)
-# abs(bias$location[,1]) > bias$location[,2] * 1.96
-# abs(bias$scale[,1]) > bias$scale[,2] * 1.96
-# data.frame(pred_seq, bias = bias$location[,1],se196= bias$location[,2] * 1.96, biased= abs(bias$location[,1]) > bias$location[,2] * 1.96)
+within_conf_int_loc = abs(bias$location[,1]) < 1.96 * bias$location[,2]
+percent_unbiased_loc = mean(within_conf_int_loc)
+percent_unbiased_loc
 
-# checking for bias in parameters
-bias = biasSE_parameters(beta, gamma, get.n.sim(simulation1), res10, MCMC = F)
-abs(bias$beta[,1]) > bias$beta[,2] * 1.96
-abs(bias$gamma[,1]) > bias$gamma[,2] * 1.96
+within_conf_int_scale = abs(bias$scale[,1]) < 1.96 * bias$scale[,2]
+percent_unbiased_scale = mean(within_conf_int_scale)
+percent_unbiased_scale
 
-bias = biasSE_parameters(beta, gamma, get.n.sim(simulation1), res10, MCMC = T)
-abs(bias$beta[,1]) > bias$beta[,2] * 1.96
-abs(bias$gamma[,1]) > bias$gamma[,2] * 1.96
+# mean MSE for predictions
+mean_mse = mean_MSE(list(true_loc, true_scale), res20, MCMC = T, parameter = F, simulation2, x = pred_seq)
+mean_mse_loc = mean_mse[1]  
+mean_mse_scale = mean_mse[2]
+mean_mse_loc
+mean_mse_scale
 
-# plotting mean prediction
-meanbeta = findmean(17, 10, res10, 1)
-meangamma = findmean(17,10, res10, 2)
-x = seq(0, 20, length.out = 100)
-pred = predict_simulation(meanbeta, meangamma, knots = c(15, 15), order = c(3,3), x)
-plot_simulation(pred, x)
-
-# checking for MSE in predictions
-MSE = MSE_predictions(beta, gamma, get.n.sim(simulation1), res10, seq = x, knots = c(15,15), 
-                      order = c(3,3))
-sd = sqrt(MSE)
-
-bias = bias_predictions(beta, gamma, get.n.sim(simulation1), res10, seq = x, knots = c(15,15), 
-                        order = c(3,3))
-bias
-colMeans(bias)
-
-# n anzahl simu, len anzahl parameterkomponenten, j = 3 (locmcmc) j = 4 scalemcmc, res = res)
-findmean = function(len, n, res, j)
-{
-  
-  vector = matrix(0, nrow = len, ncol = n)
-  
-  for (i in 1:n)
-  {
-    vector[,i] = res[[i]]$value[,j]
-  }
-  mean = rowSums(vector) / n
-  return(mean)
-}
 
 "probably bullshit from here. do tommorow
 "
 
-# function to compute the sample bias for scale and location with predictions obtained by posterior mean
-sim2_compute_bias = function(sim2_prediction) {
-  pred_seq = seq(0, 20, length.out = dim(sim2_prediction)[1])
-  true_values = array(dim = dim(sim2_prediction))
-  true_loc = loc_sim2(pred_seq) # function from file do simulation 2.r
-  true_scale = scale_sim2(pred_seq) # function from file do simulation 2.r
-  true_values[,1,,] = true_loc
-  true_values[,2,,] = true_scale
-  bias = sim2_prediction - true_values
-  bias = apply(bias, c(1,2,3), sum)
-  bias = bias/dim(sim2_prediction)["n.sim"]
-  return(bias) 
-}
 
-# compute sample bias for scale and location with predictions obtained by posterior mean
-sim2_bias = sim2_compute_bias(sim2_prediction)
+
+
 
 # function to compute the monte carlo standard error of the sample bias
 sim2_compute_bias_sd = function(sim2_prediction) {
