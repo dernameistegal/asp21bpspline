@@ -7,7 +7,7 @@ simulation3 =  varlist(
   it = list(type = "frozen", value = 1500),
   beta = list(type = "frozen", expr = quote(beta), value = beta),
   gamma = list(type = "frozen", expr = quote(gamma), value = gamma),
-  knots = list(type = "frozen", value = c(15, 15)),
+  knots = list(type = "frozen", value = c(40, 40)),
   order = list(type = "frozen", value = c(3, 3)),
   p_order = list(type = "frozen", value = c(0,0)),
   smooth =  list(type = "frozen", value = c(0,0)),
@@ -16,17 +16,24 @@ simulation3 =  varlist(
 source("simulation/general functions/analysis_functions.R")
 source("simulation/general functions/generic_simulation_functions.R")
 source("simulation/simulation 3/simulation3_functions.R")
-res3 = maybeRead("simulation/simulation 3/simulation3_test1")
+RemoveErrors(res3[3,])
 
+result_normal = maybeRead("simulation/simulation 3/simulation3_normal_seed500")
+result_random = maybeRead("simulation/simulation 3/simulation3_randomseed501")
+result_error = maybeRead("simulation/simulation 3/simulation3_error_seed502")
 
 library(ggplot2)
 
 x <- seq(0,20, length.out = 100)
+# Remove all with any errror
+res_noerror_normal = RemoveErrors(result_normal)
+res_noerror_random = RemoveErrors(result_random)
+res_noerror_error = RemoveErrors(result_error)
 
 #remove stuck mcmcs
-clean_normal = CleanStuck(res3[1,])
-clean_random = CleanStuck(res3[2,])
-clean_error = CleanStuck(res3[3,])
+clean_normal = CleanStuck(res_noerror_normal)
+clean_random = CleanStuck(res_noerror_random)
+clean_error = CleanStuck(res_noerror_error)
 
 #object gets transformed to normal simualtion objects like in simulation 2 and 1
 res_normal = all_ToNormal(resline = clean_normal)
