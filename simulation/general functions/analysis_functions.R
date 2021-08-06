@@ -216,3 +216,24 @@ plot_simulation3 = function(est_mean, est_quant, x ,ylim = c(-25,20))
                 ,alpha=0.3)+ xlim(min(x),max(x)) + ylim(ylim[1],ylim[2])+
     labs(x = "predictor" , y = "mean and credible intevalls")
 }
+
+
+RemoveErrors = function(resi){
+  n = length(resi)
+  errors = c(rep(F, n))
+  cleaned = list()
+  for (j in 1:n)
+  {
+    if(is.null(resi[[j]]$error))
+    {
+      errors[j] = F
+      cleaned = append(cleaned, resi[j])
+    }
+    else
+    {
+      errors[j] = T
+    }
+  }
+  cat("error index \n",which(errors == T),"\n",(sum(errors)/length(errors))*100, "% are errors\n")
+  return(cleaned)
+}
