@@ -21,7 +21,7 @@ print.spline <- function(m, digits = max(3, getOption("digits") - 3), ...) {
     cat("Location coefficients:\n")
     
     print.default(
-      x = format(coef(m)$location, digits = digits),
+      x = as.vector(format(coef(m)$location, digits = digits)),
       print.gap = 2,
       quote = FALSE
     )
@@ -39,7 +39,7 @@ print.spline <- function(m, digits = max(3, getOption("digits") - 3), ...) {
     cat("Scale coefficients:\n")
     
     print.default(
-      x = format(coef(m)$scale, digits = digits),
+      x = as.vector(format(coef(m)$scale, digits = digits)),
       print.gap = 2,
       quote = FALSE
     )
@@ -107,17 +107,26 @@ predict.spline = function(m, X, Z, isDesignmatrix = F)
 
 #' summary method for spline objects
 #'
-#' @param model 
-#' @param par 
+#' @param model
 #'
 #' @return
 #' @export
 #'
 #' 
-summary.spline = function(model, par)
-{
-  #todo
-  return()
+summary.spline = function(model)
+{ 
+  cat(
+  "\nCall:\n",
+  paste(deparse(m$call), sep = "\n", collapse = "\n"),
+  "\n\n",
+  sep = "")
+  prediction = predict(model, model$loc$X, model$scale$Z, T)
+  data = cbind(prediction$location, prediction$scale)
+  colnames(data) = c("location", "scale")
+  cat("\n predicted location and scale values:\n")
+  print(head(data))
+  cat("... ommited rows for better readability")
+  return(invisible(data))
 }
 
 #' print method for mcmcspline objects
@@ -214,38 +223,43 @@ plot.mcmcspline = function(sample, m)
 #' summary method for MCMC samples of a spline model
 #'
 #' @param m 
-#' @param par 
 #'
 #' @return
 #' @export
 #'
 #' 
-summary.mcmcspline = function(model, par)
+summary.mcmcspline = function(model)
 {
-  
-  spline_values = getEstimateValues2(cbind(1,1,t(m$beta),t(m$gamma)), )
-  quantile = getQuantiles(spline_values, quantile = c(0.1,0.2,0.8,0.9))
-  
-  return(quantile)
+  cat(
+    "\nCall:\n",
+    paste(deparse(m$call), sep = "\n", collapse = "\n"),
+    "\n\n",
+    sep = ""
+  )
+  cat("Posterior mean location coefficients:\n pointwise quantiles obtained from posterior \n\n")
+  spline_values = getEstimateValues2(model)
+  quantile = getQuantiles(spline_values, quantile = c(0.05,0.1,0.9, 0.95))
+  quantile = t(rbind(quantile[,,1], quantile[,,2]))
+  colnames(quantile) = c("loc0.05","loc0.1","loc0.9", "loc0.95","scale0.05","scale0.1","scale0.9", "scale0.95")
+  print(head(quantile))
+  cat("...ommited rows for better readability")
+  return(invisible(quantile))
 }
 
 
 
-
-
-getEstimateValues2 = function(reslist, simulation, x)
+getEstimateValues2 = function(m)
 {
+  reslist = cbind(t(m$beta),t(m$gamma))
   # ermittle die anzahl der für mcmc relevanten Spalten
-  iteration = (dim(reslist)[2] - 2)/2
-  # entferne ML estimates
-  reslist = reslist[,3:dim(reslist)[2]]
+  iteration = (dim(reslist)[2])/2
   # Dummy Matrix um ergebnisse zu speichen
-  results = array(data = NA, dim = c( length(x),2, iteration))
+  results = array(data = NA, dim = c( length(m$model$formerx),2, iteration))
   for (i in 1:iteration)
   {
-    location_coef = reslist[,i]
-    scale_coef = reslist[, iteration + i]
-    predictions = predict(m$m, m$m$formerx, m$m$fomerx)
+    m$model$coefficients$location = reslist[,i]
+    m$model$coefficients$scale = reslist[, iteration + i]
+    predictions = predict(m$model, m$model$loc$X, m$model$scale$Z, T)
     results[ ,1,i] = predictions$location
     results[ ,2,i] = predictions$scale
   }

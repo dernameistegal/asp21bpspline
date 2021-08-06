@@ -52,15 +52,14 @@ estimate_quantile_splines = function(res_zeile,x, quantile = c(0.025, 0.975)
   return(data)
 }
 
-
 #nimmt ein Array mit MCMC schätzern und wandelt sie zu einem Array
 #wo nur noch loc scale locmcmc und scalemcmc vorkommen um
-ToNormal = function(reslist){
-  dimension = dim(reslist)
+ToNormal = function(resij){
+  dimension = dim(resij)
   nobs = (dimension[2] - 2)/2
-  locmcmc = rowMeans(reslist[,3:nobs + 2])
-  scalemcmc = rowMeans(reslist[,(nobs+3):dimension[2]])
-  return(cbind(reslist[,1:2],locmcmc,scalemcmc))
+  locmcmc = rowMeans(resij[,3:nobs + 2])
+  scalemcmc = rowMeans(resij[,(nobs+3):dimension[2]])
+  return(cbind(resij[,1:2],locmcmc,scalemcmc))
 }
 #erweiterung der ToNormal funktion auf einen ganzen Vektor des Ergebnisses
 all_ToNormal = function(resline){
