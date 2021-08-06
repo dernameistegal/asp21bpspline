@@ -1,5 +1,4 @@
 require(asp21bpspline)
-
 set.seed(1)
 n = 1000
 x = seq(0,20, length.out = n)
@@ -19,7 +18,7 @@ a = Sys.time()
 lol = mcmc.spline(m, it = 100, burning = 50, thinning = 2)
 length(lol)
 acf(lol$gamma[,11])
-
+summary(lol)
 
 b = Sys.time()
 b-a
