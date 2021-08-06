@@ -26,7 +26,7 @@ doOne = function(init, n, beta, gamma, it, knots, order, p_order, smooth, burnin
   x = runif(n, 0, 10)
   x = sort(x)
   
-  pred = predict_simulation(beta, gamma, knots, order, x)
+  pred = predict_simulation(beta, gamma, c(15, 15), c(3, 3), x)
   y = pred$location + rnorm(n, 0, pred$scale)
   m1 = list(x = x, z = x, y = y)
   

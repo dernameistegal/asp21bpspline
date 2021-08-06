@@ -6,7 +6,7 @@ beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
 
 simulation1.2 =  varlist(
-  n.sim = list(type = "N", expr = quote(N[sim]), value = 500),
+  n.sim = list(type = "N", expr = quote(N[sim]), value = 10),
   n = list(type = "frozen", value = 1000),
   it = list(type = "frozen", value = 1500),
   beta = list(type = "frozen", expr = quote(beta), value = beta),
@@ -25,7 +25,7 @@ doOne = function(n, beta, gamma, it, knots, order, p_order, smooth, burning,
   x = runif(n, 0, 20)
   x = sort(x)
   
-  pred = predict_simulation(beta, gamma, c(knots, knots), order, x)
+  pred = predict_simulation(beta, gamma, c(15, 15), c(3, 3), x)
   y = pred$location + rnorm(n, 0, pred$scale)
   m1 = list(x = x, z = x, y = y)
   
@@ -55,7 +55,7 @@ doOne(n = 1000, beta, gamma, it = 1500, knots = 20, order = c(3, 3),
 
 set.seed(1)
 a = Sys.time()
-res10 = doLapply(simulation1.2, sfile = "simulation/simulation 1.2/500samples", doOne = doOne)
+res10 = doLapply(simulation1.2, sfile = "simulation/simulation 1.2/take1", doOne = doOne)
 b = Sys.time()
 b-a
 # pro durchlauf 40 seconds

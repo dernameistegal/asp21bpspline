@@ -214,7 +214,9 @@ plot_simulation3 = function(est_mean, est_quant, x ,ylim = c(-25,20))
                 ,alpha=0.3)+
     geom_ribbon(aes(ymin=loc_mean + 1.96 * sc_qu_low,ymax=loc_mean + 1.96 *sc_qu_upper )
                 ,alpha=0.3)+ xlim(min(x),max(x)) + ylim(ylim[1],ylim[2])+
-    labs(x = "predictor" , y = "mean and credible intevalls")
+    labs(x = "predictor" , y = "mean and credible intervals")+
+    theme(axis.text = element_text(size = 22),
+          axis.title = element_text(size=22))
 }
 
 

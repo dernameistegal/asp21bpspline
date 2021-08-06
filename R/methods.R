@@ -74,7 +74,9 @@ plot.spline <- function(m, sd = 1.96)
     geom_line(aes(y = ypred + sd * scalepred), colour = "black", alpha = 0.9, size = 1)+
     geom_line(aes(y = ypred - sd * scalepred), colour = "black", alpha = 0.9, size = 1)+
     ylab("response")+
-    xlab("predictor")
+    xlab("predictor")+
+    theme(axis.text = element_text(size = 22),
+          axis.title = element_text(size=22))
 }
 
 #' predict method for spline objects

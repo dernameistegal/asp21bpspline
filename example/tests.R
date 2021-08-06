@@ -9,8 +9,8 @@ plot(x,y)
 m1 = list(x = x, z = x, y = y)
 m = spline(m1, kn = c(50,50), order = c(3,3), p_order = c(2,2), smooth = c(0,0))
 
-plot(m, sd = 1.96)
-
+p = plot(m, sd = 1.96)
+ggsave("test.pdf", p, width = 7, height = 5)
 
 n = 200
 

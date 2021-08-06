@@ -22,37 +22,44 @@ simulation1.2 =  varlist(
 
 
 
-res = maybeRead("simulation/simulation 1.2/take2")
+res = maybeRead("simulation/simulation 1.2/take1")
 beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
 x = seq(0,20, length.out = 1000)
 
 truth = list(beta, gamma)
 
+# make sure to use the correct function
+source("simulation/simulation 1/simulation1_functions.R")
+truepred = predict_simulation(beta, gamma, knots = c(15, 15), order = c(3, 3), x)
+source("simulation/general functions/generic_simulation_functions.R")
 #choose 20 or 40 knots results
 
 # for 20 knots
 res10 = res[1,]
+res10 = RemoveErrors(res10)
+simulation1.2$knots$value = c(20,20)
 
 # for 40 knots
 res10 = res[2,]
+res10 = RemoveErrors(res10)
+simulation1.2$knots$value = c(40,40)
 
 ### Do Analysis for both 20 and 40 knots ###
 
 # checking for bias and MSE in predictions
-x = seq(0,20, length.out = 1000)
-truepred = predict_simulation(beta, gamma, simulation1.2, x)
-bias = biasSE(truepred, res10, MCMC = F, parameter = F, simulation1, x = x)
+bias = biasSE(truepred, res10, MCMC = F, parameter = F, simulation1.2, x = x)
+all(bias$scale[,1] == bias2$scale[,1])
 mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
 mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
-mean_MSE(truth, res10, MCMC = F, parameter = F, simulation1, x = x)
+mean_MSE(truth, res10, MCMC = F, parameter = F, simulation1.2, x = x)
 
 
 # checking for bias and MSE in predictions MCMC
 bias = biasSE(truepred, res10, MCMC = T, parameter = F, simulation1.2, x = x)
 mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
 mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
-mean_MSE(truth, res10, MCMC = T, parameter = F, simulation1, x = x)
+mean_MSE(truth, res10, MCMC = T, parameter = F, simulation1.2, x = x)
 
 # plotting mean prediction ML
 meanbeta = findmean(res10, 1)
@@ -68,7 +75,7 @@ truth = data.frame(x = x,
                    scale = truepred[[2]], 
                    true_or_pred = rep("2",length(x)))
 truth_pred = rbind(truth, pred)
-plot_simulation(truth_and_pred = truth_pred, sd = 1.96)
+plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-14,12))
 
 
 
@@ -86,7 +93,7 @@ truth = data.frame(x = x,
                    scale = truepred[[2]], 
                    true_or_pred = rep("2",length(x)))
 truth_pred = rbind(truth, pred)
-plot_simulation(truth_and_pred = truth_pred, sd = 1.96)
+plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-14,12))
 
 
 
