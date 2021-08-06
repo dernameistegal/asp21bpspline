@@ -6,58 +6,58 @@ library(ggplot2)
 require(asp21bpspline)
 
 
-simulation1 =  varlist(
+simulation1.2 =  varlist(
   n.sim = list(type = "N", expr = quote(N[sim]), value = 10),
-  n = list(type = "grid", value = 1000),
+  n = list(type = "frozen", value = 1000),
   it = list(type = "frozen", value = 1500),
   beta = list(type = "frozen", expr = quote(beta), value = beta),
   gamma = list(type = "frozen", expr = quote(gamma), value = gamma),
-  knots = list(type = "frozen", value = c(15, 15)),
+  knots = list(type = "grid", value = c(20, 40)),
   order = list(type = "frozen", value = c(3, 3)),
-  p_order = list(type = "frozen", value = c(0,0)),
-  smooth =  list(type = "frozen", value = c(0,0)),
+  p_order = list(type = "frozen", value = c(3,3)),
+  smooth =  list(type = "frozen", value = c("Platzhalter")),
   burning =  list(type = "frozen", value = 500),
   thinning =  list(type = "frozen", value = 10))
 
 
 
-res10 = maybeRead("simulation/simulation 1/take2")
+
+res = maybeRead("simulation/simulation 1.2/take2")
 beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
+x = seq(0,20, length.out = 1000)
 
 truth = list(beta, gamma)
 
-# checking for bias and MSE in parameters
-bias = biasSE(truth, res10, MCMC = F, parameter = T, simulation1, x = NA)
-abs(bias$location[,1]) < bias$location[,2] * 1.96
-abs(bias$scale[,1]) < bias$scale[,2] * 1.96
-mean_MSE(truth, res10, MCMC = F, parameter = T, simulation1, x = NA)
+#choose 20 or 40 knots results
 
+# for 20 knots
+res10 = res[1,]
 
-# checking for bias and MSE in parameters MCMC
-bias = biasSE(truth, res10, MCMC = T, parameter = T, simulation1, x = NA)
-abs(bias$location[,1]) < bias$location[,2] * 1.96
-abs(bias$scale[,1]) < bias$scale[,2] * 1.96
-mean_MSE(truth, res10, MCMC = T, parameter = T, simulation1, x = NA)
+# for 40 knots
+res10 = res[2,]
 
+### Do Analysis for both 20 and 40 knots ###
 
-# checking for bias in predictions
+# checking for bias and MSE in predictions
 x = seq(0,20, length.out = 1000)
-truepred = predict_simulation(beta, gamma, simulation1, x)
+truepred = predict_simulation(beta, gamma, simulation1.2, x)
 bias = biasSE(truepred, res10, MCMC = F, parameter = F, simulation1, x = x)
-abs(bias$location[,1]) < bias$location[,2] * 1.96
-abs(bias$scale[,1]) < bias$scale[,2] * 1.96
+mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
+mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
+mean_MSE(truth, res10, MCMC = F, parameter = F, simulation1, x = x)
 
-# checking for bias in predictions MCMC
-bias = biasSE(truepred, res10, MCMC = F, parameter = F, simulation1, x = x)
-abs(bias$location[,1]) < bias$location[,2] * 1.96
-abs(bias$scale[,1]) < bias$scale[,2] * 1.96
 
+# checking for bias and MSE in predictions MCMC
+bias = biasSE(truepred, res10, MCMC = T, parameter = F, simulation1.2, x = x)
+mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
+mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
+mean_MSE(truth, res10, MCMC = T, parameter = F, simulation1, x = x)
 
 # plotting mean prediction ML
 meanbeta = findmean(res10, 1)
 meangamma = findmean(res10, 2)
-pred = predict_simulation(meanbeta, meangamma, simulation1, x)
+pred = predict_simulation(meanbeta, meangamma, simulation1.2, x)
 pred = data.frame(x = x, 
                   loc = as.vector(pred$location), 
                   scale = as.vector(pred$scale), 
@@ -75,7 +75,7 @@ plot_simulation(truth_and_pred = truth_pred, sd = 1.96)
 # plotting mean prediction MCMC
 meanbeta = findmean(res10, 3)
 meangamma = findmean(res10, 4)
-pred = predict_simulation(meanbeta, meangamma, simulation1, x)
+pred = predict_simulation(meanbeta, meangamma, simulation1.2, x)
 pred = data.frame(x = x, 
                   loc = as.vector(pred$location), 
                   scale = as.vector(pred$scale), 
@@ -87,6 +87,7 @@ truth = data.frame(x = x,
                    true_or_pred = rep("2",length(x)))
 truth_pred = rbind(truth, pred)
 plot_simulation(truth_and_pred = truth_pred, sd = 1.96)
+
 
 
 

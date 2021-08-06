@@ -6,7 +6,7 @@ require(asp21bpspline)
 
 
 simulation1 =  varlist(
-  n.sim = list(type = "N", expr = quote(N[sim]), value = 10),
+  n.sim = list(type = "N", expr = quote(N[sim]), value = 500),
   n = list(type = "grid", value = 1000),
   it = list(type = "frozen", value = 1500),
   beta = list(type = "frozen", expr = quote(beta), value = beta),
@@ -20,9 +20,10 @@ simulation1 =  varlist(
 
 
 
-res10 = maybeRead("simulation/simulation 1/take3")
+res10 = maybeRead("simulation/simulation 1/500samples")
 beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
+x = seq(0,20, length.out = 1000)
 
 truth = list(beta, gamma)
 
@@ -40,18 +41,23 @@ abs(bias$scale[,1]) < bias$scale[,2] * 1.96
 mean_MSE(truth, res10, MCMC = T, parameter = T, simulation1, x = NA)
 
 
-# checking for bias in predictions
+# for exporting
+#xtable(cbind(bias$location, bias$scale, bias2$location, bias2$scale))
+
+# checking for bias and MSE in predictions
 x = seq(0,20, length.out = 1000)
 truepred = predict_simulation(beta, gamma, simulation1, x)
 bias = biasSE(truepred, res10, MCMC = F, parameter = F, simulation1, x = x)
 mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
 mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
+mean_MSE(truth, res10, MCMC = F, parameter = F, simulation1, x = x)
 
-# checking for bias in predictions MCMC
+
+# checking for bias and MSE in predictions MCMC
 bias = biasSE(truepred, res10, MCMC = T, parameter = F, simulation1, x = x)
 mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
 mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
-
+mean_MSE(truth, res10, MCMC = T, parameter = F, simulation1, x = x)
 
 # plotting mean prediction ML
 meanbeta = findmean(res10, 1)
@@ -85,18 +91,18 @@ truth = data.frame(x = x,
                    scale = truepred[[2]], 
                    true_or_pred = rep("2",length(x)))
 truth_pred = rbind(truth, pred)
-plot_simulation(truth_and_pred = truth_pred, sd = 1.96)
+plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-17,9))
 
 #Plotting quantiles
-x = seq(0,20, length.out = 1000)
+
 #without MCMC
 spline_values = getEstimateValuesFourData(res10, simulation1, x, MCMC = F)
 est_quantile = getQuantiles(spline_values, quantile = c(0.01,0.99))
 est_mean = predict_simulation(findmean(res10, 1),findmean(res10,2),simulation1,x)
-plot_simulation3(est_mean, est_quantile,x)
+plot_simulation3(est_mean, est_quantile,x, c(-22, 14))
 
 #with MCMC
 spline_values = getEstimateValuesFourData(res10, simulation1, x, MCMC = T)
 est_quantile = getQuantiles(spline_values, quantile = c(0.01,0.99))
 est_mean = predict_simulation(findmean(res10, 3),findmean(res10,4),simulation1,x)
-plot_simulation3(est_mean, est_quantile,x)
+plot_simulation3(est_mean, est_quantile,x, c(-22, 14))

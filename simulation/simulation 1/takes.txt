@@ -3,3 +3,6 @@ take 3
 
 take 4
 100 simulations
+
+500samples 
+500 simulations
