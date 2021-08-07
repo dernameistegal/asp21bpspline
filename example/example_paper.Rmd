@@ -1,0 +1,68 @@
+---
+title: "Example for paper"
+author: "Jan Schneider"
+date: "7 8 2021"
+output: pdf_document
+---
+
+## Example of asp21bpsplines
+
+```{r results = "hide", message = FALSE}
+require(asp21bpspline)
+set.seed(2)
+n = 1000
+x = c(runif(n, 0, 20))
+mean = -0.04*x^2 + 0.5* x 
+y =  mean + rnorm(n, 0, 0.2 *x + 0.3)
+m1 = list(x = x, z = x, y = y)
+
+```
+Consider you have the above data and want to fit a spline to it. With the 
+asp21bpsplines package you would first call the spline function:
+
+```{r}
+m = spline(m1, kn = c(40, 40), order = c(3,3), p_order = c(3, 3), 
+           smooth = c(1, 1))
+summary(m)
+plot(m)
+```
+
+# add plot as separate file
+
+The model estimates separate parameters for the location and the scale of the data.
+In this plot the middle line represents the prediction for the mean value
+and the outer lines represent the 95 % confidence interval for new predictions.
+However it seems that the predictions are overfitting a bit. One could now raise 
+the values of the smoothing parameters in the call to the spline function. 
+An alternative is a call to the MCMC function.
+
+```{r results = "hide"}
+sample = mcmc.spline(m, it = 3000, burning = 1000, thinning = 10)
+```
+
+As the mcmc function samples directly from the posterior, the result is a sample 
+for the beta and gamma parameters as well as for the smoothing values. The
+prediction with this sample is in result much smoother:
+
+```{r}
+summary(sample)
+plot(sample, m)
+```
+To investigate properties of the sample we can now look at the random walk for different 
+parameters.
+
+```{r}
+par(mfrow = c(2, 1))
+par(mar = c(3, 5, 2, 4))
+index = seq(1, length(sample$beta[,1]))
+plot(index, sample$beta[,1], type = "l", xlab = "")
+plot(index, sample$gamma[,1], type = "l", xlab = "")
+plot(index, sample$epsilon, type = "l", xlab = "")
+plot(index, sample$tau, type = "l")
+```
+
+While there seems to be no getting stuck, it seems that consecutive iterations
+are correlated. We now could choose a higher thinning value or
+alternatively set a custom stepsize for the sampling of the gamma values 
+for the MCMC function.
+

@@ -48,7 +48,7 @@ doOne(n = 1000, beta, gamma, it = 1500, knots = c(15, 15), order = c(3, 3),
 
 set.seed(1)
 a = Sys.time()
-res10 = doLapply(simulation1, sfile = "simulation/simulation 1/500samples", doOne = doOne)
+res10 = doLapply(simulation1, sfile = "simulation/simulation 1/500samplesseeded", doOne = doOne)
 b = Sys.time()
 b-a
 
