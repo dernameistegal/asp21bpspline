@@ -74,3 +74,33 @@ set_gamma = function(m, gamma)
   m$fitted.values$scale = exp(m$scale$Z %*% gamma)
   return(m)
 }
+
+# Function for quantile finding in summary for mcmcspline
+getEstimateValues2 = function(m)
+{
+  reslist = cbind(t(m$beta),t(m$gamma))
+  # ermittle die anzahl der für mcmc relevanten Spalten
+  iteration = (dim(reslist)[2])/2
+  # Dummy Matrix um ergebnisse zu speichen
+  results = array(data = NA, dim = c( length(m$model$formerx),2, iteration))
+  for (i in 1:iteration)
+  {
+    m$model$coefficients$location = reslist[,i]
+    m$model$coefficients$scale = reslist[, iteration + i]
+    predictions = predict(m$model, m$model$loc$X, m$model$scale$Z, T)
+    results[ ,1,i] = predictions$location
+    results[ ,2,i] = predictions$scale
+  }
+  return(results)
+}
+
+# Helper function for quantile finding in summary for mcmcspline
+getQuantiles = function(spline_values, quantile = c(0.025, 0.975))
+{
+  
+  #dier erste dimension geht wegen dem subsetting verloren
+  quantiles = apply(X = spline_values, FUN = quantile, 
+                    c(1,2), quantile)
+  
+  return(quantiles)
+}

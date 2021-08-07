@@ -1,11 +1,10 @@
 ---
-title: "Example for paper"
+title: "Example for package asp21bpsplines"
 author: "Jan Schneider"
 date: "7 8 2021"
 output: pdf_document
 ---
 
-## Example of asp21bpsplines
 
 ```{r results = "hide", message = FALSE}
 require(asp21bpspline)
@@ -18,7 +17,7 @@ m1 = list(x = x, z = x, y = y)
 
 ```
 Consider you have the above data and want to fit a spline to it. With the 
-asp21bpsplines package you would first call the spline function:
+asp21bpsplines package you would first call the spline function. The parameter m1 contains a list with the above structure, where x is the predictor for the mean, z is the predictor for the scale and y is the response. The parameter kn is short for knots and specifies the number of knots separately for the mean and the scale. In the same way the parameter stands for the order of the spline, p_order stands for the order of the smoothness penalty and smooth specifies the penalization strength.
 
 ```{r}
 m = spline(m1, kn = c(40, 40), order = c(3,3), p_order = c(3, 3), 
@@ -27,7 +26,6 @@ summary(m)
 plot(m)
 ```
 
-# add plot as separate file
 
 The model estimates separate parameters for the location and the scale of the data.
 In this plot the middle line represents the prediction for the mean value
@@ -61,8 +59,7 @@ plot(index, sample$epsilon, type = "l", xlab = "")
 plot(index, sample$tau, type = "l")
 ```
 
-While there seems to be no getting stuck, it seems that consecutive iterations
-are correlated. We now could choose a higher thinning value or
-alternatively set a custom stepsize for the sampling of the gamma values 
-for the MCMC function.
+For the sampling of gamma it is important that enough proposals are accepted in order to see movement in the random walk. This seems to be the case. However, it might be that consecutive iterations
+are correlated, since consecutive values tend to be near to each other. We now could choose a higher thinning value or alternatively set a custom stepsize for the sampling of the gamma values 
+for the MCMC function to alleviate this issue.
 

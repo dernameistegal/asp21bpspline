@@ -8,6 +8,10 @@
 #'                           consecutive iterations
 #' @param stepsize positive float stepsize for gamma sampler. Standard value is
 #'                                sqrt(3) * (df)^(-1/6).
+#' @param betastart optionally set new starting values for beta
+#' @param gammastartoptionally set new starting values for gamma
+#' @param epsstart optionally set a new starting value for epsilon
+#' @param taustart optionally set a new starting value for tau
 #'
 #' @return MCMC sample for epsilon, tau, gamma and beta
 #' @export

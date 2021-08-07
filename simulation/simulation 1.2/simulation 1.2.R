@@ -6,7 +6,7 @@ beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
 
 simulation1.2 =  varlist(
-  n.sim = list(type = "N", expr = quote(N[sim]), value = 10),
+  n.sim = list(type = "N", expr = quote(N[sim]), value = 500),
   n = list(type = "frozen", value = 1000),
   it = list(type = "frozen", value = 1500),
   beta = list(type = "frozen", expr = quote(beta), value = beta),
@@ -55,7 +55,7 @@ doOne(n = 1000, beta, gamma, it = 1500, knots = 20, order = c(3, 3),
 
 set.seed(1)
 a = Sys.time()
-res10 = doLapply(simulation1.2, sfile = "simulation/simulation 1.2/take1", doOne = doOne)
+res10 = doLapply(simulation1.2, sfile = "simulation/simulation 1.2/500samplesseeded", doOne = doOne)
 b = Sys.time()
 b-a
 # pro durchlauf 40 seconds
