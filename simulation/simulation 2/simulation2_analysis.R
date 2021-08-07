@@ -8,7 +8,7 @@ require(asp21bpspline)
 "Analysis of simulation21"
 
 # result from simulation
-res21 = maybeRead("simulation/simulation 2/test111")
+res21 = maybeRead("simulation/simulation 2/simulation21")
 
 # simulation object
 simulation2 =  varlist(
@@ -56,7 +56,7 @@ mean_mse_scale
 "Analysis of simulation22"
 
 # result from simulation
-res22 = maybeRead("simulation/simulation 2/test112")
+res22 = maybeRead("simulation/simulation 2/simulation22")
 
 # simulation object
 simulation2 =  varlist(
@@ -104,7 +104,7 @@ mean_mse_scale
 "Analysis of simulation23"
 
 # result from simulation
-res23 = maybeRead("simulation/simulation 2/test114")
+res23 = maybeRead("simulation/simulation 2/simulation23")
 
 # simulation object
 simulation2 =  varlist(

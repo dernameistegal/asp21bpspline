@@ -3,7 +3,7 @@ require(simsalapar)
 require(asp21bpspline)
 
 simulation2 =  varlist(
-  n.sim = list(type = "N", expr = quote(N[sim]), value = 5),
+  n.sim = list(type = "N", expr = quote(N[sim]), value = 500),
   n = list(type = "grid", value = c(1000)),
   it = list(type = "frozen", value = 1500),
   knots = list(type = "frozen", value = c(40,40)),
@@ -60,9 +60,9 @@ doOne3 = function(n,it, knots, order, p_order, smooth)
   return(cbind(loc, scale, locmcmc, scalemcmc))
 }
 
-doLapply(simulation2, sfile = "simulation/simulation 2/test111", doOne = doOne1, monitor = T)
-doLapply(simulation2, sfile = "simulation/simulation 2/test112", doOne = doOne2, monitor = T)
-doLapply(simulation2, sfile = "simulation/simulation 2/test114", doOne = doOne3, monitor = T)
+doLapply(simulation2, sfile = "simulation/simulation 2/simulation21", doOne = doOne1, monitor = T)
+doLapply(simulation2, sfile = "simulation/simulation 2/simulation22", doOne = doOne2, monitor = T)
+doLapply(simulation2, sfile = "simulation/simulation 2/simulation23", doOne = doOne3, monitor = T)
 
 
 
