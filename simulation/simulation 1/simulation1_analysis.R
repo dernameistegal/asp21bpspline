@@ -26,7 +26,6 @@ gamma = read.csv("simulation/simulation 1/gamma_sim1")
 x = seq(0,20, length.out = 1000)
 
 truth1 = list(beta, gamma)
-truth2 = predict_simulation(beta, gamma, simulation1, x)
 
 # checking for bias and MSE in parameters
 bias = biasSE(truth1, res10, MCMC = F, parameter = T, simulation1, x = NA)
@@ -51,14 +50,14 @@ truepred = predict_simulation(beta, gamma, simulation1, x)
 bias = biasSE(truepred, res10, MCMC = F, parameter = F, simulation1, x = x)
 mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
 mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
-mean_MSE(truth2, res10, MCMC = F, parameter = F, simulation1, x = x)
+mean_MSE(truepred, res10, MCMC = F, parameter = F, simulation1, x = x)
 
 
 # checking for bias and MSE in predictions MCMC
 bias = biasSE(truepred, res10, MCMC = T, parameter = F, simulation1, x = x)
 mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
 mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
-mean_MSE(truth2, res10, MCMC = T, parameter = F, simulation1, x = x)
+mean_MSE(truepred, res10, MCMC = T, parameter = F, simulation1, x = x)
 
 
 # plotting mean prediction ML
