@@ -104,8 +104,8 @@ predict.spline = function(m, X, Z, isDesignmatrix = F)
   }
   
   # error catching
-  stopifnot(dim(X)[2] == length(beta))
-  stopifnot(dim(Z)[2] == length(gamma))
+  # stopifnot(dim(X)[2] == length(beta))
+  # stopifnot(dim(Z)[2] == length(gamma))
   
   location = X %f*f% as.matrix(beta)
   scale = exp(Z %f*f% as.matrix(gamma))

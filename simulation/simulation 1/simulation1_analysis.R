@@ -25,20 +25,21 @@ beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
 x = seq(0,20, length.out = 1000)
 
-truth = list(beta, gamma)
+truth1 = list(beta, gamma)
+truth2 = predict_simulation(beta, gamma, simulation1, x)
 
 # checking for bias and MSE in parameters
-bias = biasSE(truth, res10, MCMC = F, parameter = T, simulation1, x = NA)
+bias = biasSE(truth1, res10, MCMC = F, parameter = T, simulation1, x = NA)
 mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
 mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
-mean_MSE(truth, res10, MCMC = F, parameter = T, simulation1, x = NA)
+mean_MSE(truth1, res10, MCMC = F, parameter = T, simulation1, x = NA)
 
 
 # checking for bias and MSE in parameters MCMC
-bias2 = biasSE(truth, res10, MCMC = T, parameter = T, simulation1, x = NA)
+bias2 = biasSE(truth1, res10, MCMC = T, parameter = T, simulation1, x = NA)
 mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
 mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
-mean_MSE(truth, res10, MCMC = T, parameter = T, simulation1, x = NA)
+mean_MSE(truth1, res10, MCMC = T, parameter = T, simulation1, x = NA)
 
 
 # for exporting
@@ -50,14 +51,15 @@ truepred = predict_simulation(beta, gamma, simulation1, x)
 bias = biasSE(truepred, res10, MCMC = F, parameter = F, simulation1, x = x)
 mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
 mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
-mean_MSE(truth, res10, MCMC = F, parameter = F, simulation1, x = x)
+mean_MSE(truth2, res10, MCMC = F, parameter = F, simulation1, x = x)
 
 
 # checking for bias and MSE in predictions MCMC
 bias = biasSE(truepred, res10, MCMC = T, parameter = F, simulation1, x = x)
 mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
 mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
-mean_MSE(truth, res10, MCMC = T, parameter = F, simulation1, x = x)
+mean_MSE(truth2, res10, MCMC = T, parameter = F, simulation1, x = x)
+
 
 # plotting mean prediction ML
 meanbeta = findmean(res10, 1)
@@ -75,6 +77,8 @@ truth = data.frame(x = x,
 truth_pred = rbind(truth, pred)
 plot_simulation(truth_and_pred = truth_pred, sd = 1.96,c(-17, 9))
 
+p1 = plot_simulation(truth_and_pred = truth_pred, sd = 1.96,c(-17, 9))
+ggsave("plotsim1ML.pdf",p1,"pdf",width = 7, height = 5)
 
 
 # plotting mean prediction MCMC
@@ -93,6 +97,8 @@ truth = data.frame(x = x,
 truth_pred = rbind(truth, pred)
 
 plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-17,9))
+p2 = plot_simulation(truth_and_pred = truth_pred, sd = 1.96,c(-17, 9))
+ggsave("plotsim1mcmc.pdf",p2,"pdf",width = 7, height = 5)
 
 #Plotting quantiles
 
@@ -100,10 +106,17 @@ plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-17,9))
 spline_values = getEstimateValuesFourData(res10, simulation1, x, MCMC = F)
 est_quantile = getQuantiles(spline_values, quantile = c(0.025,0.975))
 est_mean = predict_simulation(findmean(res10, 1),findmean(res10,2),simulation1,x)
-plot_simulation3(est_mean, est_quantile,x, c(-20, 14))
+plot_simulation3(est_mean, est_quantile,x, c(-20, 14),y = "mean and confidence intervals" )
+p3 = plot_simulation3(est_mean, est_quantile,x, c(-20, 14),y = "mean and confidence intervals" )
+ggsave("quantilessim1ML.pdf",p3,"pdf",width = 7, height = 5)
 
 #with MCMC
 spline_values = getEstimateValuesFourData(res10, simulation1, x, MCMC = T)
 est_quantile = getQuantiles(spline_values, quantile = c(0.025,0.975))
 est_mean = predict_simulation(findmean(res10, 3),findmean(res10,4),simulation1,x)
-plot_simulation3(est_mean, est_quantile,x, c(-20, 14))
+plot_simulation3(est_mean, est_quantile,x, c(-20, 14), y = "mean and confidence intervals")
+p4 = plot_simulation3(est_mean, est_quantile,x, c(-20, 14), y = "mean and confidence intervals")
+ggsave("quantilessim1MCMCL.pdf",p4,"pdf",width = 7, height = 5)
+
+
+
