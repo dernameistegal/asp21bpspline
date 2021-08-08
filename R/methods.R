@@ -104,7 +104,6 @@ predict.spline = function(m, X, Z, isDesignmatrix = F)
   }
   
   # error catching
-  browser()
   stopifnot(dim(X)[2] == length(beta))
   stopifnot(dim(Z)[2] == length(gamma))
   
