@@ -76,6 +76,8 @@ truth = data.frame(x = x,
                    true_or_pred = rep("2",length(x)))
 truth_pred = rbind(truth, pred)
 plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-14,12))
+p1 = plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-14,12))
+ggsave("simulation/plots/sim1/estsim12ML.pdf",p1,"pdf",width = 7, height = 5)
 
 
 
@@ -94,6 +96,9 @@ truth = data.frame(x = x,
                    true_or_pred = rep("2",length(x)))
 truth_pred = rbind(truth, pred)
 plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-14,12))
+p2 = plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-14,12))
+ggsave("simulation/plots/sim1/estsim12mcmc.pdf",p2,"pdf",width = 7, height = 5)
+
 
 
 
