@@ -9,7 +9,7 @@ require(asp21bpspline)
 
 # result from simulation
 res21 = maybeRead("simulation/simulation 2/simulation21")
-
+res21 = RemoveErrors(res21)
 # simulation object
 simulation2 =  varlist(
   n.sim = list(type = "N", expr = quote(N[sim]), value = 5),
@@ -39,19 +39,19 @@ plot_simulation(truth_and_pred = truth_pred, sd = 1.96)
 bias = biasSE(list(true_loc, true_scale), res21, MCMC = T, parameter = F, simulation2, x = pred_seq)
 
 within_conf_int_loc = abs(bias$location[,1]) < 1.96 * bias$location[,2]
-percent_unbiased_loc = mean(within_conf_int_loc)
-percent_unbiased_loc
+percent_unbiased_loc1 = mean(within_conf_int_loc)
+percent_unbiased_loc1
 
 within_conf_int_scale = abs(bias$scale[,1]) < 1.96 * bias$scale[,2]
-percent_unbiased_scale = mean(within_conf_int_scale)
-percent_unbiased_scale
+percent_unbiased_scale1 = mean(within_conf_int_scale)
+percent_unbiased_scale1
 
 # mean MSE for predictions
 mean_mse = mean_MSE(list(true_loc, true_scale), res21, MCMC = T, parameter = F, simulation2, x = pred_seq)
-mean_mse_loc = mean_mse[1]  
-mean_mse_scale = mean_mse[2]
-mean_mse_loc
-mean_mse_scale
+mean_mse_loc1 = mean_mse[1]  
+mean_mse_scale1 = mean_mse[2]
+mean_mse_loc1
+mean_mse_scale1
 
 "Analysis of simulation22"
 
@@ -87,19 +87,19 @@ plot_simulation(truth_and_pred = truth_pred, sd = 1.96)
 bias = biasSE(list(true_loc, true_scale), res22, MCMC = T, parameter = F, simulation2, x = pred_seq)
 
 within_conf_int_loc = abs(bias$location[,1]) < 1.96 * bias$location[,2]
-percent_unbiased_loc = mean(within_conf_int_loc)
-percent_unbiased_loc
+percent_unbiased_loc2 = mean(within_conf_int_loc)
+percent_unbiased_loc2
 
 within_conf_int_scale = abs(bias$scale[,1]) < 1.96 * bias$scale[,2]
-percent_unbiased_scale = mean(within_conf_int_scale)
-percent_unbiased_scale
+percent_unbiased_scale2 = mean(within_conf_int_scale)
+percent_unbiased_scale2
 
 # mean MSE for predictions
 mean_mse = mean_MSE(list(true_loc, true_scale), res22, MCMC = T, parameter = F, simulation2, x = pred_seq)
-mean_mse_loc = mean_mse[1]  
-mean_mse_scale = mean_mse[2]
-mean_mse_loc
-mean_mse_scale
+mean_mse_loc2 = mean_mse[1]  
+mean_mse_scale2 = mean_mse[2]
+mean_mse_loc2
+mean_mse_scale2
 
 "Analysis of simulation23"
 
@@ -135,17 +135,17 @@ plot_simulation(truth_and_pred = truth_pred, sd = 1.96)
 bias = biasSE(list(true_loc, true_scale), res23, MCMC = T, parameter = F, simulation2, x = pred_seq)
 
 within_conf_int_loc = abs(bias$location[,1]) < 1.96 * bias$location[,2]
-percent_unbiased_loc = mean(within_conf_int_loc)
-percent_unbiased_loc
+percent_unbiased_loc3 = mean(within_conf_int_loc)
+percent_unbiased_loc3
 
 within_conf_int_scale = abs(bias$scale[,1]) < 1.96 * bias$scale[,2]
-percent_unbiased_scale = mean(within_conf_int_scale)
-percent_unbiased_scale
+percent_unbiased_scale3 = mean(within_conf_int_scale)
+percent_unbiased_scale3
 
 # mean MSE for predictions
 mean_mse = mean_MSE(list(true_loc, true_scale), res23, MCMC = T, parameter = F, simulation2, x = pred_seq)
-mean_mse_loc = mean_mse[1]  
-mean_mse_scale = mean_mse[2]
-mean_mse_loc
-mean_mse_scale
+mean_mse_loc3 = mean_mse[1]  
+mean_mse_scale3 = mean_mse[2]
+mean_mse_loc3
+mean_mse_scale3
 

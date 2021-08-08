@@ -6,19 +6,18 @@ beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
 
 simulation3 =  varlist(
-  n.sim = list(type = "N", expr = quote(N[sim]), value = 4),
-  init = list(type = "grid", value = c("normal", "random" ,"error")),
+  n.sim = list(type = "N", expr = quote(N[sim]), value = 2),
+  init = list(type = "grid", value = c("random")),
   n = list(type = "frozen", value = 1000),
   it = list(type = "frozen", value = 1500),
   beta = list(type = "frozen", expr = quote(beta), value = beta),
   gamma = list(type = "frozen", expr = quote(gamma), value = gamma),
   knots = list(type = "frozen", value = c(40, 40)),
   order = list(type = "frozen", value = c(3, 3)),
-  p_order = list(type = "frozen", value = c(0,0)),
+  p_order = list(type = "frozen", value = c(3,3)),
   smooth =  list(type = "frozen", value = c(0,0)),
   burning =  list(type = "frozen", value = 500),
   thinning =  list(type = "frozen", value = 10))
-set.seed(1633)
 doOne = function(init, n, beta, gamma, it, knots, order, p_order, smooth, burning,
                  thinning)
 { 
@@ -41,8 +40,8 @@ doOne = function(init, n, beta, gamma, it, knots, order, p_order, smooth, burnin
     #do nothing
   }
   else if(init == "random") {
-    model$coefficients$location = rnorm(length(loc),0,1)
-    model$coefficients$scale =  rnorm(length(loc),0,1)
+    model$coefficients$location = rnorm(length(loc),2,2)
+    model$coefficients$scale =  rnorm(length(loc),2,2)
   }
   else if(init == "error") {
   model$coefficients$location = loc + rnorm(length(loc),0,1)
@@ -61,9 +60,10 @@ doOne = function(init, n, beta, gamma, it, knots, order, p_order, smooth, burnin
   
   return(return_stuff)
 }
+# 
+#  doOne(init = "normal", n = 1000, beta, gamma, it = 1500, knots = c(15, 15), order = c(3, 3),
+#        p_order = c(0,0), smooth = c(0,0), burning = 500, thinning = 10)
 
- # doOne(init = "normal", n = 1000, beta, gamma, it = 1500, knots = c(15, 15), order = c(3, 3), 
- #       p_order = c(0,0), smooth = c(0,0), burning = 500, thinning = 10)
-
-res3 = doLapply(simulation3, sfile = "simulation/simulation 3/simulation3_test1"
+res3 = doLapply(simulation3, sfile = "simulation/simulation 3/simulation3_error_100_10"
                 , monitor = T, doOne = doOne)
+
