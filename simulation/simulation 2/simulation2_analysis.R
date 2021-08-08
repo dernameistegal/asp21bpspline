@@ -33,7 +33,9 @@ true_scale = scale_sim2_hard(pred_seq)
 truth = data.frame(x = pred_seq, loc = true_loc, scale = true_scale, true_or_pred = rep("pred",length(pred_seq)))
 
 truth_pred = rbind(truth, pred)
+p1 = plot_simulation(truth_and_pred = truth_pred, sd = 1.96)
 plot_simulation(truth_and_pred = truth_pred, sd = 1.96)
+ggsave("scale_complex.pdf",p1,"pdf",width = 7, height = 5 )
 
 # percent unbiased
 bias = biasSE(list(true_loc, true_scale), res21, MCMC = T, parameter = F, simulation2, x = pred_seq)
@@ -82,6 +84,8 @@ truth = data.frame(x = pred_seq, loc = true_loc, scale = true_scale, true_or_pre
 
 truth_pred = rbind(truth, pred)
 plot_simulation(truth_and_pred = truth_pred, sd = 1.96)
+p2 = plot_simulation(truth_and_pred = truth_pred, sd = 1.96)
+ggsave("location_complex.pdf",p2,"pdf",width = 7, height = 5 )
 
 # percent unbiased
 bias = biasSE(list(true_loc, true_scale), res22, MCMC = T, parameter = F, simulation2, x = pred_seq)

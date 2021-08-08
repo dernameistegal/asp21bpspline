@@ -7,9 +7,9 @@ simulation3 =  varlist(
   it = list(type = "frozen", value = 1500),
   beta = list(type = "frozen", expr = quote(beta), value = beta),
   gamma = list(type = "frozen", expr = quote(gamma), value = gamma),
-  knots = list(type = "frozen", value = c(40, 40)),
+  knots = list(type = "frozen", value = c(40,40)),
   order = list(type = "frozen", value = c(3, 3)),
-  p_order = list(type = "frozen", value = c(0,0)),
+  p_order = list(type = "frozen", value = c(3,3)),
   smooth =  list(type = "frozen", value = c(0,0)),
   burning =  list(type = "frozen", value = 500),
   thinning =  list(type = "frozen", value = 10))
@@ -19,9 +19,16 @@ source("simulation/simulation 3/simulation3_functions.R")
 RemoveErrors(res3[3,])
 
 result_normal = maybeRead("simulation/simulation 3/simulation3_normal_seed500")
-result_random = maybeRead("simulation/simulation 3/simulation3_randomseed501")
-result_error = maybeRead("simulation/simulation 3/simulation3_error_seed502")
+result_random = maybeRead("simulation/simulation 3/simulation3_random_500")
+result_error = maybeRead("simulation/simulation 3/simulation3_error_500")
 
+# res3 = maybeRead("simulation/simulation 3/simulation3_test13")
+# result_normal =  res3[1,]
+# result_random =  res3[2,]
+# result_error =   res3[3,]
+
+
+result_normal[[1]]$value
 library(ggplot2)
 
 x <- seq(0,20, length.out = 100)
@@ -51,9 +58,12 @@ est_quantile_random = estimate_quantile_splines(clean_random, x, quantile = c(0.
 est_quantile_error = estimate_quantile_splines(clean_error, x, quantile = c(0.1,0.9),simulation = simulation3)
 
 #the functions are plotted
-plot_simulation3(est_mean_normal, est_quantile_normal,x)
-plot_simulation3(est_mean_random, est_quantile_random,x)
-plot_simulation3(est_mean_error, est_quantile_error,x)
+normal_plot = plot_simulation3(est_mean_normal, est_quantile_normal,x)
+random_plot = plot_simulation3(est_mean_random, est_quantile_random,x)
+error_plot = plot_simulation3(est_mean_error, est_quantile_error,x)
+ggsave("random_plot.pdf",plot =random_plot,device = "pdf",width = 7, height = 5)
+ggsave("error_plot.pdf",plot =error_plot,device = "pdf",width = 7, height = 5)
+
 #   
 # a = predict_simulation(beta, gamma,simulation3, x )
 # ggplot(mapping = aes(x = x)) + geom_line(aes(y = a[[1]])) + geom_line(aes(y = a[[1]]+ 1.96*a[[2]]))+

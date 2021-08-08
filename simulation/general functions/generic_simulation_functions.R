@@ -32,5 +32,8 @@ plot_simulation = function(truth_and_pred, sd = 1, ylim = c(-50,50))
                           labels = c("true", "predicted"))+
     scale_color_brewer(palette="Dark2") + xlim(min(x), max(x)) + ylim(ylim[1],ylim[2])+
     theme(axis.text = element_text(size = 22),
-          axis.title = element_text(size=22))
+          axis.title = element_text(size=22),
+          legend.title=element_text(size=22),
+          legend.text=element_text(size=22))
+  
 }
