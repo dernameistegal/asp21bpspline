@@ -1,6 +1,5 @@
 source("simulation/general functions/analysis_functions.R")
 source("simulation/general functions/generic_simulation_functions.R")
-source("simulation/simulation 2/simulation2_functions.R")
 library(simsalapar)
 library(ggplot2)
 require(asp21bpspline)
@@ -49,7 +48,6 @@ simulation1.2$knots$value = c(40,40)
 
 # checking for bias and MSE in predictions
 bias = biasSE(truepred, res10, MCMC = F, parameter = F, simulation1.2, x = x)
-all(bias$scale[,1] == bias2$scale[,1])
 mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
 mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
 mean_MSE(truth, res10, MCMC = F, parameter = F, simulation1.2, x = x)
@@ -94,6 +92,9 @@ truth = data.frame(x = x,
                    true_or_pred = rep("2",length(x)))
 truth_pred = rbind(truth, pred)
 plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-14,12))
+
+#plotting specific examples to visualize penalization
+length(res10)
 
 
 
