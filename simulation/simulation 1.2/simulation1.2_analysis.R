@@ -6,7 +6,7 @@ require(asp21bpspline)
 
 
 simulation1.2 =  varlist(
-  n.sim = list(type = "N", expr = quote(N[sim]), value = 10),
+  n.sim = list(type = "N", expr = quote(N[sim]), value = 500),
   n = list(type = "frozen", value = 1000),
   it = list(type = "frozen", value = 1500),
   beta = list(type = "frozen", expr = quote(beta), value = beta),
@@ -21,7 +21,7 @@ simulation1.2 =  varlist(
 
 
 
-res = maybeRead("simulation/simulation 1.2/take1")
+res = maybeRead("simulation/simulation 1.2/500samplesseeded")
 beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
 x = seq(0,20, length.out = 1000)
@@ -50,14 +50,14 @@ simulation1.2$knots$value = c(40,40)
 bias = biasSE(truepred, res10, MCMC = F, parameter = F, simulation1.2, x = x)
 mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
 mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
-mean_MSE(truth, res10, MCMC = F, parameter = F, simulation1.2, x = x)
+mean_MSE(truepred, res10, MCMC = F, parameter = F, simulation1.2, x = x)
 
 
 # checking for bias and MSE in predictions MCMC
 bias = biasSE(truepred, res10, MCMC = T, parameter = F, simulation1.2, x = x)
 mean(abs(bias$location[,1]) < bias$location[,2] * 1.96)
 mean(abs(bias$scale[,1]) < bias$scale[,2] * 1.96)
-mean_MSE(truth, res10, MCMC = T, parameter = F, simulation1.2, x = x)
+mean_MSE(truepred, res10, MCMC = T, parameter = F, simulation1.2, x = x)
 
 # plotting mean prediction ML
 meanbeta = findmean(res10, 1)
@@ -73,7 +73,9 @@ truth = data.frame(x = x,
                    scale = truepred[[2]], 
                    true_or_pred = rep("2",length(x)))
 truth_pred = rbind(truth, pred)
-plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-14,12))
+plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-22,9))
+p1 = plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-22,9))
+ggsave("simulation/plots/sim1.2/40knotssim12ML.pdf",p1,"pdf",width = 7, height = 5)
 
 
 
@@ -91,7 +93,10 @@ truth = data.frame(x = x,
                    scale = truepred[[2]], 
                    true_or_pred = rep("2",length(x)))
 truth_pred = rbind(truth, pred)
-plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-14,12))
+plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-22,9))
+p2 = plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-22,9))
+ggsave("simulation/plots/sim1.2/40knotssim12mcmc.pdf",p2,"pdf",width = 7, height = 5)
+
 
 #plotting specific examples to visualize penalization
 length(res10)

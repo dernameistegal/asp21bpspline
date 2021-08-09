@@ -61,8 +61,9 @@ est_quantile_error = estimate_quantile_splines(clean_error, x, quantile = c(0.1,
 normal_plot = plot_simulation3(est_mean_normal, est_quantile_normal,x)
 random_plot = plot_simulation3(est_mean_random, est_quantile_random,x)
 error_plot = plot_simulation3(est_mean_error, est_quantile_error,x)
-ggsave("random_plot.pdf",plot =random_plot,device = "pdf",width = 7, height = 5)
-ggsave("error_plot.pdf",plot =error_plot,device = "pdf",width = 7, height = 5)
+ggsave("simulation/plots/sim3/normal_plot.pdf",plot =normal_plot,device = "pdf",width = 7, height = 5)
+ggsave("simulation/plots/sim3/random_plot.pdf",plot =random_plot,device = "pdf",width = 7, height = 5)
+ggsave("simulation/plots/sim3/error_plot.pdf",plot =error_plot,device = "pdf",width = 7, height = 5)
 
 #   
 # a = predict_simulation(beta, gamma,simulation3, x )

@@ -77,7 +77,7 @@ truth_pred = rbind(truth, pred)
 plot_simulation(truth_and_pred = truth_pred, sd = 1.96,c(-17, 9))
 
 p1 = plot_simulation(truth_and_pred = truth_pred, sd = 1.96,c(-17, 9))
-ggsave("plotsim1ML.pdf",p1,"pdf",width = 7, height = 5)
+ggsave("simulation/plots/sim1/plotsim1ML.pdf",p1,"pdf",width = 7, height = 5)
 
 
 # plotting mean prediction MCMC
@@ -97,7 +97,7 @@ truth_pred = rbind(truth, pred)
 
 plot_simulation(truth_and_pred = truth_pred, sd = 1.96, ylim = c(-17,9))
 p2 = plot_simulation(truth_and_pred = truth_pred, sd = 1.96,c(-17, 9))
-ggsave("plotsim1mcmc.pdf",p2,"pdf",width = 7, height = 5)
+ggsave("simulation/plots/sim1/plotsim1mcmc.pdf",p2,"pdf",width = 7, height = 5)
 
 #Plotting quantiles
 
@@ -107,7 +107,7 @@ est_quantile = getQuantiles(spline_values, quantile = c(0.025,0.975))
 est_mean = predict_simulation(findmean(res10, 1),findmean(res10,2),simulation1,x)
 plot_simulation3(est_mean, est_quantile,x, c(-20, 14),y = "mean and confidence intervals" )
 p3 = plot_simulation3(est_mean, est_quantile,x, c(-20, 14),y = "mean and confidence intervals" )
-ggsave("quantilessim1ML.pdf",p3,"pdf",width = 7, height = 5)
+ggsave("simulation/plots/sim1/quantilessim1ML.pdf",p3,"pdf",width = 7, height = 5)
 
 #with MCMC
 spline_values = getEstimateValuesFourData(res10, simulation1, x, MCMC = T)
@@ -115,7 +115,7 @@ est_quantile = getQuantiles(spline_values, quantile = c(0.025,0.975))
 est_mean = predict_simulation(findmean(res10, 3),findmean(res10,4),simulation1,x)
 plot_simulation3(est_mean, est_quantile,x, c(-20, 14), y = "mean and confidence intervals")
 p4 = plot_simulation3(est_mean, est_quantile,x, c(-20, 14), y = "mean and confidence intervals")
-ggsave("quantilessim1MCMCL.pdf",p4,"pdf",width = 7, height = 5)
+ggsave("simulation/plots/sim1/quantilessim1MCMCL.pdf",p4,"pdf",width = 7, height = 5)
 
 
 

@@ -6,8 +6,8 @@ beta = read.csv("simulation/simulation 1/beta_sim1")
 gamma = read.csv("simulation/simulation 1/gamma_sim1")
 
 simulation3 =  varlist(
-  n.sim = list(type = "N", expr = quote(N[sim]), value = 2),
-  init = list(type = "grid", value = c("random")),
+  n.sim = list(type = "N", expr = quote(N[sim]), value = 500),
+  init = list(type = "grid", value = c("normal")),
   n = list(type = "frozen", value = 1000),
   it = list(type = "frozen", value = 1500),
   beta = list(type = "frozen", expr = quote(beta), value = beta),
@@ -64,6 +64,6 @@ doOne = function(init, n, beta, gamma, it, knots, order, p_order, smooth, burnin
 #  doOne(init = "normal", n = 1000, beta, gamma, it = 1500, knots = c(15, 15), order = c(3, 3),
 #        p_order = c(0,0), smooth = c(0,0), burning = 500, thinning = 10)
 
-res3 = doLapply(simulation3, sfile = "simulation/simulation 3/simulation3_error_100_10"
+res3 = doLapply(simulation3, sfile = "simulation/simulation 3/simulation3_normal_500"
                 , monitor = T, doOne = doOne)
 
