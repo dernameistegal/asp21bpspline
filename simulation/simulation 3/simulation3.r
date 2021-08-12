@@ -64,6 +64,9 @@ doOne = function(init, n, beta, gamma, it, knots, order, p_order, smooth, burnin
 #  doOne(init = "normal", n = 1000, beta, gamma, it = 1500, knots = c(15, 15), order = c(3, 3),
 #        p_order = c(0,0), smooth = c(0,0), burning = 500, thinning = 10)
 
-res3 = doLapply(simulation3, sfile = "simulation/simulation 3/simulation3_normal_500"
-                , monitor = T, doOne = doOne)
+
+a = Sys.time()
+res3 = doLapply(simulation3, sfile = "simulation/simulation 3/simulation3_normal_500", doOne = doOne)
+b = Sys.time()
+b-a
 

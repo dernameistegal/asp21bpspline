@@ -1,7 +1,5 @@
 ---
-title: "Example for package asp21bpsplines"
-author: "Jan Schneider"
-date: "7 8 2021"
+title: "Appendix A: Example for package asp21bpsplines"
 output: pdf_document
 ---
 
@@ -22,7 +20,7 @@ asp21bpsplines package you would first call the spline function. The parameter m
 ```{r}
 m = spline(m1, kn = c(40, 40), order = c(3,3), p_order = c(3, 3), 
            smooth = c(1, 1))
-summary(m)
+print(m)
 plot(m)
 ```
 
@@ -43,7 +41,7 @@ for the beta and gamma parameters as well as for the smoothing values. The
 prediction with this sample is in result much smoother:
 
 ```{r}
-summary(sample)
+print(sample)
 plot(sample, m)
 ```
 To investigate properties of the sample we can now look at the random walk for different 

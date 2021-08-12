@@ -206,17 +206,19 @@ plot_simulation3 = function(est_mean, est_quant, x ,ylim = c(-25,20), y = "mean 
                     loc_quant_lower = est_quant[1,,1],loc_quant_upper = est_quant[2,,1],
                     sc_mean = est_mean$scale,
                     sc_qu_low = est_quant[1,,2], sc_qu_upper = est_quant[2,,2])
+  
   ggplot(data, aes(x = x)) + geom_line(aes(y = loc_mean))+
     geom_ribbon(aes(ymin=loc_quant_lower,ymax=loc_quant_upper),alpha=0.3)+
     geom_line(aes(y= loc_mean + 1.96 * sc_mean))+
     geom_line(aes(y= loc_mean - 1.96 * sc_mean))+
     geom_ribbon(aes(ymin=loc_mean - 1.96 * sc_qu_upper,ymax=loc_mean - 1.96 *sc_qu_low )
-                ,alpha=0.3)+
+                ,alpha=0.3) +
     geom_ribbon(aes(ymin=loc_mean + 1.96 * sc_qu_low,ymax=loc_mean + 1.96 *sc_qu_upper )
-                ,alpha=0.3)+ xlim(min(x),max(x)) + ylim(ylim[1],ylim[2])+
+                ,alpha=0.3)+ 
     labs(x = "predictor" , y = "mean and credible intervals")+
     theme(axis.text = element_text(size = 22),
-          axis.title = element_text(size=22))
+          axis.title = element_text(size=22)) +
+    coord_cartesian(ylim = ylim)
 }
 
 

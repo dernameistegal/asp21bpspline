@@ -1,7 +1,7 @@
 
 library(simsalapar)
 simulation3 =  varlist(
-  n.sim = list(type = "N", expr = quote(N[sim]), value = 4),
+  n.sim = list(type = "N", expr = quote(N[sim]), value = 500),
   init = list(type = "grid", value = c("normal", "random" ,"error")),
   n = list(type = "frozen", value = 1000),
   it = list(type = "frozen", value = 1500),
@@ -18,7 +18,7 @@ source("simulation/general functions/generic_simulation_functions.R")
 source("simulation/simulation 3/simulation3_functions.R")
 RemoveErrors(res3[3,])
 
-result_normal = maybeRead("simulation/simulation 3/simulation3_normal_seed500")
+result_normal = maybeRead("simulation/simulation 3/simulation3_normal_500")
 result_random = maybeRead("simulation/simulation 3/simulation3_random_500")
 result_error = maybeRead("simulation/simulation 3/simulation3_error_500")
 
@@ -53,14 +53,15 @@ est_mean_random = predict_simulation(findmean(res_random, 3),findmean(res_random
 est_mean_error = predict_simulation(findmean(res_error, 3),findmean(res_error,4),simulation3,x)
 
 #estimations for the pointwise quantiles for mcmc are made 
-est_quantile_normal = estimate_quantile_splines(clean_normal, x, quantile = c(0.1,0.9),simulation = simulation3)
-est_quantile_random = estimate_quantile_splines(clean_random, x, quantile = c(0.1,0.9),simulation = simulation3)
-est_quantile_error = estimate_quantile_splines(clean_error, x, quantile = c(0.1,0.9),simulation = simulation3)
+est_quantile_normal = estimate_quantile_splines(clean_normal, x, quantile = c(0.025,0.975),simulation = simulation3)
+est_quantile_random = estimate_quantile_splines(clean_random, x, quantile = c(0.025,0.975),simulation = simulation3)
+est_quantile_error = estimate_quantile_splines(clean_error, x, quantile = c(0.025,0.975),simulation = simulation3)
 
 #the functions are plotted
-normal_plot = plot_simulation3(est_mean_normal, est_quantile_normal,x)
-random_plot = plot_simulation3(est_mean_random, est_quantile_random,x)
-error_plot = plot_simulation3(est_mean_error, est_quantile_error,x)
+#normal_plot = 
+normal_plot = plot_simulation3(est_mean_normal, est_quantile_normal,x,ylim = c(-23, 22.5))
+random_plot = plot_simulation3(est_mean_random, est_quantile_random,x,ylim = c(-23, 22.5))
+error_plot = plot_simulation3(est_mean_error, est_quantile_error,x,ylim = c(-23, 22.5))
 ggsave("simulation/plots/sim3/normal_plot.pdf",plot =normal_plot,device = "pdf",width = 7, height = 5)
 ggsave("simulation/plots/sim3/random_plot.pdf",plot =random_plot,device = "pdf",width = 7, height = 5)
 ggsave("simulation/plots/sim3/error_plot.pdf",plot =error_plot,device = "pdf",width = 7, height = 5)
