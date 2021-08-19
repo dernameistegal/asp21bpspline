@@ -4,8 +4,8 @@ Title: Bayesian P Splines for Location Scale Regression
 Version: 1.0
 Date: 2021-07-24
 Author: Valentin, Jonathan, Jan
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: Work in Progress. This description is not yet written.
+Maintainer: Who to complain to <jonathan.henrich@stud.uni-goettingen.de>
+Description: The asp21bpspline package allows to fit a basis spline model for the location and scale of a univariate response variable. It contains both a likelihood based method that allows for explicit regularization and a bayesian method that implicitly produces regularized splines.
 License: MIT + file LICENSE
 Imports: Rcpp (>= 1.0.7),
          RcppEigen,
